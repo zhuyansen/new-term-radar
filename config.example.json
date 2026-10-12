@@ -1,5 +1,7 @@
 {
   "lang": "en",
+  "data_providers": {"trends": "aisa", "volume": "aisa"},
+  "glasser": {"trends_location_code": 2840, "trends_language_code": "en"},
 
   "x_accounts": {
     "labs": ["AnthropicAI", "claudeai", "OpenAI", "OpenAIDevs", "GoogleDeepMind", "GoogleAIStudio",

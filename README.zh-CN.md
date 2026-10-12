@@ -76,11 +76,31 @@
 
 ## 只要一个 key
 
-所有付费的部分都走 [AIsa](https://go.aisa.one/yansen-zhu)：X 帖子、Google Trends 和域名数据（背后是 DataForSEO）、判断名字的模型。一个 key，按次付费，不用分别订阅 X API 和 DataForSEO。
+默认所有付费的部分都走 [AIsa](https://go.aisa.one/yansen-zhu)：X 帖子、Google Trends 和域名数据（背后是 DataForSEO）、判断名字的模型。一个 key，按次付费，不用分别订阅 X API 和 DataForSEO。
 
 > 上面是推荐链接：通过它注册是对这个项目的支持。从 aisa.one 任何入口拿到的 key 用起来完全一样。
 
 没有 key 时，免费的信号照常运行（Hugging Face、GitHub、sitemap、Search Console），只是报告里所有词不分先后列出，因为没有模型判断哪些是名字。
+
+### 可选的 Glasser 数据后端
+
+Google Trends 和 Google Ads 搜索量可以分别选择 [Glasser](https://glasser.ai/)。在 `config.json` 中加入：
+
+```json
+"data_providers": {"trends": "glasser", "volume": "glasser"},
+"glasser": {"trends_location_code": 2840, "trends_language_code": "en"}
+```
+
+通过环境变量提供 `GLASSER_API_KEY`，不要把密钥写入配置文件。省略配置时继续使用 AIsa。
+**这是混合接入**：X 最新帖子和搜索、新站 WHOIS、所有模型调用仍走 AIsa，仍需
+`AISA_API_KEY`，不会在失败时自动切换后端。Glasser Trends 默认查美国（2840）、英语，
+使用 Google Trends 而非 DataForSEO 的 clickstream Trends；仅接受逐日、无缺失的序列。
+搜索量超过 100 个关键词会在发起 Run 前报错，不会自动拆分成更多付费调用。
+
+目前仅做离线模拟验证，**尚未进行真实 Glasser 集成调用**。切换数据源或地域时建议使用独立
+`--state`，运行前核对当前价格与密钥权限。WHOIS 缺少必要筛选参数，X 的等价响应与搜索语义
+尚未验证，因此这两项没有提供 Glasser 替代。参见[接入说明、限制、错误处理与官方契约](docs/glasser.md)。
+如使用 GitHub Actions，需要在 Run the radar 步骤把已有 `GLASSER_API_KEY` secret 映射到环境变量。
 
 ## 快速开始
 
@@ -138,6 +158,8 @@ python -m radar daily --skip x,hf --out report.md  # 其余全部，每天一次
 | `topics` | 名称和正则：每个主题单独一节，列出匹配的线索、仓库和查询 |
 | `known_terms` | 你已经有页面的词，或者永远不想看到的词。包含它或被它包含的线索会被标出，不进入复盘 |
 | `stop_words` | 你这个领域的日常用词，追加到内置列表（内置列表是按 AI 工具领域调的） |
+| `data_providers` | `trends`、`volume` 分别选择 `aisa`（默认）或 `glasser`；X/WHOIS/模型仍用 AIsa |
+| `glasser` | Trends 的 `trends_location_code`（默认美国 2840）和 `trends_language_code`（默认 `en`） |
 | `judge` | `model`（AIsa 上任意对话模型）和 `min_score`（默认 0.5） |
 | `breakout` | `window_days`、`min_stars`、`velocity_min`（每天涨星）、`delta_min`（比昨天多的星） |
 | `new_sites` | `queries`：名称和域名的 SQL LIKE 模式（`"%ai%"`），每个是一次付费查询；`weekday`（0 = 周一） |

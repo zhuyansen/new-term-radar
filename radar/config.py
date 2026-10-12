@@ -8,10 +8,12 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from . import i18n, terms
+from . import data, i18n, terms
 
 DEFAULTS = {
     "lang": "en",
+    "data_providers": dict(data.DEFAULTS),
+    "glasser": {"trends_location_code": 2840, "trends_language_code": "en"},
     "x_accounts": {"labs": [], "bloggers": []},
     "sitemaps": {},
     "topics": {},
@@ -36,6 +38,7 @@ def load(path: Path) -> dict:
         v = raw.get(k, default)
         cfg[k] = {**default, **v} if isinstance(default, dict) and default and isinstance(v, dict) else v
     cfg["_dir"] = path.resolve().parent
+    data.validate(cfg)
     i18n.set_lang(cfg["lang"])
     terms.add_stop(cfg["stop_words"])
     return cfg

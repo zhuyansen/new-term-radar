@@ -92,11 +92,33 @@ Set `"usecases": {"per_day": 0}` or pass `--skip usecases` to turn it off.
 
 ## One key
 
-Everything paid goes through [AIsa](https://go.aisa.one/yansen-zhu): X posts, Google Trends and domain data (DataForSEO behind it) and the model that judges names. One key, pay per call, no subscriptions to X's API or DataForSEO.
+By default, everything paid goes through [AIsa](https://go.aisa.one/yansen-zhu): X posts, Google Trends and domain data (DataForSEO behind it) and the model that judges names. One key, pay per call, no subscriptions to X's API or DataForSEO.
 
 > That link is a referral link: signing up through it supports this project. The radar works the same with a key from anywhere on aisa.one.
 
 Without a key the free signals still run (Hugging Face, GitHub, sitemaps, Search Console); the report then lists every term unsorted, because nothing judges which are names.
+
+### Optional Glasser data backend
+
+Google Trends and Google Ads search volume can independently use [Glasser](https://glasser.ai/):
+
+```json
+"data_providers": {"trends": "glasser", "volume": "glasser"},
+"glasser": {"trends_location_code": 2840, "trends_language_code": "en"}
+```
+
+Add these fields to `config.json` and supply `GLASSER_API_KEY` in the environment.
+Omitted settings keep AIsa. **This is a hybrid setup:** X posts/search, new-site WHOIS
+and all models still require AIsa; keep `AISA_API_KEY` for them. There is no silent
+fallback. Glasser Trends uses US/English by default, requires daily, non-missing
+series, and does not use DataForSEO clickstream Trends. Requests over Glasser's
+100-keyword volume limit fail before a Run rather than splitting into extra charges.
+
+See [setup, limits, error handling and official API contracts](docs/glasser.md).
+No live Glasser integration calls have been tested; validation uses offline fixtures.
+Use separate state when changing source/geography, and inspect current prices before
+running. To use it in GitHub Actions, expose your existing `GLASSER_API_KEY` secret as
+an environment variable in the **Run the radar** step (see the setup guide).
 
 ## Quick start
 
@@ -161,6 +183,8 @@ and from `sources`:
 | `topics` | Name and regex: each topic gets its own section listing the leads, repos and queries that match |
 | `known_terms` | Terms you already have a page for, or never want reported. A lead that contains one, or is contained in one, is marked and not kept for review |
 | `stop_words` | Everyday words of your field, added to the built-in list (which is tuned for AI tooling) |
+| `data_providers` | `trends` and `volume`, each `aisa` (default) or `glasser`; X/WHOIS/chat remain AIsa |
+| `glasser` | Trends `trends_location_code` (2840/US) and `trends_language_code` (`en`); see [limits](docs/glasser.md) |
 | `judge` | `model` (any chat model on AIsa) and `min_score` (0.5) |
 | `breakout` | `window_days`, `min_stars`, `velocity_min` (stars a day), `delta_min` (stars since yesterday) |
 | `new_sites` | `queries`: a name and a SQL LIKE pattern on the domain (`"%ai%"`), one paid query each; `weekday` (0 = Monday) |

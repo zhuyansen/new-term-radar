@@ -339,7 +339,7 @@ def test_review_stores_the_verdict(cfg, tmp_path, monkeypatch):
     points = [{"date_from": (date(2026, 9, 19) + timedelta(days=i)).isoformat(), "values": [v]}
               for i, v in enumerate([0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 30, 100, 0, 0])]
     answer = {"tasks": [{"result": [{"items": [{"data": points}]}]}]}
-    monkeypatch.setattr(review.aisa, "call_all", lambda calls: ({c["call_id"]: answer for c in calls}, 1200))
+    monkeypatch.setattr(review.data_backend.aisa, "call_all", lambda calls: ({c["call_id"]: answer for c in calls}, 1200))
     out = review.review(cfg, conn, date(2026, 10, 10))
     assert out["checked"] == [{"term": "niko strata", "first_seen": "2026-09-25", "verdict": "hit", "lead_days": 3}]
     assert conn.execute("SELECT verdict, lead_days FROM leads").fetchone() == ("hit", 3)
@@ -521,10 +521,10 @@ def _fake_usecase_network(monkeypatch):
         {"phrase": "photoshop alternative", "evidence": "free clone", "brand": True},
         {"phrase": "nobody searches this", "evidence": "x", "brand": False}])
     monkeypatch.setattr(usecases, "screen", lambda model, name, ev, cands: cands)
-    monkeypatch.setattr(usecases, "volumes", lambda phrases, loc: (
+    monkeypatch.setattr(usecases, "volumes", lambda phrases, loc, cfg=None: (
         {"ai image detector": {"volume": 60000, "month": "2026-08"}, "photoshop alternative": {"volume": 6000, "month": "2026-08"},
          "nobody searches this": {"volume": 0, "month": ""}}, 90000))
-    monkeypatch.setattr(usecases, "fetch_series", lambda keywords, bench, today: (
+    monkeypatch.setattr(usecases, "fetch_series", lambda keywords, bench, today, cfg=None: (
         {k: {"solo": rise if k == "synthid detector" else flat,
              "pair": [(d, v, 40) for d, v in (rise if k == "synthid detector" else flat)]} for k in keywords}, 7200))
 
@@ -559,7 +559,7 @@ def test_review_ignores_the_unsettled_days(cfg, tmp_path, monkeypatch):
     store.record(conn, [_lead("ai image detector", ["usecase"])], date(2026, 9, 28))
     points = [{"date_from": d.isoformat(), "values": [v]} for d, v in _daily([5] * 43 + [0, 100])]
     answer = {"tasks": [{"result": [{"items": [{"data": points}]}]}]}
-    monkeypatch.setattr(review.aisa, "call_all", lambda calls: ({c["call_id"]: answer for c in calls}, 1200))
+    monkeypatch.setattr(review.data_backend.aisa, "call_all", lambda calls: ({c["call_id"]: answer for c in calls}, 1200))
     assert review.review(cfg, conn, TODAY)["checked"][0]["verdict"] == "miss"
 
 

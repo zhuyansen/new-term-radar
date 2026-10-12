@@ -20,7 +20,7 @@ import sqlite3
 import statistics
 from datetime import date, timedelta
 
-from . import aisa, store
+from . import data as data_backend, store
 
 BEFORE_DAYS = 30
 MAX_VARIANTS = 3      # each costs one Trends task ($0.0012 in October 2026)
@@ -96,7 +96,7 @@ def review(cfg: dict, conn: sqlite3.Connection, today: date | None = None) -> di
     if not due:
         return {"checked": [], "cost_micros": 0, "after_days": c["after_days"]}
     calls, plan = plan_calls(due, today, c["after_days"])
-    data, cost = aisa.call_all(calls)
+    data, cost = data_backend.call_all(calls, cfg, capability="trends")
     checked = []
     for ids, term, first_seen, keys in plan:
         if not all(cid in data for cid in ids):

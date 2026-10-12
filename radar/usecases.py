@@ -45,6 +45,7 @@ from datetime import date, timedelta
 from pathlib import Path
 
 from . import UA, aisa, review, snap
+from . import data as data_backend
 
 POSTS_KEPT = 12
 POST_CHARS = 400
@@ -181,12 +182,12 @@ def screen(model: str, name: str, ev: dict, cands: list[dict]) -> list[dict]:
     return [dict(c, relevance=scores[i]) for i, c in enumerate(cands) if scores.get(i, 1.0) >= RELEVANT_MIN]
 
 
-def volumes(phrases: list[str], location_code: int) -> tuple[dict[str, dict], int]:
+def volumes(phrases: list[str], location_code: int, cfg: dict | None = None) -> tuple[dict[str, dict], int]:
     """{phrase: {"volume", "month"}} from Google Ads, one batch call."""
     if not phrases:
         return {}, 0
-    data, cost = aisa.call([{"call_id": "vol", "tool": VOLUME_TOOL, "arguments": {"body": [{
-        "keywords": phrases, "location_code": location_code, "language_code": "en"}]}}])
+    data, cost = data_backend.call_all([{"call_id": "vol", "tool": VOLUME_TOOL, "arguments": {"body": [{
+        "keywords": phrases, "location_code": location_code, "language_code": "en"}]}}], cfg, capability="volume")
     out = {}
     for r in ((data.get("vol") or {}).get("tasks") or [{}])[0].get("result") or []:
         ms = r.get("monthly_searches") or []
@@ -307,14 +308,14 @@ def _pairs(task: dict) -> list[tuple[date, int, int]]:
     return rows
 
 
-def fetch_series(keywords: list[str], benchmark: str, today: date) -> tuple[dict[str, dict], int]:
+def fetch_series(keywords: list[str], benchmark: str, today: date, cfg: dict | None = None) -> tuple[dict[str, dict], int]:
     """{keyword: {"solo": [(day, value)], "pair": [(day, value, benchmark value)]}}: two Trends lookups each."""
     window = {"date_from": (today - timedelta(days=TRENDS_DAYS)).isoformat(), "date_to": today.isoformat()}
     calls = []
     for i, k in enumerate(keywords):
         calls.append({"call_id": f"s{i}", "tool": review.TOOL, "arguments": {"body": [{"keywords": [k], **window}]}})
         calls.append({"call_id": f"p{i}", "tool": review.TOOL, "arguments": {"body": [{"keywords": [k, benchmark], **window}]}})
-    data, cost = aisa.call_all(calls)
+    data, cost = data_backend.call_all(calls, cfg, capability="trends")
     task = lambda cid: ((data.get(cid) or {}).get("tasks") or [{}])[0]  # noqa: E731
     return {k: {"solo": review._series(task(f"s{i}")), "pair": _pairs(task(f"p{i}"))} for i, k in enumerate(keywords)}, cost
 
@@ -354,11 +355,11 @@ def run(cfg: dict, state: Path, names: list[str], repos: dict[str, str], today: 
             row["names"].append(name)
             row["brand"] |= u["brand"]
     bench = c["benchmark"].lower()
-    vol, c2 = volumes(sorted(proposed), c["location_code"])
+    vol, c2 = volumes(sorted(proposed), c["location_code"], cfg)
     generic = sorted((dict(r, **vol[p]) for p, r in proposed.items() if vol.get(p, {}).get("volume", 0) >= c["min_volume"]),
                      key=lambda r: -r["volume"])[:c["trends_max"]]
     rows = [{"term": n, "phrase": n, "kind": "name", "names": [], "brand": True, "evidence": "", **vol.get(n, {})} for n in todo] + generic
-    series, c3 = fetch_series([r["phrase"] for r in rows], bench, today)
+    series, c3 = fetch_series([r["phrase"] for r in rows], bench, today, cfg)
     daily = measure(rows, series, c["min_daily"], today)
     order = {"prioritize": 0, "watch": 1, "skip": 2}
     rows.sort(key=lambda r: (order[r["decision"]], -(r.get("per_day") or 0), -(r.get("volume") or 0)))
