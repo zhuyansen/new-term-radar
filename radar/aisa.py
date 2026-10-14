@@ -47,6 +47,20 @@ def key() -> str:
     return _no_key()
 
 
+def backend() -> str:
+    """"apisrouter" when RADAR_BACKEND says so, or when there is no AIsa key and an
+    APIsRouter key is found; otherwise "aisa". See radar/apisrouter.py."""
+    chosen = os.environ.get("RADAR_BACKEND", "").strip().lower()
+    if chosen:
+        return chosen
+    try:
+        key()
+        return "aisa"
+    except AisaError:
+        from . import apisrouter
+        return "apisrouter" if apisrouter.key(required=False) else "aisa"
+
+
 def _no_key() -> str:
     raise AisaError("no AIsa key: set AISA_API_KEY, or log in with the AIsa CLI (`aisa login`)")
 
@@ -69,6 +83,9 @@ def call(calls: list[dict]) -> tuple[dict[str, dict], int]:
     that failed are left out of the dict; only a failed request raises."""
     if not calls:
         return {}, 0
+    if backend() == "apisrouter":
+        from . import apisrouter
+        return apisrouter.call(calls)
     if len(calls) > MAX_CALLS:
         raise AisaError(f"{len(calls)} calls in one batch, the cap is {MAX_CALLS}")
     body = _post(ROUTER, {"calls": calls}, TIMEOUT)
@@ -93,6 +110,9 @@ def call_all(calls: list[dict]) -> tuple[dict[str, dict], int]:
 
 
 def chat(model: str, system: str, user: str, max_tokens: int = 1500) -> str:
+    if backend() == "apisrouter":
+        from . import apisrouter
+        return apisrouter.chat(model, system, user, max_tokens)
     body = _post(CHAT, {"model": model, "temperature": 0, "max_tokens": max_tokens, "messages": [
         {"role": "system", "content": system}, {"role": "user", "content": user}]}, CHAT_TIMEOUT)
     try:

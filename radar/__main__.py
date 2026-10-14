@@ -35,6 +35,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from datetime import date
 from pathlib import Path
@@ -200,6 +201,7 @@ def main(argv: list[str] | None = None) -> int:
     if unknown:
         p.error(f"--skip: unknown {sorted(unknown)}")
     state = Path(args.state)
+    os.environ.setdefault("RADAR_STATE", str(state))      # the APIsRouter backend caches there
     if args.command == "leads":
         return cmd_leads(args, state)
     if args.command == "keywords" and not args.names:

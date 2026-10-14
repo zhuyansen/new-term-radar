@@ -104,14 +104,22 @@ def reddit(keyword: str, c: dict) -> tuple[list[dict], int, list[str]]:
 
 
 def tutorials(term: str, c: dict) -> tuple[list[dict], int, list[str]]:
-    """Comments under the top tutorial videos for a term (needs GoAnyAPI to find the videos)."""
-    if not goanyapi.key():
+    """Comments under the top tutorial videos for a term (GoAnyAPI finds the videos; on the
+    APIsRouter backend without a GoAnyAPI key, APIsRouter's YouTube search does)."""
+    if goanyapi.key():
+        try:
+            found, cost = goanyapi.serp(f"site:youtube.com {term} tutorial")
+        except goanyapi.GoAnyError as exc:
+            return [], 0, [f"video search: {exc}"]
+        ids = list(dict.fromkeys(m.group(1) for r in found for m in [VIDEO.search(r["url"])] if m))[:c["videos"]]
+    elif aisa.backend() == "apisrouter":
+        from . import apisrouter
+        try:
+            ids, cost = apisrouter.youtube_videos(f"{term} tutorial", c["videos"])
+        except aisa.AisaError as exc:
+            return [], 0, [f"video search: {exc}"]
+    else:
         return [], 0, []
-    try:
-        found, cost = goanyapi.serp(f"site:youtube.com {term} tutorial")
-    except goanyapi.GoAnyError as exc:
-        return [], 0, [f"video search: {exc}"]
-    ids = list(dict.fromkeys(m.group(1) for r in found for m in [VIDEO.search(r["url"])] if m))[:c["videos"]]
     items, errors = [], []
     for vid in ids:
         try:
