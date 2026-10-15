@@ -24,6 +24,7 @@ apisrouter_spend.jsonl beside it.
 from __future__ import annotations
 
 import hashlib
+import http.client
 import json
 import os
 import re
@@ -89,7 +90,7 @@ def _req(method: str, path: str, body: dict | None = None, url: str | None = Non
                 return json.load(exc)
             except ValueError:
                 raise RouterError(f"HTTP {exc.code} on {path or url}") from exc
-        except (OSError, ValueError) as exc:
+        except (OSError, ValueError, http.client.HTTPException) as exc:   # IncompleteRead on a cut stream
             if attempt >= 2:
                 raise RouterError(f"{type(exc).__name__}: {exc}") from exc
             time.sleep(2 * (attempt + 1))
