@@ -225,19 +225,28 @@ Without an AIsa key the free signals still run (Hugging Face, GitHub, sitemaps, 
 
 ## Quick start
 
-Python 3.10 or newer. The radar uses only the standard library.
+[uv](https://docs.astral.sh/uv/)'s `uvx` runs the radar straight from PyPI, with nothing to clone or install:
+
+```bash
+export AISA_API_KEY=...                       # from https://go.aisa.one/yansen-zhu; or `aisa login` with the AIsa CLI
+uvx new-term-radar daily --out report.md      # today's new names and the keyword table behind them
+uvx new-term-radar keywords "photocraft"      # the keyword table for names you already have
+```
+
+With no `config.json` in the folder, `daily` watches the example X accounts and sitemaps that ship with the radar and keeps its snapshots in `./state`; copy [config.example.json](config.example.json) to `config.json` there and edit it to watch your own. `uvx new-term-radar@latest …` picks up a new release; `pip install new-term-radar` (or `uv tool install new-term-radar`) keeps a `new-term-radar` command installed. Python 3.10 or newer; the radar uses only the standard library.
+
+From a clone it is the same program, with the same key:
 
 ```bash
 git clone https://github.com/zhuyansen/new-term-radar
 cd new-term-radar
 cp config.example.json config.json      # then edit: your X accounts, sitemaps, topics
-export AISA_API_KEY=...                 # from https://go.aisa.one/yansen-zhu; or `aisa login` with the AIsa CLI
 python -m radar daily --out report.md
 ```
 
 The first run builds its snapshots: yesterday's X vocabulary, star counts and sitemap URLs do not exist yet, so only GitHub breakouts (which need no yesterday) are reported. From the second run on, every signal reports what changed.
 
-Two commands:
+Two commands (without a clone, `uvx new-term-radar` in place of `python -m radar`):
 
 ```bash
 python -m radar sources --out sources.md           # ① only: X and Hugging Face. Run every few hours.

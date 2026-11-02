@@ -227,19 +227,28 @@ python -m radar history --out sellers.csv
 
 ## 快速开始
 
-需要 Python 3.10 或更高版本。雷达本身只用标准库。
+用 [uv](https://docs.astral.sh/uv/) 的 `uvx` 可以直接从 PyPI 运行雷达，不用克隆，也不用安装：
+
+```bash
+export AISA_API_KEY=...                       # 从 https://go.aisa.one/yansen-zhu 获取；用 AIsa 命令行 `aisa login` 登录过也可以
+uvx new-term-radar daily --out report.md      # 今天的新名字，和它们背后的关键词表
+uvx new-term-radar keywords "photocraft"      # 你手上已有的名字的关键词表
+```
+
+当前目录没有 `config.json` 时，`daily` 用雷达自带的示例 X 账号和 sitemap，快照存在 `./state`；把 [config.example.json](config.example.json) 复制成 `config.json` 再编辑，就换成你自己的清单（想要中文报告把 lang 改成 "zh"）。`uvx new-term-radar@latest …` 会拿到新版本；想一直装着就 `pip install new-term-radar`（或 `uv tool install new-term-radar`），之后直接用 `new-term-radar` 命令。需要 Python 3.10 或更高版本，雷达本身只用标准库。
+
+从克隆的仓库里运行是同一个程序，用同一个 key：
 
 ```bash
 git clone https://github.com/zhuyansen/new-term-radar
 cd new-term-radar
 cp config.example.json config.json      # 然后编辑：你的 X 账号、sitemap、主题；想要中文报告把 lang 改成 "zh"
-export AISA_API_KEY=...                 # 从 https://go.aisa.one/yansen-zhu 获取；用 AIsa 命令行 `aisa login` 登录过也可以
 python -m radar daily --out report.md
 ```
 
 第一次运行只是建立快照：昨天的 X 词表、星数、sitemap 网址都还没有，所以只会报出 GitHub 爆发仓库（它不依赖昨天的数据）。从第二次运行起，每个信号都会报告变化。
 
-两个命令：
+两个命令（不克隆的话，把 `python -m radar` 换成 `uvx new-term-radar`）：
 
 ```bash
 python -m radar sources --out sources.md           # 只跑 ①：X 和 Hugging Face，每隔几小时跑一次
