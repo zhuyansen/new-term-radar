@@ -1530,6 +1530,27 @@ def test_weekly_feeds_wait_for_their_day(cfg, tmp_path, monkeypatch):
     assert feeds.feeds(cfg, tmp_path, today=date(2026, 10, 14), weekly=True)["read"]["rising"] == len(cfg["feeds"]["seeds"])
 
 
+def test_the_taaft_feed_reads_the_directory_listing_through_goanyapi(cfg, tmp_path, monkeypatch):
+    cfg["feeds"]["enabled"], cfg["feeds"]["weekly"] = ["taaft"], []
+    day = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+    rows = [{"name": "ChatSweep", "domain": "chatgptbulkdelete.net", "category": "Bulk chat deletion", "pricing": "Free",
+             "about": "Delete ChatGPT chats in bulk.\nNot one by one.", "url": "https://theresanaiforthat.com/ai/chatsweep/",
+             "released": day},
+            {"name": "Old One", "domain": "old.example", "category": "Writing", "pricing": "", "about": "",
+             "url": "https://theresanaiforthat.com/ai/old-one/", "released": "2026-01-01 00:00:00"}]
+    monkeypatch.setattr(feeds.goanyapi, "taaft_just_released", lambda day="": (rows, 5000))
+    off = feeds.feeds(cfg, tmp_path / "off", today=date(2026, 10, 22))       # no key: the source stays off
+    assert off["read"] == {"taaft": 0} and off["cost_micros"] == 0 and not off["errors"]
+    monkeypatch.setenv("GOANYAPI_API_KEY", "k")
+    first = feeds.feeds(cfg, tmp_path, today=date(2026, 10, 22))
+    # a first run lists what the source itself dates as recent: the January entry waits for the next run
+    assert first["first_run"] == ["taaft"] and [x["term"] for x in first["terms"]] == ["chatsweep"]
+    assert first["terms"][0]["about"] == ("https://theresanaiforthat.com/ai/chatsweep/", "Delete ChatGPT chats in bulk. Not one by one.")
+    assert first["terms"][0]["examples"] == ["There's An AI For That · Bulk chat deletion: ChatSweep"] and first["cost_micros"] == 5000
+    again = feeds.feeds(cfg, tmp_path, today=date(2026, 10, 23))
+    assert not again["new"]["taaft"] and again["cost_micros"] == 5000        # a paid feed is read every run, reported once
+
+
 def test_money_finds_the_owners_other_sites_and_new_advertisers(cfg, tmp_path, monkeypatch):
     cfg["money"]["ad_terms"] = ["ai headshot"]
     monkeypatch.setattr(money.goanyapi, "key", lambda: "k")

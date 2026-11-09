@@ -64,7 +64,7 @@ DEFAULTS = {
                 "max_leads": 12, "visits": True, "rank_max": 350, "max_visits": 300000, "pool": 60, "model": "gpt-4.1-mini"},
     "builders": {"weekday": 0, "platforms": ["lovable", "v0", "beehiiv"], "per_platform": 100, "rank_max": 350, "pool": 40,
                  "max_leads": 12},
-    "feeds": {"enabled": ["producthunt", "hn", "openrouter", "appstore", "awesome", "google_new", "trending", "rising"],   # civitai: anime checkpoints, mostly
+    "feeds": {"enabled": ["producthunt", "hn", "openrouter", "appstore", "awesome", "taaft", "google_new", "trending", "rising"],   # civitai: anime checkpoints, mostly
               "weekly": ["google_new", "rising"], "weekday": 0, "max_per_feed": 10, "hn_points": 30,
               "app_genres": [6007, 6008, 6027, 6002],      # Productivity, Photo & Video, Graphics & Design, Utilities
               "awesome": ["https://raw.githubusercontent.com/punkpeye/awesome-mcp-servers/main/README.md"],
