@@ -1522,6 +1522,29 @@ def test_feeds_take_a_snapshot_first_then_report_what_is_new(cfg, tmp_path, monk
     assert feeds.TOOLISH.search("AI换脸特效") and not feeds.TOOLISH.search("Chair")
 
 
+def test_feeds_deduplicate_shared_links_before_applying_limit(cfg, tmp_path, monkeypatch):
+    cfg["feeds"]["enabled"] = ["awesome"]
+    cfg["feeds"]["awesome"] = ["https://raw.example/one", "https://raw.example/two"]
+    cfg["feeds"]["max_per_feed"] = 2
+    pages = {url: "- [Oldtool](https://old.example) - existing tool\n" for url in cfg["feeds"]["awesome"]}
+    monkeypatch.setattr(feeds, "get", lambda url: pages[url].encode())
+    first = feeds.feeds(cfg, tmp_path, today=date(2026, 11, 12))
+    assert first["terms"] == []
+
+    pages["https://raw.example/one"] += "- [Newtool](https://new.example) - new tool\n"
+    pages["https://raw.example/two"] += (
+        "- [Newtool](https://new.example) - the same tool\n"
+        "- [Nexttool](https://next.example) - another tool\n"
+    )
+    result = feeds.feeds(cfg, tmp_path, today=date(2026, 11, 13))
+
+    assert [item["key"] for item in result["new"]["awesome"]] == [
+        "https://new.example", "https://next.example"
+    ]
+    assert [item["term"] for item in result["terms"]] == ["newtool", "nexttool"]
+    assert feeds.feeds(cfg, tmp_path, today=date(2026, 11, 14))["terms"] == []
+
+
 def test_weekly_feeds_wait_for_their_day(cfg, tmp_path, monkeypatch):
     cfg["feeds"]["enabled"], cfg["feeds"]["weekly"], cfg["feeds"]["weekday"] = ["rising"], ["rising"], 0
     asked = []
