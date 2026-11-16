@@ -25,7 +25,7 @@
 <text x="110.0" y="98.5" fill="#993C1D" font-size="12">HF Spaces 热门 demo</text>
 <rect x="210" y="36" width="160" height="80" rx="4" fill="#FAECE7" stroke="#993C1D" stroke-width="0.5"/>
 <text x="290.0" y="72.0" fill="#712B13" font-weight="500">② GitHub</text>
-<text x="290.0" y="91.0" fill="#993C1D" font-size="12">爆发仓库</text>
+<text x="290.0" y="91.0" fill="#993C1D" font-size="12">爆发仓库 · 新黑马免截断</text>
 <rect x="390" y="36" width="160" height="80" rx="4" fill="#FAECE7" stroke="#993C1D" stroke-width="0.5"/>
 <text x="470.0" y="54.0" fill="#712B13" font-weight="500">③ 竞品与新站</text>
 <text x="470.0" y="73.0" fill="#993C1D" font-size="12">sitemap 新页 · 每周新站</text>
@@ -47,7 +47,7 @@
 <text x="635.0" y="157.0" fill="#712B13" font-weight="500">⑦ Reddit 求助</text>
 <text x="635.0" y="176.0" fill="#993C1D" font-size="12">12 种问法 · 每周</text>
 <text x="635.0" y="192.5" fill="#993C1D" font-size="12">模型筛出要做的事</text>
-<text x="635.0" y="209.0" fill="#534AB7" font-size="12" font-weight="600">ChatGPT 推荐的工具</text>
+<text x="635.0" y="209.0" fill="#534AB7" font-size="12" font-weight="600">ChatGPT 首选与多轮分布</text>
 <rect x="696" y="134" width="30" height="15" rx="7.5" fill="#534AB7"/><text x="711" y="145" font-size="10" fill="#FFFFFF" font-weight="600">新增</text>
 <rect x="30" y="230" width="190" height="64" rx="4" fill="#FAECE7" stroke="#993C1D" stroke-width="0.5"/>
 <text x="125.0" y="249.0" fill="#712B13" font-weight="500">⑧ 刚开始收钱的站</text>
@@ -65,7 +65,7 @@
 <text x="495.0" y="363.0" fill="#185FA5" font-size="12">模型提词 → 相关性筛选 → 搜索量 → Trends</text>
 <rect x="276" y="388" width="438" height="74" rx="4" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/>
 <text x="495.0" y="412.0" fill="#0C447C" font-weight="500">首页竞争</text>
-<text x="495.0" y="431.0" fill="#185FA5" font-size="12">前十弱站 · KD · 广告 · 已有页面 · 在投广告</text>
+<text x="495.0" y="431.0" fill="#185FA5" font-size="12">前十弱站 · KD · KGR · 广告 · 已有页面 · 在投广告</text>
 <text x="495.0" y="447.5" fill="#185FA5" font-size="12">首页挤满的「优先」降为「观察 ↓」</text>
 <rect x="276" y="480" width="438" height="92" rx="4" fill="#EEEDFE" stroke="#534AB7" stroke-width="1.2"/>
 <text x="495.0" y="504.0" fill="#3C3489" font-weight="500">词龄 · 多市场 · 首页形态 · 12 个月</text>
@@ -104,7 +104,7 @@
 <text x="470.0" y="1000.5" fill="#185FA5" font-size="12">跑一次</text>
 <rect x="570" y="942" width="160" height="72" rx="4" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
 <text x="650.0" y="965.0" fill="#444441" font-weight="500">pains 痛点命令</text>
-<text x="650.0" y="984.0" fill="#5F5E5A" font-size="12">Chrome 低星评论</text>
+<text x="650.0" y="984.0" fill="#5F5E5A" font-size="12">Chrome / App Store 低星</text>
 <text x="650.0" y="1000.5" fill="#5F5E5A" font-size="12">Reddit · 教程评论</text>
 </g>
 <path d="M30 918 H730" stroke="#D3D1C7" stroke-width="0.5" fill="none"/><text x="30" y="934" font-size="12" fill="#5F5E5A" font-weight="500">四种用法，同一套引擎</text><text x="730" y="311" text-anchor="end" font-size="11" fill="#185FA5">建议：子木 @CoderJeffLee</text>

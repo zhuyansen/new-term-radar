@@ -897,6 +897,9 @@ def test_mcp_tools_say_why_they_failed(tmp_path, monkeypatch):
     monkeypatch.setattr(cli, "kept_leads", read_only)
     with pytest.raises(mcp_server.ToolError, match="Read-only file system.*RADAR_STATE sets the folder"):
         mcp_server.recent_leads(7)
+    import asyncio
+    with pytest.raises(mcp_server.ToolError, match='command must be "sources" or "daily"'):
+        asyncio.run(mcp_server.run_radar("weekly"))
 
 
 def test_skills_have_a_name_and_a_description():
@@ -2173,3 +2176,57 @@ def test_keyword_table_shows_the_year_your_rank_threads_and_the_dot_com(cfg, tmp
     zh = "\n".join(report.keyword_table(cfg, uc))
     assert "| 现在 | 近 12 个月 | 首次有搜索 |" in zh and "| **优先** · 你在第 1 → 更新现有页 |" in zh and "| 观察 → 新建页面 |" in zh
     assert "上升,6 个月 +120%" in zh and "首页上的论坛帖" in zh and "**synthiddetector.com 未注册**" in zh
+
+
+def test_review_rose_does_not_pick_a_baseline_blip_before_first_seen(monkeypatch):
+    import pytest
+    import radar
+    assert radar.__version__ in radar.UA
+    # baseline has a blip (30 on 09-20, above line=28.75) before first_seen (09-25), then real rise (60, 100) on 09-28..29
+    pts = _series([0, 30, 0, 0, 0, 0, 0, 0, 0, 60, 100, 80, 0, 0])
+    got = review.rose(pts, SEEN)
+    assert got["rose"] and got["first_rise"] == "2026-09-28" and got["earliest_rise"] == "2026-09-20"
+    v, lead = review.verdict({"v": got}, SEEN)
+    assert v == "hit" and lead == 3
+    assert review.unclear(date(2026, 10, 3), date(2026, 10, 5)) == "recording_start"
+    assert review.unclear(SEEN, date(2026, 9, 20), date(2026, 9, 24)) == "pre_existing"
+    assert review.unclear(SEEN, date(2026, 9, 25), date(2026, 9, 24)) == ""
+    t = review.tally([(["breakout"], "hit", 3, False), (["breakout"], "hit", -2, True), (["breakout"], "miss", None, False)])
+    assert t["breakout"] == {"checked": 3, "early": 1, "late": 0, "unclear": 1, "miss": 1, "no_data": 0, "median_lead": 3}
+
+    monkeypatch.setenv("RADAR_EMAIL_TO", "me@example.com")
+    monkeypatch.delenv("RESEND_API_KEY", raising=False)
+    monkeypatch.delenv("EMAIL_FROM", raising=False)
+    with pytest.raises(SystemExit, match="mail requires RESEND_API_KEY, EMAIL_FROM"):
+        notify.send("subject", "body")
+
+
+def test_breakout_shown_keeps_new_repos_even_below_top_fifteen():
+    rows = [{"repo": f"old/{i}", "velocity": 1000 - i, "delta": None, "new": False} for i in range(15)] + [
+        {"repo": "new/gem", "velocity": 250, "delta": None, "new": True}]
+    kept = breakout.shown(rows)
+    assert len(kept) == 15 and any(r["repo"] == "new/gem" for r in kept)
+
+
+def test_kgr_and_ai_answers_multi_run_distribution(cfg, monkeypatch):
+    assert competition.kgr_of(20, 200) == (0.1, "great")
+    assert competition.kgr_of(150, 200) == (0.75, "watch")
+    assert competition.kgr_of(300, 200) == (1.5, "skip")
+    assert competition.kgr_of(10, 0) == (None, None)
+    comp = {"verdict": "open", "built": 20, "kgr": 0.1, "kgr_band": "great"}
+    assert "KGR 0.1 (<0.25)" in report._page_one(comp)
+
+    cfg["ai_answers"].update(enabled=True, engines=["chatgpt"], max_rows=1, runs=3)
+    replies = iter([
+        ({"brand_entities": [{"markdown": "ToolA"}, {"markdown": "ToolB"}], "sources": [{"domain": "a.com"}]}, 4000),
+        ({"brand_entities": [{"markdown": "ToolB"}], "sources": [{"domain": "b.com"}]}, 4000),
+        ({"brand_entities": [], "sources": []}, 4000),
+    ])
+    monkeypatch.setattr(ai_answers.aisa, "rest", lambda path, task: next(replies))
+    rows = [{"phrase": "convert slides to notes", "posts": [], "subreddits": []}]
+    cost, errors = ai_answers.assess(rows, cfg)
+    ai = rows[0]["ai"]
+    assert cost == 12000 and errors == [] and ai["runs"] == 3
+    assert ai["by"]["chatgpt"]["names"] == ["ToolB", "ToolA"] and ai["first_pick"] == {"chatgpt": "ToolB"}
+    assert ai["distribution"]["chatgpt"]["counts"] == {"ToolA": 1, "ToolB": 2} and not ai["gap"]
+

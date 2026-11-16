@@ -94,7 +94,7 @@ How it is made (`radar/usecases.py`):
 3. **Screen**: a second call scores how well the name answers each phrase, marks brands, and spots the names of other things; the loosely related ones are dropped. For Claude Haiku 5.5 it dropped all six proposed ("ai coding assistant", "github copilot alternative"); for SynthID Detector it kept all five.
 4. **Volume**: Google Ads monthly searches for the rest, one batch call. Phrases under `min_volume` are dropped; most are.
 5. **Trends**, twice per row: the term alone gives the shape (new or not, the day it started rising, the peak, the last week against the week before, what it is doing now); the term beside a benchmark keyword (`gpts` by default) gives the size.
-6. **Page one**, for the rows that would be acted on (eight at most): Google's first page (about $0.002 a keyword), the rating of each site on it (GoAnyAPI, $0.002 a site, kept 30 days) and the keyword difficulty ($0.012 a call). With a GoAnyAPI key also who already builds for the term and who pays for it: the pages Google holds with it in the title from the last month (`pages built`) and the domains running Google ads on it (`advertisers`, from Ads transparency), $0.008 a row. `open` = three or more of the ten results sit on sites rated under 30, or difficulty under 20; `crowded` = none does and difficulty is 40 or more; `mixed` in between. Under the table it names the weakest site on page one, where a new page can get in, and what kinds of pages hold it (tools, lists, articles, videos, forums). Ads on the page mean someone pays for that click. Recorded only, in report.json as `page_age` and not used in any decision yet: how old the sites on page one are (each domain's registration, from RDAP, free) and which results entered the top 10 since the reading before, to check later whether a page one with young sites on it is one a new site gets onto.
+6. **Page one**, for the rows that would be acted on (eight at most): Google's first page (about $0.002 a keyword), the rating of each site on it (GoAnyAPI, $0.002 a site, kept 30 days) and the keyword difficulty ($0.012 a call). With a GoAnyAPI key also who already builds for the term and who pays for it: the pages Google holds with it in the title from the last month (`pages built`), the **KGR** (`KGR = pages built / monthly searches`: `< 0.25` great, `<= 1.0` watch, `> 1.0` skip) and the domains running Google ads on it (`advertisers`, from Ads transparency), $0.008 a row. `open` = three or more of the ten results sit on sites rated under 30, or difficulty under 20; `crowded` = none does and difficulty is 40 or more; `mixed` in between. Under the table it names the weakest site on page one, where a new page can get in, and what kinds of pages hold it (tools, lists, articles, videos, forums). Ads on the page mean someone pays for that click. Recorded only, in report.json as `page_age` and not used in any decision yet: how old the sites on page one are (each domain's registration, from RDAP, free) and which results entered the top 10 since the reading before, to check later whether a page one with young sites on it is one a new site gets onto.
 
 7. **Word age**, for the prioritize and watch rows: the term's Trends interest over five years (one point a week); the first week with any interest is `First searched`, and 🆕 marks a term first searched in the last 180 days. A new term's page one is read one step easier (crowded → mixed, mixed → open): difficulty scores and site ratings are made from pages written for something else and lag a word nobody searched half a year ago. The week still running and Trends' unsettled last two days are left out, so a "0, 100" tail cannot make an old word look new. One Trends task a row, $0.0012. A term made of words people searched before ("nano banana" reads a little interest in 2021) is dated by those older searches.
 8. **Markets**, for the same rows: Google Ads monthly searches in each market of `markets.codes` (US, DE, FR, JP by default; all languages) and, with `difficulty` on, the keyword difficulty there, in one compact cell: `best DE · US 5k/50 · DE 900/5 · FR 300 · JP 0 · top Germany`. `best` = the most searches per point of difficulty when every market with searches has a difficulty, else the most searches. `top` = the country where Trends interest is highest, among the major markets (Trends measures a share of local searches, and on its own puts Sint Maarten first). About $0.41 a run with the defaults (a $0.09 volume call per market, about $0.012 a difficulty call), plus $0.0024 a row for the top region.
@@ -154,7 +154,7 @@ TrustMRR's API terms forbid republishing its data and building public SEO pages 
 
 Once a week the radar searches Reddit for a dozen ways people ask for a tool ("is there an AI tool", "I wish there was a tool", "how do I automate", in `asks.patterns`), keeps the posts of the last week with a score of 2 or more, and has a small model sort them: a request, a complaint, a shared solution, or other. For requests and complaints an AI tool could answer, it writes the job the way a person would search it ("add b roll automatically", "convert slides to notes"). Jobs with at least 50 searches a month are listed with their posts and get the page-one check; each becomes a lead. Most asks are too specific to have searches yet: the first real week, 84 posts held 43 asks and only two had 50 searches a month ("best ai tool for research", from a 1,034-point r/PhD thread, and "best ai tool for coding"). So the best-scored of the others are listed too, as ideas rather than keywords. A month of posts read in a trial held a request for "an AI tool to convert PowerPoint lecture slides into notes", the same job a tool-site course uses as its worked example.
 
-With `ai_answers` on (off by default; about $0.004 an answer), the jobs with searches are also put to ChatGPT, as the answer its own interface gives with search (DataForSEO's LLM scraper), and with `"engines": ["chatgpt", "google"]` to Google's AI Mode, as "What is the best tool to {job}?". A column says which tools the answers name; under the table come the sites they cite, and ✅ when one is yours. An answer that names no tool is a gap a new tool can fill in AI search; the cited sites are the pages AI search reads for the job: get listed there, or write the comparison against them. On 2026-10-20, for "convert powerpoint slides to notes", ChatGPT named Google NotebookLM, ChatGPT and Microsoft Copilot, and AI Mode listed Knowt, NoteGPT and Microsoft Copilot among others.
+With `ai_answers` on (off by default; about $0.004 an answer), the jobs with searches are also put to ChatGPT, as the answer its own interface gives with search (DataForSEO's LLM scraper), and with `"engines": ["chatgpt", "google"]` to Google's AI Mode, as "What is the best tool to {job}?". A column says which tools the answers name (and which tool came first as `first_pick`), or with `"runs": 3` (or more) aggregates the tool and site frequency across runs (`Tool (2/3)`), marking a job as a `gap` when at least 80% of runs name no tool; under the table come the sites they cite, and ✅ when one is yours. An answer that names no tool is a gap a new tool can fill in AI search; the cited sites are the pages AI search reads for the job: get listed there, or write the comparison against them. On 2026-10-20, for "convert powerpoint slides to notes", ChatGPT named Google NotebookLM, ChatGPT and Microsoft Copilot, and AI Mode listed Knowt, NoteGPT and Microsoft Copilot among others.
 
 Posts are for your own research: quote them, do not republish them.
 
@@ -206,12 +206,13 @@ For up to three leads a day marked ⚡ (a widely shared walkthrough of a manual 
 What people complain about for a kind of tool, grouped into the gaps a new tool can fill:
 
 - low-star Chrome Web Store reviews (1 to 3 stars) of the extensions Google shows for the keyword, or of the ones you name with `--extension ID` (GoAnyAPI: 2 credits to find them, 3 a page of reviews);
+- low-star App Store reviews (1 to 3 stars) of the iOS apps Apple's search API returns for the keyword, read from Apple's public RSS feed (free);
 - Reddit posts that complain about the job or its tools ("{keyword} alternative", "{keyword} frustrating", ...; AIsa);
 - comments under the top tutorial videos for the keyword (AIsa).
 
 A model groups them into gaps (missing, too hard, quality, price, wants a tool), each with a count, an example and the phrase someone with that problem would search. About $0.05 a keyword. Counts are of what was read, not of the market.
 
-What it cannot read: App Store, Google Play and Trustpilot reviews (DataForSEO serves them as tasks to post and fetch later, and AIsa runs synchronous calls only); There's An AI For That's request board (a Cloudflare challenge in front of every page; getting past it would be getting past their bot protection, so the radar does not); Facebook groups (Meta closed the Groups API in April 2024, and its research library is open to approved academic and nonprofit researchers only).
+What it cannot read: Google Play and Trustpilot reviews (DataForSEO serves them as tasks to post and fetch later, and AIsa runs synchronous calls only); There's An AI For That's request board (a Cloudflare challenge in front of every page; getting past it would be getting past their bot protection, so the radar does not); Facebook groups (Meta closed the Groups API in April 2024, and its research library is open to approved academic and nonprofit researchers only).
 
 ## One key, and an optional second
 
@@ -255,7 +256,7 @@ python -m radar daily --skip x,hf --out report.md  # everything else, once a day
 
 `sources` writes a report only when there is a new name. `daily` with `--skip x,hf` lists what `sources` kept in the last 24 hours. If you run only once a day, use `python -m radar daily` and skip nothing.
 
-Other flags: `--skip` takes any of `x,hf,breakout,sitemaps,newsites,gsc,review,judge,usecases`; `--new-sites` runs the weekly signal today; `--mail` sends the report (below); `--state DIR` moves the database and snapshots.
+Other flags: `--skip` takes any of `x,hf,breakout,sitemaps,newsites,revenue,asks,sellers,feeds,money,sidelights,gsc,review,judge,usecases`; `--new-sites` runs the weekly signal today; `--mail` sends the report (below); `--state DIR` moves the database and snapshots.
 
 ## What a report looks like
 
@@ -280,7 +281,7 @@ and from `sources`:
 
 ```
 | **qwen image 2.1** | Hugging Face: new at #4, 2 versions | 1.00 | none | Qwen/Qwen-Image-2.1-Turbo (text-to-image, ♥569) |
-| **ltx 2.5** | Hugging Face: new at #6 | 0.90 | none | Lightricks/LTX-2.5 (image-to-video, ♥7347) |
+| **ltx 2.5** | Hugging Face: new at #6 | 1.00 | none | Lightricks/LTX-2.5 (image-to-video, ♥7347) |
 ```
 
 `daily` also writes `report.json` beside the Markdown, with everything the report was built from.
@@ -296,7 +297,7 @@ and from `sources`:
 | `known_terms` | Terms you already have a page for, or never want reported. A lead that contains one, or is contained in one, is marked and not kept for review |
 | `stop_words` | Everyday words of your field, added to the built-in list (which is tuned for AI tooling) |
 | `judge` | `model` (any chat model on AIsa) and `min_score` (0.5) |
-| `breakout` | `window_days`, `min_stars`, `velocity_min` (stars a day), `delta_min` (stars since yesterday) |
+| `breakout` | `window_days`, `min_stars`, `velocity_min` (stars a day), `delta_min` (stars since yesterday); optional shadow queries `young_days`/`young_min_stars` (young fast-growing repos) and `late_days`/`late_min_stars` (older repos breaking out now); newly emerged breakouts (`is_new`) are kept ahead of old repos in the top-15 report slice |
 | `new_sites` | `queries`: a name and a SQL LIKE pattern on the domain (`"%ai%"`), one paid query each; `weekday` (0 = Monday) |
 | `review` | `after_days` (14) and `per_day` (5 leads a day) |
 | `usecases` | The keyword table. `per_day` (names read a day, 0 = off), `model`, `benchmark` (the keyword sizes are compared with), `min_volume` (monthly searches a phrase needs), `min_daily` (searches a day for "prioritize"), `recheck_days` (3), `related` (use related queries when `GOANYAPI_API_KEY` is set), `related_geo` (`US`), `country_trends` (read the bigger rows' curves from that country), `country_min_volume` (1000) and `country_max` (8) |
@@ -306,7 +307,7 @@ and from `sources`:
 | `yours` | `enabled`, `domains` (your sites; empty = the Search Console property's domain), `days` (28: the Search Console window) |
 | `year_curve` | `enabled`: the twelve-month column, from the volume call (free) |
 | `dot_com` | `enabled`, `max_rows` (8: prioritized rows checked a run, names first) |
-| `ai_answers` | `enabled` (`false`: it costs about $0.004 an answer), `engines` (`["chatgpt"]`; add `"google"` for AI Mode), `max_rows` (6), `prompt` (`"What is the best tool to {job}?"`), `location_code` (2840), `language_code` (`en`) |
+| `ai_answers` | `enabled` (`false`: it costs about $0.004 an answer), `engines` (`["chatgpt"]`; add `"google"` for AI Mode), `runs` (`1`; set `3` or more to sample multi-run tool/site frequency, first-pick counts and empty-run gap rate), `max_rows` (6), `prompt` (`"What is the best tool to {job}?"`), `location_code` (2840), `language_code` (`en`) |
 | `gsc` | `site` (`sc-domain:example.com`) and `token_file`. Leave `{}` to turn the signal off; with it set, `yours` also reads your average position per keyword |
 
 Please read each site's robots.txt before you add its sitemap, and keep `pause` at or above its crawl-delay. The example config makes a few dozen requests a day in total, spaced by `pause`.

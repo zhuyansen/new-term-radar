@@ -306,7 +306,7 @@ def pains(result: dict) -> str:
     """The `pains` command: the gaps people point at for a kind of tool."""
     by = result["by_source"]
     lines = [t("pains_h", keyword=result["keyword"]), "",
-             t("pains_src", chrome=by["chrome"], reddit=by["reddit"], youtube=by["youtube"]), ""]
+             t("pains_src", chrome=by["chrome"], appstore=by.get("appstore", 0), reddit=by["reddit"], youtube=by["youtube"]), ""]
     if result["gaps"]:
         lines += [t("pains_cols"), "|---|---|---|---|---|"]
         for g in result["gaps"]:
@@ -439,7 +439,7 @@ def daily(cfg: dict, lead: list[dict], b: dict[str, dict], gsc: dict, rev: dict,
 
 
 def _page_one(comp: dict | None) -> str:
-    """The page-one cell: verdict, weak results, difficulty, ads."""
+    """The page-one cell: verdict, weak results, difficulty, ads, pages built (and KGR), advertisers."""
     if not comp:
         return t("dash")
     bits = [t("pc_" + comp["verdict"])]
@@ -451,6 +451,8 @@ def _page_one(comp: dict | None) -> str:
         bits.append(t("pc_ads"))
     if comp.get("built") is not None:
         bits.append(t("pc_built", n=f"{comp['built']:,}"))
+    if comp.get("kgr") is not None and comp.get("kgr_band"):
+        bits.append(t("pc_kgr_" + comp["kgr_band"], kgr=f"{comp['kgr']:g}"))
     if comp.get("paid"):
         bits.append(t("pc_paid", n=len(comp["paid"])))
     return " · ".join(bits + _features(comp))

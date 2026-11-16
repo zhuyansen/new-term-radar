@@ -23,10 +23,10 @@ CREDIT_SOURCE = "by 饭特稀 | Fentix @fantexi997"
 
 # A line that starts with "+" is new in 0.6.0: drawn in purple, without the "+".
 ZH = {
-    "s1": ("① X 与 HF", "每 8 小时", "HF Spaces 热门 demo"), "s2": ("② GitHub", "爆发仓库"),
+    "s1": ("① X 与 HF", "每 8 小时", "HF Spaces 热门 demo"), "s2": ("② GitHub", "爆发仓库 · 新黑马免截断"),
     "s3": ("③ 竞品与新站", "sitemap 新页 · 每周新站", "8 个 AI 工具导航站", "+新站最先排上的词"), "s4": ("④ 搜索控制台", "首次曝光的词 · 可选"),
     "s6": ("⑥ 有人付钱的产品", "TrustMRR · 每周", "增长最快 · 从 $0 到有收入"),
-    "s7": ("⑦ Reddit 求助", "12 种问法 · 每周", "模型筛出要做的事", "+ChatGPT 推荐的工具"),
+    "s7": ("⑦ Reddit 求助", "12 种问法 · 每周", "模型筛出要做的事", "+ChatGPT 首选与多轮分布"),
     "s8": ("⑧ 刚开始收钱的站", "收款链接 · 每周", "+8 家收款 · 建站作品"),
     "judge": ("名字判断：是具体名字吗", "得分 ≥ 0.5 才留下", "格式：视频>语音>图片 · ⚡ 一键机会"),
     "known": ("剔除你已经覆盖的词",),
@@ -34,7 +34,7 @@ ZH = {
                  "前十形态 · 讨论帖与 AI 概览 · 精确匹配的 .com", "你的排名 → 更新、改进或新建页面"),
     "sources": ("源头报告（每 8 小时）", "有新名字才出", "附推文原文"),
     "table": ("新词表：名字 + 它背后的通用词", "模型提词 → 相关性筛选 → 搜索量 → Trends"),
-    "page": ("首页竞争", "前十弱站 · KD · 广告 · 已有页面 · 在投广告", "首页挤满的「优先」降为「观察 ↓」"),
+    "page": ("首页竞争", "前十弱站 · KD · KGR · 广告 · 已有页面 · 在投广告", "首页挤满的「优先」降为「观察 ↓」"),
     "evidence": ("取证（AIsa）", "高赞推文 · README", "付费产品的自述"),
     "goany": ("GoAnyAPI（可选）", "相关查询 · 美国日走势", CREDIT_SOURCE),
     "daily": ("日报（每天一次）", "新词表在最前 · 线索存入 radar.db", "⑥ 收入 · ⑦ 求助 · ⑧ 新卖家 · ⚡ 教程观众在要什么",
@@ -43,15 +43,15 @@ ZH = {
     "credit": f"建议：{CREDIT_TABLE}",
     "use_h": "四种用法，同一套引擎",
     "use": [("命令行 + 定时任务", "daily · sources", "keywords · leads"), ("3 个 Agent Skill", "一站式", "只收集 · 只做关键词"),
-            ("MCP 服务器", "查线索 · 出新词表", "跑一次"), ("pains 痛点命令", "Chrome 低星评论", "Reddit · 教程评论")],
+            ("MCP 服务器", "查线索 · 出新词表", "跑一次"), ("pains 痛点命令", "Chrome / App Store 低星", "Reddit · 教程评论")],
     "tag": "新增",
     "legend": ("信号与取证", "报告产出", "新词表", "0.6.0 新增", "命中率写回日报"),
 }
 EN = {
-    "s1": ("① X and HF", "every 8 hours", "trending HF Spaces"), "s2": ("② GitHub", "breakout repos"),
+    "s1": ("① X and HF", "every 8 hours", "trending HF Spaces"), "s2": ("② GitHub", "breakouts · new kept"),
     "s3": ("③ Sitemaps", "new pages · new sites", "8 AI tool directories", "+new sites' top-20 words"), "s4": ("④ Search Console", "optional"),
     "s6": ("⑥ What people pay for", "TrustMRR · weekly", "fastest growing · from $0"),
-    "s7": ("⑦ Reddit asks", "12 phrasings · weekly", "the jobs people want done", "+what ChatGPT recommends"),
+    "s7": ("⑦ Reddit asks", "12 phrasings · weekly", "the jobs people want done", "+ChatGPT pick · multi-run"),
     "s8": ("⑧ Started selling", "payment links · weekly", "+8 platforms · builders"),
     "judge": ("Name judge: a name, or a word?", "a score of 0.5 or more stays", "format: video>voice>image · ⚡ one-click"),
     "known": ("Drop the terms you already cover",),
@@ -59,7 +59,7 @@ EN = {
                  "top-10 shape · threads and AI overview · exact-match .com", "your rank → update, improve or new page"),
     "sources": ("Sources report (every 8 h)", "only on a new name", "with the posts"),
     "table": ("Keyword table: names + generic terms", "model phrases → screen → volume → Trends"),
-    "page": ("Page one", "weak sites · KD · ads · pages built · advertisers", "a crowded \"prioritize\" becomes \"watch ↓\""),
+    "page": ("Page one", "weak sites · KD · KGR · ads · pages built · advertisers", "a crowded \"prioritize\" becomes \"watch ↓\""),
     "evidence": ("Evidence (AIsa)", "top posts · README", "a paying product's own words"),
     "goany": ("GoAnyAPI (optional)", "related queries · US curve", CREDIT_SOURCE),
     "daily": ("Daily report (once a day)", "keyword table first · leads in radar.db", "⑥ revenue · ⑦ asks · ⑧ sellers · ⚡ viewers ask",
@@ -68,7 +68,7 @@ EN = {
     "credit": f"Idea: {CREDIT_TABLE}",
     "use_h": "Four ways in, one engine",
     "use": [("Command line", "daily · sources", "keywords · leads"), ("3 Agent Skills", "one run,", "or its two halves"),
-            ("MCP server", "leads · keyword table", "run"), ("pains command", "Chrome reviews", "Reddit · tutorials")],
+            ("MCP server", "leads · keyword table", "run"), ("pains command", "Chrome / App Store", "Reddit · tutorials")],
     "tag": "NEW",
     "legend": ("signals", "reports", "keyword table", "new in 0.6.0", "hit rate fed back"),
 }

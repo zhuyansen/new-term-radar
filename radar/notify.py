@@ -60,6 +60,9 @@ def send(subject: str, md_text: str) -> str:
     bad = [i + 1 for i, a in enumerate(to) if not _ADDRESS.match(a)]
     if bad:   # the address itself stays out of the log
         raise SystemExit(f"RADAR_EMAIL_TO: {len(to)} address(es), number {bad} is not an email address")
+    missing = [k for k in ("RESEND_API_KEY", "EMAIL_FROM") if not os.environ.get(k)]
+    if missing:
+        raise SystemExit(f"mail requires {', '.join(missing)}")
     body = json.dumps({"from": os.environ["EMAIL_FROM"], "to": to, "subject": subject, "html": html(md_text)}).encode()
     # Resend sits behind Cloudflare, which answers Python's default User-Agent with 403 "error code: 1010".
     req = urllib.request.Request("https://api.resend.com/emails", data=body, method="POST", headers={

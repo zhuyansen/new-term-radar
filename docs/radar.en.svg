@@ -25,7 +25,7 @@
 <text x="110.0" y="98.5" fill="#993C1D" font-size="12">trending HF Spaces</text>
 <rect x="210" y="36" width="160" height="80" rx="4" fill="#FAECE7" stroke="#993C1D" stroke-width="0.5"/>
 <text x="290.0" y="72.0" fill="#712B13" font-weight="500">② GitHub</text>
-<text x="290.0" y="91.0" fill="#993C1D" font-size="12">breakout repos</text>
+<text x="290.0" y="91.0" fill="#993C1D" font-size="12">breakouts · new kept</text>
 <rect x="390" y="36" width="160" height="80" rx="4" fill="#FAECE7" stroke="#993C1D" stroke-width="0.5"/>
 <text x="470.0" y="54.0" fill="#712B13" font-weight="500">③ Sitemaps</text>
 <text x="470.0" y="73.0" fill="#993C1D" font-size="12">new pages · new sites</text>
@@ -47,7 +47,7 @@
 <text x="635.0" y="157.0" fill="#712B13" font-weight="500">⑦ Reddit asks</text>
 <text x="635.0" y="176.0" fill="#993C1D" font-size="12">12 phrasings · weekly</text>
 <text x="635.0" y="192.5" fill="#993C1D" font-size="12">the jobs people want done</text>
-<text x="635.0" y="209.0" fill="#534AB7" font-size="12" font-weight="600">what ChatGPT recommends</text>
+<text x="635.0" y="209.0" fill="#534AB7" font-size="12" font-weight="600">ChatGPT pick · multi-run</text>
 <rect x="698" y="134" width="28" height="15" rx="7.5" fill="#534AB7"/><text x="712" y="145" font-size="10" fill="#FFFFFF" font-weight="600">NEW</text>
 <rect x="30" y="230" width="190" height="64" rx="4" fill="#FAECE7" stroke="#993C1D" stroke-width="0.5"/>
 <text x="125.0" y="249.0" fill="#712B13" font-weight="500">⑧ Started selling</text>
@@ -65,7 +65,7 @@
 <text x="495.0" y="363.0" fill="#185FA5" font-size="12">model phrases → screen → volume → Trends</text>
 <rect x="276" y="388" width="438" height="74" rx="4" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/>
 <text x="495.0" y="412.0" fill="#0C447C" font-weight="500">Page one</text>
-<text x="495.0" y="431.0" fill="#185FA5" font-size="12">weak sites · KD · ads · pages built · advertisers</text>
+<text x="495.0" y="431.0" fill="#185FA5" font-size="12">weak sites · KD · KGR · ads · pages built · advertisers</text>
 <text x="495.0" y="447.5" fill="#185FA5" font-size="12">a crowded "prioritize" becomes "watch ↓"</text>
 <rect x="276" y="480" width="438" height="92" rx="4" fill="#EEEDFE" stroke="#534AB7" stroke-width="1.2"/>
 <text x="495.0" y="504.0" fill="#3C3489" font-weight="500">Word age · Markets · Page-one shape · 12 months</text>
@@ -104,7 +104,7 @@
 <text x="470.0" y="1000.5" fill="#185FA5" font-size="12">run</text>
 <rect x="570" y="942" width="160" height="72" rx="4" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
 <text x="650.0" y="965.0" fill="#444441" font-weight="500">pains command</text>
-<text x="650.0" y="984.0" fill="#5F5E5A" font-size="12">Chrome reviews</text>
+<text x="650.0" y="984.0" fill="#5F5E5A" font-size="12">Chrome / App Store</text>
 <text x="650.0" y="1000.5" fill="#5F5E5A" font-size="12">Reddit · tutorials</text>
 </g>
 <path d="M30 918 H730" stroke="#D3D1C7" stroke-width="0.5" fill="none"/><text x="30" y="934" font-size="12" fill="#5F5E5A" font-weight="500">Four ways in, one engine</text><text x="730" y="311" text-anchor="end" font-size="11" fill="#185FA5">Idea: 子木 @CoderJeffLee</text>

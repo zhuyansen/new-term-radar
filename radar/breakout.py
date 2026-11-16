@@ -47,6 +47,10 @@ def repo_term(name: str) -> str:
     return re.sub(r"[-_.]+", " ", name).strip().lower()
 
 
+def _speed(row: dict) -> int:
+    return -max(row["velocity"], row["delta"] or 0)
+
+
 def score(repos: list[dict], before: dict[str, int] | None, now: datetime,
           velocity_min: int = 200, delta_min: int = 400) -> list[dict]:
     """Repos that break out, fastest first. `repos` items are GitHub search results."""
@@ -62,9 +66,16 @@ def score(repos: list[dict], before: dict[str, int] | None, now: datetime,
         owner, name = r["full_name"].split("/", 1)
         out.append({"repo": r["full_name"], "owner": owner, "name": name, "stars": stars,
                     "velocity": round(velocity), "delta": delta, "age_days": round(age, 1),
-                    "description": (r.get("description") or "")[:120]})
-    out.sort(key=lambda x: -max(x["velocity"], x["delta"] or 0))
+                    "born": created.date().isoformat(), "description": (r.get("description") or "")[:120]})
+    out.sort(key=_speed)
     return out[:TOP]
+
+
+def shown(rows: list[dict]) -> list[dict]:
+    """At most TOP rows, fastest first: the first-time breakouts (the TOP fastest of them),
+    then the fastest of those reported before. Rows need 'new'."""
+    new = [r for r in rows if r["new"]][:TOP]
+    return sorted(new + [r for r in rows if not r["new"]][:TOP - len(new)], key=_speed)
 
 
 def variants(row: dict, display: str) -> list[str]:
@@ -78,28 +89,60 @@ def variants(row: dict, display: str) -> list[str]:
     return out
 
 
-def breakouts(cfg: dict, state: Path) -> dict:
-    c = cfg["breakout"]
-    since = (date.today() - timedelta(days=c["window_days"])).isoformat()
-    q = urllib.parse.quote(f"created:>={since} stars:>={c['min_stars']}")
+def _search(query: str) -> list[dict]:
+    q = urllib.parse.quote(query)
     repos: list[dict] = []
     for page in range(1, PAGES + 1):
         items = _get(f"/search/repositories?q={q}&sort=stars&order=desc&per_page=100&page={page}").get("items", [])
         repos += items
         if len(items) < 100:
             break
+    return repos
+
+
+def breakouts(cfg: dict, state: Path) -> dict:
+    c = cfg["breakout"]
+    today_d = date.today()
+    since = (today_d - timedelta(days=c["window_days"])).isoformat()
+    repos = _search(f"created:>={since} stars:>={c['min_stars']}")
+    seen = {r["full_name"] for r in repos}
+    if c.get("young_days") and c.get("young_min_stars"):
+        young_since = (today_d - timedelta(days=c["young_days"])).isoformat()
+        try:
+            for r in _search(f"created:>={young_since} stars:>={c['young_min_stars']}"):
+                if r["full_name"] not in seen:
+                    repos.append(r)
+                    seen.add(r["full_name"])
+        except (OSError, ValueError):
+            pass
+    if c.get("late_days") and c.get("late_min_stars"):
+        late_from = (today_d - timedelta(days=c["late_days"])).isoformat()
+        late_to = (today_d - timedelta(days=c["window_days"] + 1)).isoformat()
+        try:
+            for r in _search(f"created:{late_from}..{late_to} stars:>={c['late_min_stars']}"):
+                if r["full_name"] not in seen:
+                    repos.append(r)
+                    seen.add(r["full_name"])
+        except (OSError, ValueError):
+            pass
     path = state / "gh_stars.json.gz"
     before = snap.load(path)
-    rows = score(repos, before, datetime.now(timezone.utc), c["velocity_min"], c["delta_min"])
+    all_rows = []
+    now = datetime.now(timezone.utc)
+    for r in repos:
+        all_rows += score([r], before, now, c["velocity_min"], c["delta_min"])
+    all_rows.sort(key=_speed)
     if repos:
         snap.save(path, {r["full_name"]: r["stargazers_count"] for r in repos})
     flagged_path = state / "gh_flagged.json.gz"
     flagged: dict[str, str] = snap.load(flagged_path) or {}
-    today = date.today().isoformat()
-    for row in rows:
+    today = today_d.isoformat()
+    for row in all_rows:
         row["new"] = row["repo"] not in flagged
+    rows = shown(all_rows)
+    for row in rows:
         flagged.setdefault(row["repo"], today)
-    cutoff = (date.today() - timedelta(days=FLAGGED_DAYS)).isoformat()
+    cutoff = (today_d - timedelta(days=FLAGGED_DAYS)).isoformat()
     snap.save(flagged_path, {k: v for k, v in flagged.items() if v >= cutoff})
     terms = []
     for row in (r for r in rows if r["new"]):
@@ -110,6 +153,7 @@ def breakouts(cfg: dict, state: Path) -> dict:
         row["variants"] = variants(row, display)
         gain = t("note_breakout_gain", delta=row["delta"]) if row["delta"] is not None else ""
         terms.append({"term": row["variants"][0], "recent": 1, "variants": row["variants"], "repo": row["repo"],
+                      "born": row.get("born", ""),
                       "note": t("note_breakout", repo=row["repo"], stars=row["stars"], velocity=row["velocity"], gain=gain),
                       "examples": [f"{row['repo']}: {row['description']}"]})
     return {"searched": len(repos), "first_run": before is None, "repos": rows, "terms": terms,

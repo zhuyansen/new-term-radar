@@ -28,7 +28,7 @@ If the user gave names, use them. If they gave text (a listening report, posts, 
 
 ## Step 2: say the cost, wait for a yes, then run
 
-About 0.05 USD a name plus 0.09 USD a call, and 40 to 90 seconds a name. State the estimate and run only after the user says yes: a request for keywords is not a yes to the cost. Ask again if the list of names changes. Then:
+About 0.05 USD a name plus 0.09 USD a call for the core table (and about 0.41 USD a call when `markets` is enabled), and 40 to 90 seconds a name. State the estimate and run only after the user says yes: a request for keywords is not a yes to the cost. Ask again if the list of names changes. Then:
 
 ```bash
 uvx new-term-radar==0.6.1 keywords "photocraft" "synthid detector" --repo "photocraft=storytold/photocraft" --json

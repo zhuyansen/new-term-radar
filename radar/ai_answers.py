@@ -74,22 +74,69 @@ def _ask(job: str, engine: str, c: dict) -> tuple[str, str, dict | None, int, st
     return job, engine, READ[engine](result), cost, None
 
 
+def _merge_runs(runs_got: list[dict]) -> tuple[dict, dict]:
+    """Combines `runs_got` for one engine into {"names", "sites"} (ordered by frequency then first appearance)
+    and distribution stats {"runs", "counts", "site_counts", "first_picks", "empty"}."""
+    name_counts: dict[str, int] = {}
+    site_counts: dict[str, int] = {}
+    first_picks: dict[str, int] = {}
+    empty = 0
+    for got in runs_got:
+        names = got.get("names") or []
+        sites = got.get("sites") or []
+        if not names:
+            empty += 1
+        else:
+            first_picks[names[0]] = first_picks.get(names[0], 0) + 1
+        for n in names:
+            name_counts[n] = name_counts.get(n, 0) + 1
+        for s in sites:
+            site_counts[s] = site_counts.get(s, 0) + 1
+    ordered_names = [k for k, _ in sorted(name_counts.items(), key=lambda kv: -kv[1])][:KEPT]
+    ordered_sites = [k for k, _ in sorted(site_counts.items(), key=lambda kv: -kv[1])][:KEPT]
+    dist = {"runs": len(runs_got), "counts": name_counts, "site_counts": site_counts,
+            "first_picks": first_picks, "empty": empty}
+    return {"names": ordered_names, "sites": ordered_sites}, dist
+
+
 def assess(rows: list[dict], cfg: dict) -> tuple[int, list[str]]:
-    """Adds `ai` = {"prompt", "by": {engine: {"names", "sites"}}, "yours"} to the first `max_rows` rows. (cost, errors)"""
+    """Adds `ai` = {"prompt", "by": {engine: {"names", "sites"}}, "yours", "first_pick", "gap", ...}
+    to the first `max_rows` rows. When `runs` > 1, asks each engine `runs` times and records
+    `distribution` across runs. (cost, errors)"""
     c = cfg.get("ai_answers") or {}
     if not c.get("enabled") or not rows:
         return 0, []
+    runs = max(1, int(c.get("runs", 1)))
     engines = [e for e in c["engines"] if e in PATHS]
     errors = [f"unknown engine: {e}" for e in c["engines"] if e not in PATHS]
     picked = {r["phrase"]: r for r in rows[:c["max_rows"]]}
     mine, cost = yours.own_domains(cfg), 0
+    per_job: dict[str, dict[str, list[dict]]] = {j: {} for j in picked}
+    tasks = [(j, e) for j in picked for e in engines for _ in range(runs)]
     with ThreadPoolExecutor(WORKERS) as pool:
-        for job, engine, got, spent, error in pool.map(lambda p: _ask(*p, c), [(j, e) for j in picked for e in engines]):
+        for job, engine, got, spent, error in pool.map(lambda p: _ask(*p, c), tasks):
             cost += spent
             if error:
                 errors.append(error)
                 continue
-            ai = picked[job].setdefault("ai", {"prompt": c["prompt"].format(job=job), "by": {}, "yours": False})
-            ai["by"][engine] = got
-            ai["yours"] |= any(yours.is_mine(s, mine) for s in got["sites"]) if mine else False
+            per_job[job].setdefault(engine, []).append(got)
+    for job, by_eng in per_job.items():
+        if not by_eng:
+            continue
+        ai: dict = {"prompt": c["prompt"].format(job=job), "by": {}, "yours": False}
+        dist_by: dict[str, dict] = {}
+        total_runs, empty_runs = 0, 0
+        for engine, runs_got in by_eng.items():
+            merged, dist = _merge_runs(runs_got)
+            ai["by"][engine] = merged
+            dist_by[engine] = dist
+            total_runs += dist["runs"]
+            empty_runs += dist["empty"]
+            ai["yours"] |= any(yours.is_mine(s, mine) for s in merged["sites"]) if mine else False
+        ai["first_pick"] = {e: g["names"][0] for e, g in ai["by"].items() if g["names"]}
+        ai["gap"] = (empty_runs / total_runs >= 0.8) if total_runs else False
+        if runs > 1:
+            ai["runs"] = runs
+            ai["distribution"] = dist_by
+        picked[job]["ai"] = ai
     return cost, errors

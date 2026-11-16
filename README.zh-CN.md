@@ -94,7 +94,7 @@
 3. **筛选**：再调一次模型，给每个写法打分：这个名字能不能回答这个搜索；同时标出品牌、认出别的东西的名字。关系不够直接的丢掉。Claude Haiku 5.5 提出的 6 个全被筛掉（「ai coding assistant」「github copilot alternative」）；SynthID Detector 的 5 个全部保留。
 4. **搜索量**：一次批量查询，取剩下写法的 Google Ads 月搜索量。低于 `min_volume` 的丢掉，大部分都会被丢掉。
 5. **Trends**，每行查两次：单独查这个词，得到曲线形状（是不是新词、哪天开始涨、峰值、近 7 天比前 7 天、现在的走势）；和基准词（默认 `gpts`）放在一起查，得到规模。
-6. **首页竞争**，只查会被采取行动的行（最多 8 行）：Google 第一页（每词约 $0.002）、第一页上每个站的评分（GoAnyAPI，每站 $0.002，保留 30 天）和关键词难度（每次 $0.012）。有 GoAnyAPI key 时，还会看谁已经在为这个词做东西、谁在为它付钱：近一个月标题里带这个词的页面数（「已有页面」）和在这个词上投谷歌广告的域名（「在投广告」，来自广告透明度），每行 $0.008。`能进` = 前十里有 3 个以上评分低于 30 的站，或难度低于 20；`挤满` = 一个弱站都没有、难度 40 以上；其余为 `一般`。表下面会列出首页最弱的那个站（新页面最容易挤进去的位置），以及首页由哪类页面构成（工具、榜单、文章、视频、论坛）。首页有广告，说明有人在花钱买这个点击。只记录、不参与判断（report.json 里的 `page_age`）：第一页上的站分别是什么时候注册的（RDAP 查注册日期，免费），以及和上一次读这个词相比新进前十的结果，留着以后验证「第一页上有新站的词，新站是不是更容易进」。
+6. **首页竞争**，只查会被采取行动的行（最多 8 行）：Google 第一页（每词约 $0.002）、第一页上每个站的评分（GoAnyAPI，每站 $0.002，保留 30 天）和关键词难度（每次 $0.012）。有 GoAnyAPI key 时，还会看谁已经在为这个词做东西、谁在为它付钱：近一个月标题里带这个词的页面数（「已有页面」）、**KGR**（`KGR = 已有页面 / 月搜索量`：`< 0.25` 极好、`<= 1.0` 观察、`> 1.0` 跳过）和在这个词上投谷歌广告的域名（「在投广告」，来自广告透明度），每行 $0.008。`能进` = 前十里有 3 个以上评分低于 30 的站，或难度低于 20；`挤满` = 一个弱站都没有、难度 40 以上；其余为 `一般`。表下面会列出首页最弱的那个站（新页面最容易挤进去的位置），以及首页由哪类页面构成（工具、榜单、文章、视频、论坛）。首页有广告，说明有人在花钱买这个点击。只记录、不参与判断（report.json 里的 `page_age`）：第一页上的站分别是什么时候注册的（RDAP 查注册日期，免费），以及和上一次读这个词相比新进前十的结果，留着以后验证「第一页上有新站的词，新站是不是更容易进」。
 
 7. **词龄**，只查「优先」和「观察」的行：取这个词 5 年的 Trends 热度（每周一个点），第一个有热度的那一周就是「首次有搜索」，180 天以内的标 🆕。新词的首页竞争放宽一档读（挤满 → 一般，一般 → 能进）：难度分数和站点评分都是按为别的东西写的页面算的，跟不上半年前还没人搜的词。还没过完的那一周和 Trends 没结算的最后两天不计，所以「0, 100」这种尾巴不会让老词看起来像新词。每行一次 Trends 查询，$0.0012。由老词拼成的词（「nano banana」在 2021 年就有一点热度）会按那些更早的搜索来定年龄。
 8. **市场**，同样只查这些行：`markets.codes` 里每个市场（默认 US、DE、FR、JP，不限语言）的 Google Ads 月搜索量，`difficulty` 打开时还有当地的关键词难度，压成一格：`最佳 DE · US 5k/50 · DE 900/5 · FR 300 · JP 0 · 热度最高 Germany`。`最佳` = 所有有搜索量的市场都有难度时，按每点难度对应的搜索量选；否则按搜索量选。`热度最高` = Trends 热度最高的国家，只在主要市场里选（Trends 量的是当地搜索的占比，不加限制会把荷属圣马丁排第一）。默认配置每次约 $0.41（每个市场一次 $0.09 的搜索量查询，难度每次约 $0.012），热度最高国家每行另加 $0.0024。
@@ -156,7 +156,7 @@ TrustMRR 的 API 条款禁止转载它的数据，也禁止拿它做公开的 SE
 
 雷达每周在 Reddit 上按十来种求工具的问法搜一次（"is there an AI tool"、"I wish there was a tool"、"how do I automate" 等，见 `asks.patterns`），留下最近一周、得分 2 以上的帖子，让一个小模型分类：求助、抱怨、分享的解法，或其他。对 AI 工具能解决的求助和抱怨，它把要做的事写成大家会搜的说法（"add b roll automatically"、"convert slides to notes"）。月搜索量 50 以上的列出来，附上帖子并做首页竞争检查，每件事记为一条线索。大多数求助太具体，还没有搜索量：第一次真实运行，一周 84 个帖子里有 43 个求助，只有两个月搜索量过 50（"best ai tool for research"，来自 r/PhD 一个 1,034 分的帖子；以及 "best ai tool for coding"）。所以其余得分最高的也会单独列出来，作为点子而不是关键词。试跑时读一个月的帖子，找到了「有没有 AI 工具能把 PPT 课件转成笔记」——正是一门工具站课程拿来做示范的那个需求。
 
-打开 `ai_answers`（默认关；每个回答约 $0.004）后，有搜索量的需求还会拿去问 ChatGPT（用 DataForSEO 的 LLM 抓取，拿到的是 ChatGPT 自己界面带搜索时给的回答）；设成 `"engines": ["chatgpt", "google"]` 还会问 Google 的 AI Mode。问法是「What is the best tool to {job}?」。表里多一列写回答点名了哪些工具，表下面列出它们引用的站，引用了你的站会标 ✅。没点名任何工具 = AI 搜索里的空位，新工具可以去占；被引用的站 = AI 搜索读的就是这些页面：争取被它们收录，或者写和它们的对比页。2026-10-20 实测「convert powerpoint slides to notes」：ChatGPT 点名 Google NotebookLM、ChatGPT 和 Microsoft Copilot，AI Mode 列出 Knowt、NoteGPT、Microsoft Copilot 等。
+打开 `ai_answers`（默认关；每个回答约 $0.004）后，有搜索量的需求还会拿去问 ChatGPT（用 DataForSEO 的 LLM 抓取，拿到的是 ChatGPT 自己界面带搜索时给的回答）；设成 `"engines": ["chatgpt", "google"]` 还会问 Google 的 AI Mode。问法是「What is the best tool to {job}?」。表里多一列写回答点名了哪些工具（并记录第一个被推荐的工具 `first_pick`），设 `"runs": 3`（或更多）时会跨多轮汇总工具与引用站点的出现频次（如 `Tool (2/3)`），80% 及以上轮次都没点名工具时标为空缺（`gap`）；表下面列出它们引用的站，引用了你的站会标 ✅。没点名任何工具 = AI 搜索里的空位，新工具可以去占；被引用的站 = AI 搜索读的就是这些页面：争取被它们收录，或者写和它们的对比页。2026-10-20 实测「convert powerpoint slides to notes」：ChatGPT 点名 Google NotebookLM、ChatGPT 和 Microsoft Copilot，AI Mode 列出 Knowt、NoteGPT、Microsoft Copilot 等。
 
 帖子只供自己研究：可以引用，不要转载。
 
@@ -208,12 +208,13 @@ python -m radar history --out sellers.csv
 把大家对一类工具的抱怨，归纳成新工具能填的缺口：
 
 - Google 上这个词对应的 Chrome 扩展的低星评论（1 到 3 星），或你用 `--extension ID` 指定的扩展（GoAnyAPI：找扩展 2 credits，每页评论 3 credits）；
+- 苹果搜索接口为这个词返回的 iOS 应用的低星评论（1 到 3 星，来自苹果公开 RSS，免费）；
 - Reddit 上抱怨这件事或相关工具的帖子（"{关键词} alternative"、"{关键词} frustrating" 等；AIsa）；
 - 这个词的热门教程视频下的评论（AIsa）。
 
 模型把它们归成缺口（缺功能、太难、质量、价格、想要工具），每个缺口给出次数、例子和有这个问题的人会搜的说法。每个词约 $0.05。次数是读到的条目数，不代表市场规模。
 
-读不到的：App Store、Google Play、Trustpilot 的评论（DataForSEO 是「先提交、后取结果」的任务接口，AIsa 只支持同步调用）；There's An AI For That 的求助板（每个页面前都有 Cloudflare 挑战，硬闯就是绕过对方的反爬，雷达不做）；Facebook 小组（Meta 2024 年 4 月关闭了 Groups API，它的研究数据库只对获批的学术和非营利研究者开放）。
+读不到的：Google Play、Trustpilot 的评论（DataForSEO 是「先提交、后取结果」的任务接口，AIsa 只支持同步调用）；There's An AI For That 的求助板（每个页面前都有 Cloudflare 挑战，硬闯就是绕过对方的反爬，雷达不做）；Facebook 小组（Meta 2024 年 4 月关闭了 Groups API，它的研究数据库只对获批的学术和非营利研究者开放）。
 
 ## 一个必需的 key，一个可选的
 
@@ -257,7 +258,7 @@ python -m radar daily --skip x,hf --out report.md  # 其余全部，每天一次
 
 `sources` 只在有新名字时才写报告。`daily` 带 `--skip x,hf` 时，会列出 `sources` 在过去 24 小时记下的线索。如果你每天只跑一次，直接用 `python -m radar daily`，什么都不跳过。
 
-其他参数：`--skip` 可选 `x,hf,breakout,sitemaps,newsites,gsc,review,judge,usecases`；`--new-sites` 让每周信号今天就跑；`--mail` 发邮件（见下）；`--state DIR` 指定数据库和快照的目录。
+其他参数：`--skip` 可选 `x,hf,breakout,sitemaps,newsites,revenue,asks,sellers,feeds,money,sidelights,gsc,review,judge,usecases`；`--new-sites` 让每周信号今天就跑；`--mail` 发邮件（见下）；`--state DIR` 指定数据库和快照的目录。
 
 ## 报告长什么样
 
@@ -291,7 +292,7 @@ python -m radar daily --skip x,hf --out report.md  # 其余全部，每天一次
 | `known_terms` | 你已经有页面的词，或者永远不想看到的词。包含它或被它包含的线索会被标出，不进入复盘 |
 | `stop_words` | 你这个领域的日常用词，追加到内置列表（内置列表是按 AI 工具领域调的） |
 | `judge` | `model`（AIsa 上任意对话模型）和 `min_score`（默认 0.5） |
-| `breakout` | `window_days`、`min_stars`、`velocity_min`（每天涨星）、`delta_min`（比昨天多的星） |
+| `breakout` | `window_days`、`min_stars`、`velocity_min`（每天涨星）、`delta_min`（比昨天多的星）；可选影子查询 `young_days`/`young_min_stars`（刚出生涨得快的年轻仓库）和 `late_days`/`late_min_stars`（更早创建但最近起量的仓库）；当天首次达到爆发标准的新仓库（`is_new`）在前 15 条展示切片中优先保留 |
 | `new_sites` | `queries`：名称和域名的 SQL LIKE 模式（`"%ai%"`），每个是一次付费查询；`weekday`（0 = 周一） |
 | `review` | `after_days`（14）和 `per_day`（每天复盘 5 条） |
 | `usecases` | 新词表。`per_day`（每天读几个名字，0 = 关闭）、`model`、`benchmark`（用来比规模的基准词）、`min_volume`（写法至少要有的月搜索量）、`min_daily`（判为「优先」所需的日搜）、`recheck_days`（3）、`related`（设了 `GOANYAPI_API_KEY` 时是否用相关查询）、`related_geo`（`US`）、`country_trends`（规模较大的行改读该国数据）、`country_min_volume`（1000）、`country_max`（8） |
@@ -301,7 +302,7 @@ python -m radar daily --skip x,hf --out report.md  # 其余全部，每天一次
 | `yours` | `enabled`、`domains`（你的站；不填 = Search Console 资源的域名）、`days`（28：Search Console 的时间窗） |
 | `year_curve` | `enabled`：「近 12 个月」那一列，数据来自搜索量查询（免费） |
 | `dot_com` | `enabled`、`max_rows`（8：每次查几个优先行，名字优先） |
-| `ai_answers` | `enabled`（`false`：每个回答约 $0.004）、`engines`（`["chatgpt"]`；加 `"google"` 即同时问 AI Mode）、`max_rows`（6）、`prompt`（`"What is the best tool to {job}?"`）、`location_code`（2840）、`language_code`（`en`） |
+| `ai_answers` | `enabled`（`false`：每个回答约 $0.004）、`engines`（`["chatgpt"]`；加 `"google"` 即同时问 AI Mode）、`runs`（`1`；设为 `3` 及以上时跨多轮统计工具与引用站点的出现频次、首选次数与空缺率）、`max_rows`（6）、`prompt`（`"What is the best tool to {job}?"`）、`location_code`（2840）、`language_code`（`en`） |
 | `gsc` | `site`（`sc-domain:example.com`）和 `token_file`。留 `{}` 即关闭；配了之后 `yours` 也会读你在每个词上的平均排名 |
 
 添加某个站的 sitemap 之前，请先看它的 robots.txt，`pause` 不要低于它的 crawl-delay。示例配置每天总共几十次请求，按 `pause` 间隔发出。

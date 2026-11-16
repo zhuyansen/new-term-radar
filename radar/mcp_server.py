@@ -117,7 +117,7 @@ async def run_radar(command: str = "sources", skip: list[str] | None = None) -> 
     each); `daily` takes 5 to 15 minutes. It updates the same state the scheduled runs use, so
     do not call it as a substitute for the schedule."""
     if command not in ("sources", "daily"):
-        raise ValueError('command must be "sources" or "daily"')
+        raise ToolError('command must be "sources" or "daily"')
     return await asyncio.to_thread(_run, command, skip or [])
 
 

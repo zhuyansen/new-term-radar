@@ -16,6 +16,7 @@ This is verification, not discovery: it tells you which signals to trust.
 """
 from __future__ import annotations
 
+import re
 import sqlite3
 import statistics
 from datetime import date, timedelta
@@ -33,6 +34,13 @@ TOOL = "post_dataforseo_keywords_trends_explore_live"
 UNSETTLED_DAYS = 2
 
 
+EARLY_DAYS = 1
+OUTCOMES = ("early", "late", "unclear", "miss", "no_data")
+RECORDING_START = date(2026, 10, 3)
+PRE_EXISTING_DAYS = 1
+BORN_NOTE = re.compile(r"★(\d+) \((?:均 )?(\d+)/")
+
+
 def settled(points: list[tuple], today: date) -> list[tuple]:
     """A daily Trends series without its last UNSETTLED_DAYS days. Rows are (day, value, ...)."""
     cut = today - timedelta(days=UNSETTLED_DAYS)
@@ -45,15 +53,18 @@ def rose(points: list[tuple[date, int]], first_seen: date) -> dict:
     if not values or max(values) == 0:
         return {"rose": False, "no_data": True}
     before = [v for d, v in points if d < first_seen]
-    after = [v for d, v in points if d >= first_seen]
+    after_pts = [(d, v) for d, v in points if d >= first_seen]
+    after = [v for _, v in after_pts]
     base = statistics.mean(before) if before else 0.0
     peak_after = max(after, default=0)
-    peak = max(values)
     out = {"base": round(base, 1), "peak_after": peak_after, "no_data": False,
            "rose": peak_after >= max(base * RISE_FACTOR, base + RISE_MIN)}
     if out["rose"]:
-        line = base + RISE_SHARE * (peak - base)
-        out["first_rise"] = next(d for d, v in points if v >= max(line, 1) and v > base).isoformat()
+        line = base + RISE_SHARE * (peak_after - base)
+        out["first_rise"] = next(d for d, v in after_pts if v >= max(line, 1) and v > base).isoformat()
+        earliest = next(d for d, v in points if v >= max(line, 1) and v > base).isoformat()
+        if earliest != out["first_rise"]:
+            out["earliest_rise"] = earliest
     return out
 
 
@@ -65,6 +76,60 @@ def verdict(per_variant: dict[str, dict], first_seen: date) -> tuple[str, int | 
     if all(v.get("no_data") for v in per_variant.values()):
         return "no_data", None
     return "miss", None
+
+
+def born_day(born: str | None, notes: list[str] | None, first_seen: date) -> date | None:
+    """The day the repository a breakout lead came from was created, when known."""
+    if born:
+        return date.fromisoformat(born)
+    for note in notes or []:
+        m = BORN_NOTE.search(note)
+        if m and int(m.group(2)):
+            return first_seen - timedelta(days=round(int(m.group(1)) / int(m.group(2))))
+    return None
+
+
+def earliest_rise(trends: dict | None) -> date | None:
+    """The earliest day a variant crossed the rise line (including pre-existing baseline rises)."""
+    days = [v.get("earliest_rise") or v.get("first_rise") for v in (trends or {}).values()
+            if isinstance(v, dict) and (v.get("earliest_rise") or v.get("first_rise"))]
+    return date.fromisoformat(min(days)) if days else None
+
+
+def unclear(first_seen: date, rise: date | None, born: date | None = None) -> str:
+    """Why a hit's lead_days cannot tell how early the radar was, or '' when it is clear."""
+    if first_seen == RECORDING_START:
+        return "recording_start"
+    if rise and born and (born - rise).days > PRE_EXISTING_DAYS:
+        return "pre_existing"
+    return ""
+
+
+def outcome(said: str, lead_days: int | None, vague: bool | str = False) -> str:
+    """A stored verdict classified into early / late / unclear / miss / no_data."""
+    if said == "hit":
+        if vague:
+            return "unclear"
+        return "early" if lead_days is not None and lead_days >= EARLY_DAYS else "late"
+    return "no_data" if said == "no_data" else "miss"
+
+
+def tally(rows: list[tuple]) -> dict[str, dict]:
+    """{signal: {"checked", "early", "late", "unclear", "miss", "no_data", "median_lead"}} from
+    (signals, verdict, lead_days[, vague]) rows; median_lead is over early hits."""
+    by: dict[str, dict] = {}
+    for kinds, said, lead_days, *vague in rows:
+        got = outcome(said, lead_days, bool(vague and vague[0]))
+        for k in kinds or ["?"]:
+            s = by.setdefault(k, {"checked": 0, **dict.fromkeys(OUTCOMES, 0), "leads": []})
+            s["checked"] += 1
+            s[got] += 1
+            if got == "early" and lead_days is not None:
+                s["leads"].append(lead_days)
+    for s in by.values():
+        leads = s.pop("leads")
+        s["median_lead"] = statistics.median(leads) if leads else None
+    return by
 
 
 def _series(task: dict) -> list[tuple[date, int]]:
@@ -104,5 +169,10 @@ def review(cfg: dict, conn: sqlite3.Connection, today: date | None = None) -> di
         per = {k: rose(settled(_series((data[cid].get("tasks") or [{}])[0]), today), first_seen) for cid, k in zip(ids, keys)}
         v, lead = verdict(per, first_seen)
         store.save_verdict(conn, term, v, lead, per, today)
-        checked.append({"term": term, "first_seen": first_seen.isoformat(), "verdict": v, "lead_days": lead})
+        row = {"term": term, "first_seen": first_seen.isoformat(), "verdict": v, "lead_days": lead}
+        if v == "hit":
+            why = unclear(first_seen, earliest_rise(per))
+            if why:
+                row["unclear"] = why
+        checked.append(row)
     return {"checked": checked, "cost_micros": cost, "after_days": c["after_days"]}

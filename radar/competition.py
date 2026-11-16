@@ -111,8 +111,19 @@ def ratings(domains: list[str], state: Path) -> tuple[dict[str, int | None], int
     return {d: v["dr"] for d, v in fresh.items()}, cost
 
 
+def kgr_of(built: int | None, volume: int | None) -> tuple[float | None, str | None]:
+    """Keyword Golden Ratio (allintitle / monthly search volume):
+    < 0.25 -> 'great', <= 1.0 -> 'watch', > 1.0 -> 'skip'."""
+    if built is None or not volume or volume <= 0:
+        return None, None
+    kgr = round(built / volume, 2)
+    band = "great" if kgr < 0.25 else ("watch" if kgr <= 1.0 else "skip")
+    return kgr, band
+
+
 def supply(rows: list[dict]) -> tuple[int, list[str]]:
-    """Adds `built` (pages titled with the term this month) and `paid` (domains advertising on it)."""
+    """Adds `built` (pages titled with the term this month), `kgr` / `kgr_band` when monthly
+    `volume` is known, and `paid` (domains advertising on it)."""
     if not goanyapi.key() or not rows:
         return 0, []
 
@@ -124,6 +135,9 @@ def supply(rows: list[dict]) -> tuple[int, list[str]]:
                 cost += spent
             except goanyapi.GoAnyError as exc:
                 errors.append(f"{r['phrase']} ({field}): {exc}")
+        kgr, band = kgr_of(out.get("built"), r.get("volume"))
+        if kgr is not None:
+            out["kgr"], out["kgr_band"] = kgr, band
         return r, out, cost, errors
     total, errors = 0, []
     with ThreadPoolExecutor(WORKERS) as pool:
