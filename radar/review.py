@@ -165,7 +165,9 @@ def review(cfg: dict, conn: sqlite3.Connection, today: date | None = None) -> di
     checked = []
     for ids, term, first_seen, keys in plan:
         if not all(cid in data for cid in ids):
-            continue   # stays due; the next run takes it again
+            if (today - first_seen).days > after_days + 14:
+                store.save_verdict(conn, term, "no_data", None, {}, today)
+            continue   # stays due until the retry window expires
         per = {k: rose(settled(_series((data[cid].get("tasks") or [{}])[0]), today), first_seen) for cid, k in zip(ids, keys)}
         v, lead = verdict(per, first_seen)
         store.save_verdict(conn, term, v, lead, per, today)

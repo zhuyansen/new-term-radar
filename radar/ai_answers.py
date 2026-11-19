@@ -37,10 +37,46 @@ def _unique(values) -> list[str]:
     return list(dict.fromkeys(v for v in values if v))[:KEPT]
 
 
+STOP_WORDS = frozenset({
+    "what", "is", "the", "best", "tool", "tools", "to", "for", "and", "or", "in", "of", "on", "with", "by", "from",
+    "a", "an", "how", "can", "i", "use", "using", "that", "which", "are", "top", "software", "app", "apps", "ai",
+})
+
+
+def extract_fan_out_queries(result: dict) -> list[str]:
+    """Web search queries ChatGPT issued before answering (`fan_out_queries` or `search_queries`)."""
+    raw = result.get("fan_out_queries") or result.get("search_queries") or []
+    out: list[str] = []
+    for q in raw:
+        text = (q.get("query") or q.get("keyword") or "") if isinstance(q, dict) else (q if isinstance(q, str) else "")
+        text = " ".join(text.strip().split())
+        if text and text not in out:
+            out.append(text)
+    return out
+
+
+def fan_out_modifiers(queries: list[str], job: str = "", limit: int = KEPT) -> list[tuple[str, int]]:
+    """High-frequency co-occurring modifier tokens in `queries` that are not part of `job`."""
+    job_words = set(re.findall(r"[a-z0-9]+", (job or "").lower())) | STOP_WORDS
+    counts: dict[str, int] = {}
+    for q in queries:
+        seen_in_q: set[str] = set()
+        for tok in re.findall(r"[a-z0-9]+", (q or "").lower()):
+            if len(tok) < 2 or tok in job_words or tok in seen_in_q:
+                continue
+            seen_in_q.add(tok)
+            counts[tok] = counts.get(tok, 0) + 1
+    return sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))[:limit]
+
+
 def read_chatgpt(result: dict) -> dict:
     """Names as the answer writes them (the entity's title can be a category: "AI assistant" for ChatGPT)."""
     names = (re.sub(r"[*_`\[\]\\]", "", b.get("markdown") or b.get("title") or "").strip() for b in result.get("brand_entities") or [])
-    return {"names": _unique(names), "sites": _unique(_host(s.get("domain")) for s in result.get("sources") or [])}
+    out = {"names": _unique(names), "sites": _unique(_host(s.get("domain")) for s in result.get("sources") or [])}
+    queries = extract_fan_out_queries(result)
+    if queries:
+        out["fan_out_queries"] = queries
+    return out
 
 
 LISTED = re.compile(r"^\s*(?:[-*+]|\d+[.)])\s+\*\*(.+?)\*\*", re.M)
@@ -94,9 +130,13 @@ def _merge_runs(runs_got: list[dict]) -> tuple[dict, dict]:
             site_counts[s] = site_counts.get(s, 0) + 1
     ordered_names = [k for k, _ in sorted(name_counts.items(), key=lambda kv: -kv[1])][:KEPT]
     ordered_sites = [k for k, _ in sorted(site_counts.items(), key=lambda kv: -kv[1])][:KEPT]
+    all_queries = [q for got in runs_got for q in (got.get("fan_out_queries") or [])]
+    merged: dict = {"names": ordered_names, "sites": ordered_sites}
+    if all_queries:
+        merged["fan_out_queries"] = list(dict.fromkeys(all_queries))[:KEPT * 2]
     dist = {"runs": len(runs_got), "counts": name_counts, "site_counts": site_counts,
             "first_picks": first_picks, "empty": empty}
-    return {"names": ordered_names, "sites": ordered_sites}, dist
+    return merged, dist
 
 
 def assess(rows: list[dict], cfg: dict) -> tuple[int, list[str]]:
@@ -135,6 +175,12 @@ def assess(rows: list[dict], cfg: dict) -> tuple[int, list[str]]:
             ai["yours"] |= any(yours.is_mine(s, mine) for s in merged["sites"]) if mine else False
         ai["first_pick"] = {e: g["names"][0] for e, g in ai["by"].items() if g["names"]}
         ai["gap"] = (empty_runs / total_runs >= 0.8) if total_runs else False
+        all_fan_out = [q for eng_runs in by_eng.values() for got in eng_runs for q in (got.get("fan_out_queries") or [])]
+        if all_fan_out:
+            ai["fan_out_queries"] = list(dict.fromkeys(all_fan_out))[:KEPT * 2]
+            mods = fan_out_modifiers(all_fan_out, job=job)
+            if mods:
+                ai["fan_out_modifiers"] = [{"token": tok, "count": cnt} for tok, cnt in mods]
         if runs > 1:
             ai["runs"] = runs
             ai["distribution"] = dist_by

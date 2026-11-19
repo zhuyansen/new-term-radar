@@ -105,10 +105,47 @@ def rest(path: str, task: dict) -> tuple[dict, int]:
     return (t.get("result") or [{}])[0] or {}, int(round(float(body.get("cost") or t.get("cost") or 0) * 1e6))
 
 
+# Rates in micro-USD per token (1 USD = 1e6 micro-USD; so $3/1M tokens = 3.0 micro-USD/token).
+CHAT_RATES: dict[str, tuple[float, float]] = {
+    "sonnet": (3.0, 15.0),
+    "haiku": (0.8, 4.0),
+    "gpt-4.1-mini": (0.4, 1.6),
+    "gpt-4o-mini": (0.15, 0.6),
+}
+DEFAULT_CHAT_RATE = (0.4, 1.6)
+_CHAT_COST_MICROS = 0
+
+
+def estimate_chat_cost(model: str, body: dict, prompt_chars: int = 0, answer_chars: int = 0) -> int:
+    """Micro-USD for one chat completion, from explicit cost, usage tokens, or char estimate."""
+    for k in ("customer_cost_micros_usd", "cost_micros"):
+        if body.get(k) is not None:
+            return int(body[k])
+    if body.get("cost") is not None:
+        return int(round(float(body["cost"]) * 1e6))
+    usage = body.get("usage") if isinstance(body.get("usage"), dict) else {}
+    if usage.get("cost") is not None:
+        return int(round(float(usage["cost"]) * 1e6))
+    in_rate, out_rate = next((r for tag, r in CHAT_RATES.items() if tag in (model or "").lower()), DEFAULT_CHAT_RATE)
+    in_tok = int(usage.get("prompt_tokens") or (max(1, prompt_chars // 4) if prompt_chars else 0))
+    out_tok = int(usage.get("completion_tokens") or (max(1, answer_chars // 4) if answer_chars else 0))
+    return int(round(in_tok * in_rate + out_tok * out_rate))
+
+
+def take_chat_cost() -> int:
+    """Returns and resets the accumulated chat cost in micro-USD."""
+    global _CHAT_COST_MICROS
+    spent, _CHAT_COST_MICROS = _CHAT_COST_MICROS, 0
+    return spent
+
+
 def chat(model: str, system: str, user: str, max_tokens: int = 1500) -> str:
+    global _CHAT_COST_MICROS
     body = _post(CHAT, {"model": model, "temperature": 0, "max_tokens": max_tokens, "messages": [
         {"role": "system", "content": system}, {"role": "user", "content": user}]}, CHAT_TIMEOUT)
     try:
-        return body["choices"][0]["message"]["content"] or ""
+        text = body["choices"][0]["message"]["content"] or ""
     except (KeyError, IndexError, TypeError) as exc:
         raise AisaError(f"unexpected chat answer: {str(body)[:160]}") from exc
+    _CHAT_COST_MICROS += estimate_chat_cost(model, body, len(system) + len(user), len(text))
+    return text

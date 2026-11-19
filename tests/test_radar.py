@@ -2229,4 +2229,72 @@ def test_kgr_and_ai_answers_multi_run_distribution(cfg, monkeypatch):
     assert cost == 12000 and errors == [] and ai["runs"] == 3
     assert ai["by"]["chatgpt"]["names"] == ["ToolB", "ToolA"] and ai["first_pick"] == {"chatgpt": "ToolB"}
     assert ai["distribution"]["chatgpt"]["counts"] == {"ToolA": 1, "ToolB": 2} and not ai["gap"]
+    assert "ToolB (2/3)" in report._ai_cell(ai) and "ToolA (1/3)" in report._ai_cell(ai)
+    rendered = "\n".join(report._ai_lines(rows, cfg))
+    assert "ToolB (2/3), ToolA (1/3)" in rendered and "a.com (1/3)" in rendered
 
+
+
+def test_chat_cost_due_window_x_age_missing_visits_and_fan_out_modifiers(cfg, tmp_path, monkeypatch):
+    from radar import aisa
+    # 1. aisa.estimate_chat_cost & take_chat_cost
+    aisa.take_chat_cost()
+    assert aisa.estimate_chat_cost("claude-sonnet-4-6", {"usage": {"prompt_tokens": 1000, "completion_tokens": 200}}) == 6000
+    assert aisa.estimate_chat_cost("gpt-4.1-mini", {}, prompt_chars=400, answer_chars=100) > 0
+    monkeypatch.setattr(aisa, "_post", lambda url, body, timeout: {
+        "choices": [{"message": {"content": "ok"}}],
+        "usage": {"prompt_tokens": 500, "completion_tokens": 100},
+    })
+    assert aisa.chat("gpt-4.1-mini", "sys", "usr") == "ok"
+    assert aisa.take_chat_cost() == int(round(500 * 0.4 + 100 * 1.6))
+    assert aisa.take_chat_cost() == 0
+
+    # 2. store.due max_age_days prevents permanently stuck ancient leads from blocking the queue
+    conn = store.connect(tmp_path)
+    store.record(conn, [{"term": "ancient_stuck", "kinds": ["x"], "signals": ["s"]}], today=date(2026, 5, 1))
+    store.record(conn, [{"term": "fresh_due", "kinds": ["x"], "signals": ["s"]}], today=date(2026, 10, 1))
+    due_terms = [t for t, _, _ in store.due(conn, date(2026, 10, 20), after_days=14, limit=5)]
+    assert due_terms == ["fresh_due"]
+
+    # 3. asks.collect drops X posts whose date failed to parse (created == 0.0)
+    monkeypatch.setattr(asks.social, "reddit", lambda q, **k: ([], 0))
+    now_ts = datetime.now(timezone.utc).timestamp()
+    monkeypatch.setitem(asks.EXTRA, "x", lambda c: ([
+        {"id": "x:bad", "title": "old unparseable tweet", "text": "", "subreddit": "x", "score": 50, "url": "", "created": 0.0},
+        {"id": "x:good", "title": "recent tweet", "text": "", "subreddit": "x", "score": 50, "url": "", "created": now_ts - 3600},
+    ], 3000))
+    c_asks = dict(cfg["asks"], patterns=[], extra_sources=["x"])
+    kept_posts, _, _ = asks.collect(c_asks)
+    assert [p["id"] for p in kept_posts] == ["x:good"]
+
+    # 4. sellers drops sites whose visits lookup failed when GOANYAPI_API_KEY is configured
+    monkeypatch.setenv("GOANYAPI_API_KEY", "k")
+    cfg["sellers"]["platforms"] = ["stripe"]
+    rows = [("small-indie.app", "https://buy.stripe.com/a"), ("giant-failed.com", "https://buy.stripe.com/b")]
+    def seller_call(calls):
+        if calls[0]["tool"] == sellers.DOMAINS:
+            return _sites([d for d, _ in rows]), 27600
+        return _backlinks(rows), 27600
+    monkeypatch.setattr(sellers.aisa, "call", seller_call)
+    monkeypatch.setattr(sellers, "page_words", lambda host: ("Indie AI Tool", "automate tasks"))
+    monkeypatch.setattr(sellers.aisa, "chat", lambda model, system, user, max_tokens=1500: '[{"i": 0, "kind": "ai"}, {"i": 1, "kind": "ai"}]')
+    monkeypatch.setattr(sellers, "visits", lambda hosts: ({"small-indie.app": {"visits": 1200}}, 3000))
+    got_sellers = sellers.sellers(cfg, tmp_path / "sellers_state")
+    assert [s["host"] for s in got_sellers["sellers"]] == ["small-indie.app"]
+
+    # 5. ai_answers fan-out query modifier extraction & report rendering
+    cfg["ai_answers"].update(enabled=True, engines=["chatgpt"], max_rows=1, runs=2)
+    fan_replies = iter([
+        ({"brand_entities": [{"markdown": "ToolA"}], "sources": [{"domain": "a.com"}],
+          "fan_out_queries": ["best convert slides to notes github 2026", "convert slides to notes free comparison"]}, 4000),
+        ({"brand_entities": [{"markdown": "ToolA"}], "sources": [{"domain": "a.com"}],
+          "fan_out_queries": ["convert slides to notes github open source 2026"]}, 4000),
+    ])
+    monkeypatch.setattr(ai_answers.aisa, "rest", lambda path, task: next(fan_replies))
+    job_rows = [{"phrase": "convert slides to notes", "posts": [], "subreddits": []}]
+    ai_answers.assess(job_rows, cfg)
+    ai = job_rows[0]["ai"]
+    mods = {m["token"]: m["count"] for m in ai.get("fan_out_modifiers") or []}
+    assert mods.get("github") == 2 and mods.get("2026") == 2
+    ai_text = "\n".join(report._ai_lines(job_rows, cfg))
+    assert "fan-out modifiers: 2026 (2), github (2)" in ai_text

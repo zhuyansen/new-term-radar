@@ -68,9 +68,15 @@ def record(conn: sqlite3.Connection, rows: list[dict], today: date | None = None
     return len(rows)
 
 
-def due(conn: sqlite3.Connection, today: date, after_days: int, limit: int) -> list[tuple[str, date, list[str]]]:
-    rows = conn.execute("SELECT term, first_seen, variants FROM leads WHERE reviewed_at IS NULL AND first_seen <= ? "
-                        "ORDER BY first_seen, term LIMIT ?", ((today - timedelta(days=after_days)).isoformat(), limit)).fetchall()
+MAX_REVIEW_AGE_DAYS = 90
+
+
+def due(conn: sqlite3.Connection, today: date, after_days: int, limit: int,
+        max_age_days: int = MAX_REVIEW_AGE_DAYS) -> list[tuple[str, date, list[str]]]:
+    oldest = (today - timedelta(days=max_age_days)).isoformat()
+    cutoff = (today - timedelta(days=after_days)).isoformat()
+    rows = conn.execute("SELECT term, first_seen, variants FROM leads WHERE reviewed_at IS NULL AND first_seen >= ? AND first_seen <= ? "
+                        "ORDER BY first_seen, term LIMIT ?", (oldest, cutoff, limit)).fetchall()
     return [(t, date.fromisoformat(f), json.loads(v)) for t, f, v in rows]
 
 

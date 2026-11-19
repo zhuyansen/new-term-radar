@@ -224,6 +224,7 @@ T = {
     "ai_line": ("- **{job}**: {engines}", "- **{job}**:{engines}"),
     "ai_engine": ("{engine} names {names}; cites {sites}", "{engine} 点名 {names};引用 {sites}"),
     "ai_yours": (" · ✅ cites your site", " · ✅ 引用了你的站"),
+    "ai_fan_out": (" · fan-out modifiers: {mods}", " · 子查询高频修饰词:{mods}"),
     "ai_note": ("No tool named = a gap a new tool can fill in AI search; the cited sites are what AI search reads for the job: get listed there, or write the comparison against them. ChatGPT through DataForSEO's LLM scraper, Google through AI Mode; about $0.004 an answer.",
                 "没点名任何工具 = AI 搜索里的空位,新工具可以去占;被引用的站 = AI 搜索读的就是这些页面:争取被它们收录,或者写和它们的对比页。ChatGPT 用 DataForSEO 的 LLM 抓取,Google 用 AI Mode;每个回答约 $0.004。"),
     "pc_open": ("open", "能进"), "pc_mixed": ("mixed", "一般"), "pc_crowded": ("crowded", "挤满"),

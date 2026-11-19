@@ -157,7 +157,7 @@ def collect(c: dict) -> tuple[list[dict], int, list[str]]:
         posts += [p for p in got if p["id"] not in seen and p["score"] >= c["min_score"]]
     # Reddit's "week" is a ranking window, not a filter: posts from 2020 came back on 2026-10-15. The date decides.
     oldest = datetime.now(timezone.utc).timestamp() - c["max_age_days"] * 86400
-    return [p for p in posts if not p.get("created") or p["created"] >= oldest], cost, errors
+    return [p for p in posts if (not p.get("created") and p.get("subreddit") != "x") or (p.get("created") or 0) >= oldest], cost, errors
 
 
 def classify(model: str, posts: list[dict]) -> tuple[list[dict], list[str]]:
@@ -208,4 +208,4 @@ def asks(cfg: dict, state: Path, today: date | None = None) -> dict:
     quiet = sorted((dict(j, volume=vol.get(k, {}).get("volume", 0)) for k, j in jobs.items()
                     if vol.get(k, {}).get("volume", 0) < c["min_volume"]), key=lambda j: (-len(j["posts"]), -j["score"]))[:c["max_leads"]]   # many askers over one viral thread
     return {"read": len(posts), "asks": len(kept), "unsized": len(jobs) - len(rows), "rows": rows, "quiet": quiet,
-            "terms": terms, "errors": errors + failed + comp_errors + ai_errors, "cost_micros": cost}
+            "terms": terms, "errors": errors + failed + comp_errors + ai_errors, "cost_micros": cost + aisa.take_chat_cost()}

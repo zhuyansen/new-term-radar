@@ -318,13 +318,15 @@ def sellers(cfg: dict, state: Path, today: date | None = None) -> dict:
         r["kind"] = sorted_kinds[r["host"]]
     order = lambda r: (KINDS.index(r["kind"]), -r["rank"])  # noqa: E731
     new = sorted(pool, key=order)[:c["max_leads"] * 2]
+    want_visits = bool(c.get("visits", True) and goanyapi.key())
     sizes, spent = visits([r["host"] for r in new]) if c.get("visits", True) else ({}, 0)
-    cost += spent
+    cost += spent + aisa.take_chat_cost()
     for r in new:
         info = sizes.get(r["host"]) or {}
         r.update(visits=info.get("visits"), registered=info.get("registered", ""), top_source=info.get("top_source", ""),
                  ai_share=info.get("ai_share"))
-    new = [r for r in new if (r["visits"] or 0) <= c["max_visits"]]
+    new = [r for r in new if (r["visits"] is not None and r["visits"] <= c["max_visits"])
+           or (r["visits"] is None and (not want_visits or r["host"] in sizes))]
     new = sorted(new, key=lambda r: (KINDS.index(r["kind"]), -(r["visits"] or 0), -r["rank"]))[:c["max_leads"]]
     for host in found:
         seen.setdefault(host, today.isoformat())
@@ -368,4 +370,4 @@ def builders(cfg: dict, state: Path, today: date | None = None) -> dict:
               "examples": [f"{r['host']} · {LABEL[r['platform']]}"], "note": t("note_builder", via=LABEL[r["platform"]], day=r["first_seen"])}
              for r in rows if r["kind"] == "ai"]
     return {"links": got["read"], "old": got["old"], "new": len(found), "first_run": first, "sites": rows, "terms": terms,
-            "by_kind": by_kind, "kind_error": kind_error, "errors": got["errors"], "cost_micros": got["cost"]}
+            "by_kind": by_kind, "kind_error": kind_error, "errors": got["errors"], "cost_micros": got["cost"] + aisa.take_chat_cost()}

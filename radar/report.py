@@ -180,12 +180,30 @@ def _asks_lines(ak: dict, cfg: dict) -> list[str]:
 ENGINE = {"chatgpt": "ChatGPT", "google": "Google AI Mode"}
 
 
+def _fmt_dist(items: list[str], dist_counts: dict[str, int], runs: int) -> list[str]:
+    if runs <= 1 or not dist_counts:
+        return items
+    return [f"{x} ({dist_counts[x]}/{runs})" if x in dist_counts else x for x in items]
+
+
 def _ai_cell(ai: dict | None) -> str:
     """The tools AI answers name for a job, the first three; ✅ when one of your sites is cited."""
     if not ai:
         return t("dash")
-    names = list(dict.fromkeys(n for got in ai["by"].values() for n in got["names"]))
-    cell = (", ".join(names[:3]) + (f" +{len(names) - 3}" if len(names) > 3 else "")) if names else t("ai_none")
+    dist = ai.get("distribution") or {}
+    shown: list[str] = []
+    seen: set[str] = set()
+    for eng, got in ai["by"].items():
+        d = dist.get(eng) or {}
+        runs = d.get("runs", 1)
+        counts = d.get("counts") or {}
+        for n in got["names"]:
+            if n not in seen:
+                seen.add(n)
+                shown.append(f"{n} ({counts[n]}/{runs})" if runs > 1 and n in counts else n)
+    cell = (", ".join(shown[:3]) + (f" +{len(shown) - 3}" if len(shown) > 3 else "")) if shown else t("ai_none")
+    if ai.get("gap"):
+        cell += " [gap]"
     return cell + (" ✅" if ai.get("yours") else "")
 
 
@@ -195,9 +213,19 @@ def _ai_lines(rows: list[dict], cfg: dict) -> list[str]:
         return []
     lines = ["", t("ai_h", prompt=cfg["ai_answers"]["prompt"])]
     for r in asked:
-        parts = [t("ai_engine", engine=ENGINE.get(e, e), names=", ".join(g["names"]) or t("ai_none"), sites=", ".join(g["sites"]) or t("dash"))
-                 for e, g in r["ai"]["by"].items()]
-        lines.append(t("ai_line", job=r["phrase"], engines=" · ".join(parts)) + (t("ai_yours") if r["ai"]["yours"] else ""))
+        ai = r["ai"]
+        dist = ai.get("distribution") or {}
+        parts = []
+        for e, g in ai["by"].items():
+            d = dist.get(e) or {}
+            runs = d.get("runs", 1)
+            names = _fmt_dist(g["names"], d.get("counts") or {}, runs)
+            sites = _fmt_dist(g["sites"], d.get("site_counts") or {}, runs)
+            parts.append(t("ai_engine", engine=ENGINE.get(e, e), names=", ".join(names) or t("ai_none"), sites=", ".join(sites) or t("dash")))
+        gap_note = " · [gap]" if ai.get("gap") else ""
+        mods = ai.get("fan_out_modifiers") or []
+        mod_note = t("ai_fan_out", mods=", ".join(f"{m['token']} ({m['count']})" if m.get("count", 1) > 1 else m["token"] for m in mods[:5])) if mods else ""
+        lines.append(t("ai_line", job=r["phrase"], engines=" · ".join(parts)) + gap_note + mod_note + (t("ai_yours") if ai["yours"] else ""))
     return lines + [t("ai_note")]
 
 

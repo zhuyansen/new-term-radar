@@ -553,7 +553,7 @@ def run(cfg: dict, state: Path, names: list[str], repos: dict[str, str], today: 
             "related": use_related, "tails": {n: v for n, v in tails.items() if v}, "cosearch": cosearch,
             "related_errors": related_errors, "geo": c["related_geo"], "country_errors": local_errors,
             "competition_errors": comp_errors, "extra_errors": age_errors + market_errors + serp_errors + own_errors + com_errors,
-            "cost_micros": cost + c0 + c2 + c3 + c4 + c5 + c6 + c7 + c8}
+            "cost_micros": cost + c0 + c2 + c3 + c4 + c5 + c6 + c7 + c8 + aisa.take_chat_cost()}
 
 
 READ_KINDS = {"x", "hf", "breakout", "newsite", "revenue", "seller"}

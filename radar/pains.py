@@ -168,7 +168,7 @@ def run(cfg: dict, keyword: str, extensions: list[str] | None = None) -> dict:
     except aisa.AisaError as exc:
         gaps, errors = [], errors + [f"model: {exc}"]
     by = {s: sum(1 for x in items if x["source"] == s) for s in ("chrome", "reddit", "youtube", "appstore")}
-    return {"keyword": keyword, "items": len(items), "by_source": by, "gaps": gaps, "errors": errors, "cost_micros": cost}
+    return {"keyword": keyword, "items": len(items), "by_source": by, "gaps": gaps, "errors": errors, "cost_micros": cost + aisa.take_chat_cost()}
 
 
 def tutorial_asks(cfg: dict, leads: list[dict]) -> dict:
@@ -184,4 +184,4 @@ def tutorial_asks(cfg: dict, leads: list[dict]) -> dict:
             gaps, errors = [], errors + [f"model: {exc}"]
         if gaps:
             out.append({"term": lead["term"], "comments": len(items), "gaps": gaps[:5]})
-    return {"leads": out, "errors": errors, "cost_micros": cost}
+    return {"leads": out, "errors": errors, "cost_micros": cost + aisa.take_chat_cost()}
