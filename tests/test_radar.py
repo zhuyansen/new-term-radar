@@ -5,6 +5,8 @@ import re
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
+import pytest
+
 from radar import __main__ as cli
 from radar import breakout, config, gsc, i18n, judge, new_sites, notify, report, review, sitemaps, store
 from radar import page_age as _page_age
@@ -499,6 +501,7 @@ def test_every_text_has_both_languages():
 
 
 def test_mail_html_renders_tables():
+    pytest.importorskip("markdown")          # the optional "mail" extra
     out = notify.html("| a | b |\n|---|---|\n| 1 | 2 |")
     assert "<table style=" in out and ">1</td>" in out
     # Gmail drops a <style> block outside <head>: every tag carries its own style.

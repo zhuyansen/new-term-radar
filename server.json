@@ -7,12 +7,12 @@
     "url": "https://github.com/zhuyansen/new-term-radar",
     "source": "github"
   },
-  "version": "0.6.1",
+  "version": "0.7.0",
   "packages": [
     {
       "registryType": "pypi",
       "identifier": "new-term-radar",
-      "version": "0.6.1",
+      "version": "0.7.0",
       "runtimeHint": "uvx",
       "runtimeArguments": [
         {

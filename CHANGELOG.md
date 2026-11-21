@@ -1,7 +1,13 @@
 # Changelog
 
-## Unreleased
+## 0.7.0 (2026-11-21)
 
+- **⑨ Just listed: There's An AI For That's own list** (`taaft` feed, PR #11 by @shineforever): read day by day
+  through GoAnyAPI (5 credits a day), with each tool's category and description. It runs only when a GoAnyAPI key is
+  set; without one, `google_new`'s weekly `site:` query still covers the directory.
+- **Feeds drop repeated links before the per-feed limit** (PR #12 by @iyuzhang): the same tool listed twice no longer
+  takes two places and pushes another new one out.
+- The mail test is skipped when the optional `mail` extra (markdown) is not installed.
 - **⑤ Review**: `rose()` now scans `first_rise` starting from `first_seen` (`after_pts`) rather than across the whole
   window including the pre-report baseline, fixing negative `lead_days` when a variant had a spike before it was
   reported. Synced the October 27 retro rules into `review.py`: pre-existing terms (`born_day < 2026-10-03 - 14d` or

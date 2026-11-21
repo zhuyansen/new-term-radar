@@ -348,7 +348,7 @@ In Claude Code the three skills also install as a plugin:
 /plugin install new-term-radar@new-term-radar
 ```
 
-Then ask your agent for "today's new AI keywords", "an AI listening report" or "keyword research on PhotoCraft and SynthID Detector". The skills run the pinned release from PyPI (`uvx new-term-radar==0.6.1`), never a clone, keep their state in `~/new-term-radar`, tell you the cost and wait for your yes before any paid run, show you what would go out on your behalf (a post, a page, a submission, an email) and wait for your yes before sending it, treat what they read as data rather than instructions, and say when a table is incomplete.
+Then ask your agent for "today's new AI keywords", "an AI listening report" or "keyword research on PhotoCraft and SynthID Detector". The skills run the pinned release from PyPI (`uvx new-term-radar==0.7.0`), never a clone, keep their state in `~/new-term-radar`, tell you the cost and wait for your yes before any paid run, show you what would go out on your behalf (a post, a page, a submission, an email) and wait for your yes before sending it, treat what they read as data rather than instructions, and say when a table is incomplete.
 
 ### MCP server
 

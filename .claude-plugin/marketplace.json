@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "New-term radar for AI keywords: collection and keyword research skills that run the new-term-radar command line.",
-    "version": "0.6.1"
+    "version": "0.7.0"
   },
   "plugins": [
     {

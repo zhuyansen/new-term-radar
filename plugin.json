@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "new-term-radar",
-  "version": "0.6.1",
+  "version": "0.7.0",
   "description": "Three skills that find the names of new AI models, products and repositories as they surface, and size the search terms behind them with Google Ads volume and DataForSEO Trends, an estimate of Google search interest.",
   "author": {
     "name": "Jason Zhu",
