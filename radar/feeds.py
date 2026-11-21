@@ -209,9 +209,12 @@ def feeds(cfg: dict, state: Path, today: date | None = None, weekly: bool = Fals
         out["cost_micros"] += cost
         out["read"][name] = len(items)
         first = not any(k.startswith(name + ":") for k in seen)
-        fresh = [i for i in items if f"{name}:{i['key']}" not in seen]
-        for i in fresh:
-            seen[f"{name}:{i['key']}"] = today.isoformat()
+        fresh = []
+        for i in items:
+            key = f"{name}:{i['key']}"
+            if key not in seen:
+                fresh.append(i)
+                seen[key] = today.isoformat()
         if first:               # the snapshot is taken; what the source itself dates as recent is news already
             out["first_run"].append(name)
             fresh = [i for i in fresh if i.get("fresh")]
