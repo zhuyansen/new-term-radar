@@ -62,7 +62,7 @@
 | ⑦ 求助 | Reddit 上大家在要什么（"is there an AI tool that…" 等 12 种问法），还有 X、Stack Exchange（Software Recommendations 等 4 个站）和 Freelancer.com 上的：模型留下 AI 工具能解决的求助和抱怨，把每件事写成大家会搜的说法；有搜索量的再做首页竞争检查 | AIsa key | 每周约 $0.12，X 另加几美分 |
 | ⑧ 新卖家 | 刚挂上第一条收款链接的站（Stripe Payment Links、Polar、Lemon Squeezy、Gumroad、Creem、Paddle、Dodo Payments、Waffo Pancake），来自公开外链数据，带这个站第一次挂链接的日期；老卖家的新页面、平台上的用户页、论坛，以及好几个新站共用的同一条链接（站群）都不算；站点自己的介绍交给新词表，有 GoAnyAPI 时还有访问量、域名注册日期和访客来源（含 AI 占比） | AIsa key；GoAnyAPI 可选 | 每周约 $0.50 |
 | ⑧b 新作品 | 刚用 Lovable、v0 做出来的站，刚在 beehiiv 开张的 newsletter，从它们挂的徽章认出来；只有其中的软件才进线索 | AIsa key | 每周约 $0.15 |
-| ⑨ 新上架 | Product Hunt、Show HN、OpenRouter、Civitai、App Store 畅销榜和 awesome 列表上的新条目（免费）；每周一次：Google 新收录的 Figma 插件、There's An AI For That、Chrome 应用商店页面，抖音、TikTok、Reddit 热搜，以及词根旁边正在上升的搜索（"ai generator"） | 免费列表不用 key；其余要 AIsa 和 GoAnyAPI 的 key | 免费；每个路径约 $0.02，每份热搜 $0.001，每个词根 6 个 GoAnyAPI 积分 |
+| ⑨ 新上架 | Product Hunt、Show HN、OpenRouter、Civitai、App Store 畅销榜和 awesome 列表上的新条目（免费）；每天一次：There's An AI For That 自己的 Just Released 列表（GoAnyAPI）；每周一次：Google 新收录的 Figma 插件、There's An AI For That、Chrome 应用商店页面，抖音、TikTok、Reddit 热搜，以及词根旁边正在上升的搜索（"ai generator"） | 免费列表不用 key；其余要 AIsa 和 GoAnyAPI 的 key | 免费；TAAFT 每天 5 个 GoAnyAPI 积分；每个路径约 $0.02，每份热搜 $0.001，每个词根 6 个 GoAnyAPI 积分 |
 | ⑩ 付费信号 | 一个付费工具站的 AdSense 账户名下的其他站（站长的其他赛道），以及你关注的词上新出现的广告主（Google 广告透明度中心） | GoAnyAPI key | 每个站双向各 3 积分，每个词 4 积分；每周一次 |
 | 新名字的旁证 | 当天最强的几个新名字：带这个名字的新域名（whois，或 crt.sh 的新证书）、维基百科浏览量、Google 把它认作什么、Discord 服务器；付费产品则查「alternative」「vs」「free」「pricing」「review」这些搜索 | AIsa key；Discord 要 GoAnyAPI | whois 每个名字约 $0.12，搜索量 $0.09 |
 | ⑥ 收入 | 有人付钱的产品，来自 TrustMRR 核验过的收入：增长最快的（30 天收入 $500 以上）和最新上榜的；上次 $0、这次过了门槛的排最前。它自己的介绍会作为依据交给新词表 | TrustMRR key | 免费，6 次请求，每周一次 |
@@ -195,7 +195,7 @@ python -m radar history --out sellers.csv
 ### ⑧b、⑨、⑩ 和新名字的旁证
 
 - **⑧b 新作品**（每周，跟 ⑧ 一起）：AI 建站工具挂在作品上的徽章（「Edit with Lovable」「Built with v0」）和新 newsletter 的「Powered by beehiiv」链接，从同一份外链数据里读。用建站工具做的大多是小商家的网站（披萨店、草坪养护）；只有其中的软件进线索，其余的只说明这个工具被拿来做什么。
-- **⑨ 新上架**（每天；付费的每周）：每份列表里雷达上次读过之后新出现的条目（第一次运行只建快照，并列出来源自己标明是近期的条目）。Figma、There's An AI For That、Chrome 应用商店本身不去读，读的是 Google 对它们新页面的收录。
+- **⑨ 新上架**（每天；付费的每周）：每份列表里雷达上次读过之后新出现的条目（第一次运行只建快照，并列出来源自己标明是近期的条目）。有 GoAnyAPI key 时，There's An AI For That 读的是它自己的列表，按天取（每天 5 个积分，每条附带这个工具自己的简介）；Figma、Chrome 应用商店本身不去读，读的是 Google 对它们新页面的收录。
 - **⑩ 付费信号**（每周，GoAnyAPI）：靠广告赚钱的站会在 ads.txt 里写出自己的 AdSense ID，同一个 ID 出现在别的域名上，就是同一个站长的其他站，每个都是有人已经赚到钱的细分赛道。查的是当天值得做的词首页上的工具站，以及 ⑥、⑧ 里的付费产品。你在 `ad_terms` 里关注的词上出现了新广告主，说明有人刚认定这个词值得花钱。
 - **新名字的旁证**：大家会在搜索引擎收录之前就注册带新名字的站，所以看带这个名字的最新域名（前两个名字用 whois，其余看新签发的 HTTPS 证书）、维基百科本周和上周的浏览量、Google 自己给它的类型（「AI agent」说明 Google 已经认识它；Google 只认得别的东西，就是撞名了）和相关的 Discord 服务器。付费产品的「替代品、对比、价格」这些搜索，是有人已经验证过的市场。
 

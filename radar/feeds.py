@@ -12,6 +12,9 @@ Free:
 - new entries in awesome lists on GitHub (`awesome`: raw README URLs).
 
 Paid, small:
+- `taaft`: There's An AI For That's own just-released list, day by day (GoAnyAPI, 5 credits a day): the
+  directory answers bots with a Cloudflare challenge, so its pages are otherwise only reachable through
+  `google_new`'s site: query.
 - `google_new`: pages Google indexed in the last week under a path (DataForSEO through AIsa, about
   $0.02 a path, AIsa media credits): Figma community plugins, There's An AI For That tool pages,
   Chrome Web Store items. The sites themselves are not touched: Figma answers bots with 403 and
@@ -42,7 +45,8 @@ SERP = "post_dataforseo_serp_google_organic_live_regular"
 TOOLISH = re.compile(r"(?<![a-z])(ai|app|tool|generator|filter|effect|template|prompt|editor|maker|bot|gpt|agent|plugin|extension|"
                      r"converter|translator|avatar)s?(?![a-z])|特效|模板|滤镜|工具|生成|剪辑|一键|智能|插件", re.I)
 LABEL = {"producthunt": "Product Hunt", "hn": "Show HN", "openrouter": "OpenRouter", "civitai": "Civitai", "appstore": "App Store",
-         "awesome": "awesome list", "google_new": "Google, new this week", "trending": "trending", "rising": "rising with"}
+         "awesome": "awesome list", "taaft": "There's An AI For That", "google_new": "Google, new this week",
+         "trending": "trending", "rising": "rising with"}
 
 
 def get(url: str) -> bytes:
@@ -133,6 +137,19 @@ def awesome(c: dict) -> tuple[list[dict], int]:
     return out, 0
 
 
+def taaft(c: dict) -> tuple[list[dict], int]:
+    """There's An AI For That's own "just released" list, through GoAnyAPI (5 credits a day).
+
+    `google_new` finds those pages with a `site:` query because the directory answers bots with a Cloudflare
+    challenge; this feed is the list itself, with the category and the description written for each tool.
+    """
+    if not goanyapi.key():
+        return [], 0
+    rows, cost = goanyapi.taaft_just_released()
+    return [{"key": r["url"] or r["name"].lower(), "name": clean(r["name"], 80), "url": r["url"],
+             "about": clean(r["about"]), "where": r["category"], "fresh": recent(r["released"])} for r in rows], cost
+
+
 def google_new(c: dict) -> tuple[list[dict], int]:
     """Pages Google indexed in the last seven days under each path."""
     out, cost = [], 0
@@ -187,7 +204,7 @@ def rising(c: dict) -> tuple[list[dict], int]:
 
 
 FEEDS = {"producthunt": producthunt, "hn": show_hn, "openrouter": openrouter, "civitai": civitai, "appstore": appstore,
-         "awesome": awesome, "google_new": google_new, "trending": trending, "rising": rising}
+         "awesome": awesome, "taaft": taaft, "google_new": google_new, "trending": trending, "rising": rising}
 
 
 def feeds(cfg: dict, state: Path, today: date | None = None, weekly: bool = False) -> dict:
