@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.7.1 (2026-11-21)
+
+- **README: how early, as far as it was checked.** "Not two weeks later" and "days or weeks later" rested on one case:
+  Strata, which the radar named three days before its rise in DataForSEO Trends. The README now says that case and
+  no more (also in the Chinese README).
+- **README: `--mail` needs the `mail` extra.** The report is always mailed as HTML, built with `markdown`, so an
+  install from PyPI needs `pip install "new-term-radar[mail]"` (or `uvx --from "new-term-radar[mail]" …`); from a
+  clone, `pip install markdown`.
+- No change to the code.
+
 ## 0.7.0 (2026-11-21)
 
 - **⑨ Just listed: There's An AI For That's own list** (`taaft` feed, PR #11 by @shineforever): read day by day

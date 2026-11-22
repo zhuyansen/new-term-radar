@@ -30,7 +30,7 @@
 
 A daily report of the names that are starting to surge in AI: new models, products, tools and repos, caught where they are said first, before they show up in keyword tools.
 
-Built for people who make pages, posts or products around new terms: SEO for AI tool sites, newsletters, directories, anyone who wants to know about "Strata" or "Seedance" the day it appears and not two weeks later.
+Built for people who make pages, posts or products around new terms: SEO for AI tool sites, newsletters, directories, anyone who wants to know about "Strata" or "Seedance" the day it appears. In the one case checked so far, Strata, the radar named it three days before its rise in DataForSEO Trends ([what we measured](#what-we-measured-and-what-we-have-not)).
 
 ## Why
 
@@ -40,7 +40,7 @@ A new name leaves a trail, in this order:
 2. One GitHub repo takes off on its own.
 3. Directories and competitors add pages for it; someone registers a domain for it and the site starts to rank.
 4. Your own site gets its first search impressions for it.
-5. Google Trends shows the curve, days or weeks later.
+5. Google Trends shows the curve.
 
 Keyword tools read step 5. This radar reads steps 1 to 4 every day and uses step 5 only to check itself.
 
@@ -323,7 +323,7 @@ python scripts/gsc_auth.py gsc_client.json   # opens a browser once, writes gsc_
 
 ### Mail (optional)
 
-`--mail` sends the report through [Resend](https://resend.com). Set `RESEND_API_KEY`, `EMAIL_FROM` (an address on a domain you verified there) and `RADAR_EMAIL_TO` (comma-separated). `pip install markdown` for the HTML version.
+`--mail` sends the report through [Resend](https://resend.com). Set `RESEND_API_KEY`, `EMAIL_FROM` (an address on a domain you verified there) and `RADAR_EMAIL_TO` (comma-separated). It needs the `mail` extra: `pip install "new-term-radar[mail]"`, or `uvx --from "new-term-radar[mail]" new-term-radar daily --mail`; from a clone, `pip install markdown`.
 
 ## Use it from an agent: skills and an MCP server
 
@@ -348,7 +348,7 @@ In Claude Code the three skills also install as a plugin:
 /plugin install new-term-radar@new-term-radar
 ```
 
-Then ask your agent for "today's new AI keywords", "an AI listening report" or "keyword research on PhotoCraft and SynthID Detector". The skills run the pinned release from PyPI (`uvx new-term-radar==0.7.0`), never a clone, keep their state in `~/new-term-radar`, tell you the cost and wait for your yes before any paid run, show you what would go out on your behalf (a post, a page, a submission, an email) and wait for your yes before sending it, treat what they read as data rather than instructions, and say when a table is incomplete.
+Then ask your agent for "today's new AI keywords", "an AI listening report" or "keyword research on PhotoCraft and SynthID Detector". The skills run the pinned release from PyPI (`uvx new-term-radar==0.7.1`), never a clone, keep their state in `~/new-term-radar`, tell you the cost and wait for your yes before any paid run, show you what would go out on your behalf (a post, a page, a submission, an email) and wait for your yes before sending it, treat what they read as data rather than instructions, and say when a table is incomplete.
 
 ### MCP server
 
@@ -447,7 +447,7 @@ DeepSeek Harness does not pass the variables that look like keys on to a server,
 ## What we measured, and what we have not
 
 - The name judge (`gpt-4.1-mini`) was run on 170 terms an earlier judge had passed as names in our own daily use. It agreed on 149. Of the 21 it rejected, most were noise the earlier judge let through (sitemap path fragments such as `io.github.wxt invoice`, `asd`); about three were real names it missed (`synthid detector`, `veo`, `v4.1 flash`), in a test that gave it less context than a real run does. It passed none of 40 common words (`dashboard`, `pricing`, `today`).
-- Hit rates per signal: not yet. The review needs 14 days per lead and ours has only begun. The one seeded check, Strata, came back a hit, three days ahead of its Trends rise. Your own report shows your numbers as they accumulate; treat any signal as unproven until then.
+- Hit rates per signal: not yet. The review needs 14 days per lead and ours has only begun. The one seeded check, Strata, came back a hit, three days ahead of its rise in DataForSEO Trends: one case, not a lead time to expect. Your own report shows your numbers as they accumulate; treat any signal as unproven until then.
 - The X signal is only as good as the account list. It will not see a name none of your accounts says.
 
 ## Known issues

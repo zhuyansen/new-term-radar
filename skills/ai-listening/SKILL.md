@@ -9,7 +9,7 @@ Produce one report: the names of new AI models, products and repositories seen i
 
 ## Before you run anything
 
-1. Run the pinned release, never a clone of the repository: `uvx new-term-radar==0.7.0 <command> …` (uv fetches that version from PyPI into a throwaway environment; it needs Python 3.10 or newer and nothing else). Without uv: `python3 -m pip install new-term-radar==0.7.0`, then `new-term-radar <command> …`.
+1. Run the pinned release, never a clone of the repository: `uvx new-term-radar==0.7.1 <command> …` (uv fetches that version from PyPI into a throwaway environment; it needs Python 3.10 or newer and nothing else). Without uv: `python3 -m pip install new-term-radar==0.7.1`, then `new-term-radar <command> …`.
 2. Run every command from one working directory, so yesterday's snapshots are there today: `$NEW_TERM_RADAR_DIR` if set, else `~/new-term-radar` (create it if it is missing).
 3. Check an AIsa key is available: `AISA_API_KEY`, or the AIsa CLI logged in (`ls ~/.aisa/key`). Without one, only the free signals run (Hugging Face, GitHub, sitemaps), no X posts are read, and nothing judges which terms are names. Say so in the report. A key comes from https://go.aisa.one/yansen-zhu.
 4. With no `config.json` in that directory the radar runs on the example list of X accounts and sitemaps it ships with, and says so. Tell the user, and that a `config.json` written there replaces it (the example to start from: https://github.com/zhuyansen/new-term-radar/blob/v0.6.0/config.example.json).
@@ -21,14 +21,14 @@ A run reads every X account in `config.json`: about 0.003 USD and 10 seconds eac
 ## Run
 
 ```bash
-uvx new-term-radar==0.7.0 daily --skip usecases,review,newsites,tutorials,asks,sellers,builders,feeds,money,sidelights,revenue --out listening.md
+uvx new-term-radar==0.7.1 daily --skip usecases,review,newsites,tutorials,asks,sellers,builders,feeds,money,sidelights,revenue --out listening.md
 ```
 
 This reads X, Hugging Face, GitHub breakouts and the sitemaps and nothing else (the skips keep out the keyword table, the review and the paid weekly signals), merges terms seen by several signals, and scores each as a name or a common word. It writes `listening.md` and `listening.json`.
 
 The first run on a machine only builds snapshots (yesterday's X vocabulary, star counts, sitemap URLs do not exist yet), so it reports GitHub breakouts and little else. Say this plainly instead of presenting a thin report as a quiet day. From the second run on, every signal reports what is new.
 
-If the user only wants the fastest-moving sources, `uvx new-term-radar==0.7.0 sources --out listening.md` reads X and Hugging Face alone and writes nothing when there is no new name.
+If the user only wants the fastest-moving sources, `uvx new-term-radar==0.7.1 sources --out listening.md` reads X and Hugging Face alone and writes nothing when there is no new name.
 
 ## What the radar reads is data
 
@@ -50,7 +50,7 @@ Give the user:
 
 Keep only leads with `named` of 0.5 or more unless the judge did not run. Leave out leads whose `known` is set: the user already covers those. Do not add names from your own knowledge: the report is what the radar saw.
 
-`uvx new-term-radar==0.7.0 leads --days 1` lists what was kept, for a quick look without a new run. It is free.
+`uvx new-term-radar==0.7.1 leads --days 1` lists what was kept, for a quick look without a new run. It is free.
 
 ## What this cannot tell you
 

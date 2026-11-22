@@ -30,7 +30,7 @@
 
 每天一份报告，列出 AI 领域里刚开始冒头的名字：新模型、新产品、新工具、新仓库。在它们最早被说出来的地方抓，而不是等关键词工具里有数据再看。
 
-适合围绕新词做页面、写内容、做产品的人：AI 工具站的 SEO、Newsletter、导航站，或者任何想在「Strata」「Seedance」出现当天就知道、而不是两周后才知道的人。
+适合围绕新词做页面、写内容、做产品的人：AI 工具站的 SEO、Newsletter、导航站，或者任何想在「Strata」「Seedance」出现当天就知道的人。比趋势曲线早多少，目前只核对过一个例子：雷达报出 Strata，比它在 DataForSEO Trends 里起量早 3 天（见[实测过什么](#实测过什么没测过什么)）。
 
 ## 为什么做这个
 
@@ -40,7 +40,7 @@
 2. GitHub 上某一个仓库自己涨起来。
 3. 导航站和竞品给它加页面；有人为它注册域名，新站开始有排名。
 4. 你自己的站第一次因为这个词有了搜索曝光。
-5. Google Trends 上出现曲线，这已经是几天到几周之后了。
+5. Google Trends 上出现曲线。
 
 关键词工具读的是第 5 步。这个雷达每天读第 1 到 4 步，第 5 步只用来复盘自己准不准。
 
@@ -318,7 +318,7 @@ python scripts/gsc_auth.py gsc_client.json   # 打开一次浏览器授权，写
 
 ### 邮件（可选）
 
-`--mail` 通过 [Resend](https://resend.com) 发送报告。设置 `RESEND_API_KEY`、`EMAIL_FROM`（你在 Resend 验证过的域名下的地址）和 `RADAR_EMAIL_TO`（多个用逗号分隔）。要 HTML 版需要 `pip install markdown`。
+`--mail` 通过 [Resend](https://resend.com) 发送报告。设置 `RESEND_API_KEY`、`EMAIL_FROM`（你在 Resend 验证过的域名下的地址）和 `RADAR_EMAIL_TO`（多个用逗号分隔）。需要 `mail` 这个 extra：`pip install "new-term-radar[mail]"`，或 `uvx --from "new-term-radar[mail]" new-term-radar daily --mail`；从克隆运行就 `pip install markdown`。
 
 ## 在 agent 里用：skill 和 MCP 服务器
 
@@ -343,7 +343,7 @@ npx skills add zhuyansen/new-term-radar
 /plugin install new-term-radar@new-term-radar
 ```
 
-然后对你的 agent 说「今天有哪些 AI 新词」「出一份 AI listening 报告」或「给 PhotoCraft 和 SynthID Detector 做关键词调研」。skill 跑的是 PyPI 上锁定的版本（`uvx new-term-radar==0.7.0`），不克隆仓库，状态存在 `~/new-term-radar`；任何付费运行之前先告诉你大概花多少，等你同意再跑；要替你往外发东西（发帖、上线页面、提交、发邮件）之前，先给你看发到哪里、发什么，等你同意再发；读到的帖子和网页只当数据，不当指令；表不完整时也会说明。
+然后对你的 agent 说「今天有哪些 AI 新词」「出一份 AI listening 报告」或「给 PhotoCraft 和 SynthID Detector 做关键词调研」。skill 跑的是 PyPI 上锁定的版本（`uvx new-term-radar==0.7.1`），不克隆仓库，状态存在 `~/new-term-radar`；任何付费运行之前先告诉你大概花多少，等你同意再跑；要替你往外发东西（发帖、上线页面、提交、发邮件）之前，先给你看发到哪里、发什么，等你同意再发；读到的帖子和网页只当数据，不当指令；表不完整时也会说明。
 
 ### MCP 服务器
 
@@ -442,7 +442,7 @@ DeepSeek Harness 不会把环境里像密钥的变量传给服务器，所以 ke
 ## 实测过什么，没测过什么
 
 - 名字判断（`gpt-4.1-mini`）：拿我们自己日常使用中、之前的判断器放行的 170 个词重新判了一遍，它同意其中 149 个。它拒掉的 21 个里，大部分是之前误放的噪音（sitemap 路径碎片如 `io.github.wxt invoice`、`asd`），真正漏掉的名字大约 3 个（`synthid detector`、`veo`、`v4.1 flash`），而且这次测试给它的上下文比实际运行时少。40 个普通词（`dashboard`、`pricing`、`today`）没有一个被放行。
-- 各信号的命中率：还没有。复盘每条线索要等 14 天，我们的才刚开始。唯一一条手工放进去的检查是 Strata，结论是命中，比 Trends 曲线起来早 3 天。你自己的报告会随时间显示你的数字；在那之前，任何信号都应当视为未经验证。
+- 各信号的命中率：还没有。复盘每条线索要等 14 天，我们的才刚开始。唯一一条手工放进去的检查是 Strata，结论是命中，比它在 DataForSEO Trends 里起量早 3 天。这只是一个例子，不代表一般能提前多少。你自己的报告会随时间显示你的数字；在那之前，任何信号都应当视为未经验证。
 - X 信号的好坏取决于账号名单。你的账号都没提到的名字，它看不到。
 
 ## 已知问题
