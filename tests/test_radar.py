@@ -2345,3 +2345,31 @@ def test_chat_cost_due_window_x_age_missing_visits_and_fan_out_modifiers(cfg, tm
     assert mods.get("github") == 2 and mods.get("2026") == 2
     ai_text = "\n".join(report._ai_lines(job_rows, cfg))
     assert "fan-out modifiers: 2026 (2), github (2)" in ai_text
+
+
+def test_page_one_reads_the_site_of_a_google_redirect_from_its_breadcrumb(monkeypatch):
+    # Since 2026-11-06 every organic url is a google.com/goto redirect with domain google.com (a Glasser Run of
+    # 2026-11-26, trimmed; AIsa's answers changed the same way). The site is in the breadcrumb, a video's in its name.
+    goto = "https://google.com/goto?url=CAESbQHEIkXX&gsessionid=lXBrG8f4"
+    items = [{"type": "organic", "rank_group": 1, "domain": "google.com", "url": goto, "breadcrumb": "https://lookalike.com › Compare",
+              "website_name": "lookalike.com", "title": "9 Best HeyGen LiveAvatar Alternatives for Real ... - Lookalike", "checks": None},
+             {"type": "organic", "rank_group": 2, "domain": "google.com", "url": goto, "breadcrumb": "2.2K+ views  ·  6 months ago",
+              "website_name": "YouTube · Yash Thakker", "title": "Open Source HeyGen Alternative", "checks": ["is_video"]},
+             {"type": "organic", "rank_group": 3, "domain": "google.com", "url": goto, "breadcrumb": "https://www.vorec.ai",
+              "website_name": "vorec.ai", "title": "Vorec: tutorials from a screen recording", "checks": None},
+             {"type": "organic", "rank_group": 4, "domain": "www.easyreels.io", "url": "https://www.easyreels.io/blog/heygen",
+              "title": "HeyGen alternatives"}]
+    monkeypatch.setattr(competition.backend, "call", lambda calls: ({"serp": {"tasks": [{"result": [{"items": items}]}]}}, 2000))
+    page, _ = competition.page_one("heygen alternative", 2840)
+    got = [(r["domain"], r["kind"], r.get("home")) for r in page["results"]]
+    assert got == [("lookalike.com", "list", False), ("youtube.com", "video", None), ("vorec.ai", "tool", True),
+                   ("easyreels.io", "list", None)]
+    assert serpshape.shape(page["results"], "heygen alternative", ["youtube.com"])["homepages"] == 1
+
+
+def test_the_radar_reads_none_of_the_fields_dataforseo_moved_into_checks():
+    # DataForSEO's Google Organic SERP moved is_image, is_video, is_featured_snippet, is_malicious, is_web_story and
+    # amp_version into each item's `checks` array (2026-11). Reading them would read nothing once they are gone.
+    moved = re.compile(r"\b(is_image|is_video|is_featured_snippet|is_malicious|is_web_story|amp_version)\b")
+    readers = [p.name for p in (Path(__file__).resolve().parents[1] / "radar").glob("*.py") if moved.search(p.read_text())]
+    assert readers == []

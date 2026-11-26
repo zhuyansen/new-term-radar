@@ -41,11 +41,19 @@ VIDEO = ("youtube.com", "tiktok.com", "vimeo.com")
 FORUM = ("reddit.com", "quora.com", "ycombinator.com", "stackoverflow.com", "stackexchange.com", "x.com", "facebook.com")
 FORUMS_KEPT = 5             # threads kept per term: where an answer reaches the people searching
 TOOL = re.compile(r"\b(generator|maker|editor|converter|creator|online|free|app|tool|detector|remover|upscaler|translator)\b", re.I)
+# Since 2026-11-06 DataForSEO gives each organic result's url as a google.com/goto redirect, its domain as google.com
+# (seen through AIsa and Glasser alike); the site is in the breadcrumb ("https://lookalike.com › Compare") or, for a
+# video or a post, the site's name ("YouTube · Yash Thakker").
+REDIRECT = re.compile(r"^https?://(?:www\.)?google\.[a-z.]+/(?:goto|url)\b")
+SITE_NAMES = {"youtube": "youtube.com", "reddit": "reddit.com", "tiktok": "tiktok.com", "x": "x.com", "twitter": "x.com",
+              "facebook": "facebook.com", "instagram": "instagram.com", "linkedin": "linkedin.com", "quora": "quora.com",
+              "medium": "medium.com", "github": "github.com", "vimeo": "vimeo.com"}
 LIST = re.compile(r"\b(best|top|alternatives?|vs\.?|compared?|review(?:s|ed)?)\b|\b\d+\s+\w+", re.I)
 
 
-def page_kind(domain: str, url: str, title: str) -> str:
-    """tool, list, article, video or forum, from the address and the title."""
+def page_kind(domain: str, url: str, title: str, home: bool | None = None) -> str:
+    """tool, list, article, video or forum, from the address and the title (`home`: the site's home page, when
+    the address itself cannot say)."""
     if domain.endswith(VIDEO):
         return "video"
     if domain.endswith(FORUM):
@@ -53,7 +61,21 @@ def page_kind(domain: str, url: str, title: str) -> str:
     if LIST.search(title):
         return "list"
     path = re.sub(r"^https?://[^/]+", "", url).strip("/")
-    return "tool" if TOOL.search(title) or not path else "article"
+    return "tool" if TOOL.search(title) or (home if home is not None else not path) else "article"
+
+
+def site_of(item: dict) -> tuple[str, bool | None]:
+    """(the site an organic result is on, whether it is that site's home page or None when the url says it). A
+    redirect's site comes from its breadcrumb, a home page being a breadcrumb with no path after the site."""
+    domain = re.sub(r"^www\.", "", (item.get("domain") or "").lower())
+    if not REDIRECT.match(item.get("url") or ""):
+        return domain, None
+    crumb = item.get("breadcrumb") or ""
+    m = re.match(r"https?://([^/\s›]+)", crumb)
+    if m:
+        return re.sub(r"^www\.", "", m.group(1).lower()), "›" not in crumb
+    name = (item.get("website_name") or "").split("·")[0].strip().lower()
+    return (name.removeprefix("www.") if re.fullmatch(r"[a-z0-9-]+(\.[a-z0-9-]+)+", name) else SITE_NAMES.get(name, "")), None
 
 
 def threads(results: list[dict], items: list[dict]) -> list[dict]:
@@ -72,10 +94,13 @@ def page_one(keyword: str, location: int, language: str = "en", device: str = "d
     data, cost = backend.call([{"call_id": "serp", "tool": SERP_TOOL, "arguments": {"body": [{
         "keyword": keyword, "location_code": location, "language_code": language, "device": device, "depth": 10}]}}])
     items = (((data.get("serp") or {}).get("tasks") or [{}])[0].get("result") or [{}])[0].get("items") or []
-    results = [{"domain": re.sub(r"^www\.", "", i.get("domain") or ""), "url": i.get("url") or "", "title": i.get("title") or "",
-                "position": i.get("rank_group")} for i in items if i.get("type") == "organic"][:10]
+    results = []
+    for i in [i for i in items if i.get("type") == "organic"][:10]:
+        domain, home = site_of(i)
+        results.append({"domain": domain, "url": i.get("url") or "", "title": i.get("title") or "", "position": i.get("rank_group"),
+                        **({"home": home} if home is not None else {})})
     for r in results:
-        r["kind"] = page_kind(r["domain"], r["url"], r["title"])
+        r["kind"] = page_kind(r["domain"], r["url"], r["title"], r.get("home"))
     return {"results": results, "ads": any(i.get("type") == "paid" for i in items),
             "features": sorted({i["type"] for i in items if i.get("type") not in ("organic", "paid")}),
             "forums": threads(results, items)}, cost
@@ -199,7 +224,8 @@ def assess(rows: list[dict], cfg: dict, state: Path) -> tuple[int, list[str]]:
                             "eased": bool(r.get("is_new")) and verdict(weak, kd) != verdict(weak, kd, True),
                             "location_code": c["location_code"],
                             # the ten results as read, for the SERP shape (radar/serpshape.py) to reuse
-                            "results": [{k: x[k] for k in ("domain", "url", "title", "position", "kind", "dr")} for x in rated],
+                            "results": [{k: x[k] for k in ("domain", "url", "title", "position", "kind", "dr", "home") if k in x}
+                                        for x in rated],
                             "kinds": kinds, "features": p["features"], "forums": p.get("forums", []),
                             "weakest": {k: weakest[k] for k in ("domain", "dr", "position", "url")} if weakest else None,
                             # the tool sites already ranking: ⑩ asks who else their owners run

@@ -67,7 +67,7 @@ def shape(results: list[dict], term: str, platforms: list[str]) -> dict:
     results = results[:10]
     if not results:
         return {"verdict": None, "results": 0}
-    homes = [r for r in results if is_homepage(r.get("url", ""))]
+    homes = [r for r in results if (r["home"] if r.get("home") is not None else is_homepage(r.get("url", "")))]
     plat = [r for r in results if on_platform(r.get("domain") or domain_of(r.get("url", "")), platforms)]
     exact = [r for r in results if has_phrase(r.get("title", ""), term)]
     exact_home = any(has_phrase(r.get("title", ""), term)
