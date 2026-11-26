@@ -21,7 +21,7 @@ from __future__ import annotations
 import re
 from concurrent.futures import ThreadPoolExecutor
 
-from . import aisa, yours
+from . import aisa, backend, yours
 
 PATHS = {"chatgpt": "ai_optimization/chat_gpt/llm_scraper/live/advanced",
          "google": "serp/google/ai_mode/live/advanced"}
@@ -104,7 +104,7 @@ READ = {"chatgpt": read_chatgpt, "google": read_google}
 def _ask(job: str, engine: str, c: dict) -> tuple[str, str, dict | None, int, str | None]:
     task = {"keyword": c["prompt"].format(job=job), "location_code": c["location_code"], "language_code": c["language_code"]}
     try:
-        result, cost = aisa.rest(PATHS[engine], task)
+        result, cost = backend.rest(PATHS[engine], task)
     except aisa.AisaError as exc:
         return job, engine, None, 0, f"{job} ({engine}): {exc}"
     return job, engine, READ[engine](result), cost, None

@@ -177,7 +177,7 @@ def test_new_site_name_terms():
 def test_new_sites_drop_domains_ranking_for_a_handful_of_terms(cfg, tmp_path, monkeypatch):
     sent = []
     cfg["new_sites"]["words"] = 0                              # the words each site ranks for: their own test below
-    monkeypatch.setattr(new_sites.aisa, "rest", lambda path, task: (sent.append((path, task)) or {"items": json.loads(FIXTURE.read_text())}, 121200))
+    monkeypatch.setattr(new_sites.backend, "rest", lambda path, task: (sent.append((path, task)) or {"items": json.loads(FIXTURE.read_text())}, 121200))
     out = new_sites.new_sites(cfg, tmp_path, date(2026, 10, 6))
     domains = [r["domain"] for r in out["sites"]]
     assert "ai-hailuo.com" in domains and "neonwin386.ai" not in domains and "oyo88.ai" not in domains
@@ -213,7 +213,7 @@ def test_a_new_site_comes_with_the_first_words_it_ranks_for(cfg, tmp_path, monke
         if len(asked) == 2:                                    # the first site asked ranks; the second does not yet
             return {"total_count": 7, "items": [ranked("typing test 15 seconds", 1), ranked("股价走势", 6, loc=2158, vol=1000, kd=None, new=False)]}, 12240
         return {"total_count": None, "items": None}, 12000
-    monkeypatch.setattr(new_sites.aisa, "rest", rest)
+    monkeypatch.setattr(new_sites.backend, "rest", rest)
     cfg["new_sites"]["words"] = 2
     out = new_sites.new_sites(cfg, tmp_path, date(2026, 10, 6))
     worded = [r for r in out["sites"] if "words" in r]
@@ -236,7 +236,7 @@ def test_a_failed_words_call_is_named_and_the_sites_still_come(cfg, tmp_path, mo
         if path == new_sites.PATH:
             return {"items": json.loads(FIXTURE.read_text())}, 121200
         raise new_sites.aisa.AisaError("Internal Server Error.")
-    monkeypatch.setattr(new_sites.aisa, "rest", rest)
+    monkeypatch.setattr(new_sites.backend, "rest", rest)
     cfg["new_sites"]["words"] = 1
     out = new_sites.new_sites(cfg, tmp_path, date(2026, 10, 6))
     assert out["sites"] and len(out["errors"]) == 1 and out["errors"][0].endswith("words: Internal Server Error.")
@@ -285,7 +285,7 @@ def test_judge_scores_rows_in_chunks(monkeypatch):
         n = len(json.loads(user))
         sizes.append(n)
         return json.dumps([{"i": i, "score": 0.8} for i in range(n)])
-    monkeypatch.setattr(judge.aisa, "chat", chat)
+    monkeypatch.setattr(judge.backend, "chat", chat)
     assert judge.score(rows, "m") == {"judged": judge.CHUNK + 2} and sizes == [judge.CHUNK, 2]
     assert all(r["named"] == 0.8 for r in rows)
 
@@ -293,7 +293,7 @@ def test_judge_scores_rows_in_chunks(monkeypatch):
 def test_judge_failure_leaves_rows_unscored(monkeypatch):
     def chat(*a):
         raise judge.aisa.AisaError("HTTP 402: no credit")
-    monkeypatch.setattr(judge.aisa, "chat", chat)
+    monkeypatch.setattr(judge.backend, "chat", chat)
     rows = [{"term": "strata", "examples": []}]
     assert "error" in judge.score(rows, "m") and "named" not in rows[0]
 
@@ -423,7 +423,7 @@ def test_review_stores_the_verdict(cfg, tmp_path, monkeypatch):
     points = [{"date_from": (date(2026, 9, 19) + timedelta(days=i)).isoformat(), "values": [v]}
               for i, v in enumerate([0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 30, 100, 0, 0])]
     answer = {"tasks": [{"result": [{"items": [{"data": points}]}]}]}
-    monkeypatch.setattr(review.aisa, "call_all", lambda calls: ({c["call_id"]: answer for c in calls}, 1200))
+    monkeypatch.setattr(review.backend, "call_all", lambda calls: ({c["call_id"]: answer for c in calls}, 1200))
     out = review.review(cfg, conn, date(2026, 10, 10))
     assert out["checked"] == [{"term": "niko strata", "first_seen": "2026-09-25", "verdict": "hit", "lead_days": 3}]
     assert conn.execute("SELECT verdict, lead_days FROM leads").fetchone() == ("hit", 3)
@@ -644,20 +644,20 @@ def test_review_ignores_the_unsettled_days(cfg, tmp_path, monkeypatch):
     store.record(conn, [_lead("ai image detector", ["usecase"])], date(2026, 9, 28))
     points = [{"date_from": d.isoformat(), "values": [v]} for d, v in _daily([5] * 43 + [0, 100])]
     answer = {"tasks": [{"result": [{"items": [{"data": points}]}]}]}
-    monkeypatch.setattr(review.aisa, "call_all", lambda calls: ({c["call_id"]: answer for c in calls}, 1200))
+    monkeypatch.setattr(review.backend, "call_all", lambda calls: ({c["call_id"]: answer for c in calls}, 1200))
     assert review.review(cfg, conn, TODAY)["checked"][0]["verdict"] == "miss"
 
 
 def test_screen_drops_loosely_related_keywords_and_keeps_all_when_the_call_fails(monkeypatch):
     cands = [{"phrase": p, "brand": False} for p in ("ai image detector", "chatgpt alternative", "ai audio detector")]
     ev = {"posts": [{"text": "check if any image is AI generated", "likes": 900, "by": "a"}], "readme": ""}
-    monkeypatch.setattr(usecases.aisa, "chat", lambda *a, **k: '[{"i": 0, "score": 0.95}, {"i": 1, "score": 0.2}, {"i": 2, "score": 0.7}]')
+    monkeypatch.setattr(usecases.backend, "chat", lambda *a, **k: '[{"i": 0, "score": 0.95}, {"i": 1, "score": 0.2}, {"i": 2, "score": 0.7}]')
     kept = usecases.relevant(usecases.screen("m", "synthid detector", ev, cands))
     assert [(c["phrase"], c["relevance"]) for c in kept] == [("ai image detector", 0.95), ("ai audio detector", 0.7)]
 
     def down(*a, **k):
         raise usecases.aisa.AisaError("HTTP 500")
-    monkeypatch.setattr(usecases.aisa, "chat", down)
+    monkeypatch.setattr(usecases.backend, "chat", down)
     assert usecases.screen("m", "synthid detector", ev, cands) == cands
 
 
@@ -680,7 +680,7 @@ def test_related_queries_split_into_long_tails_and_candidates():
 def test_screen_marks_brands_and_other_names(monkeypatch):
     cands = [{"phrase": "free up mac disk space", "brand": False, "source": "model"},
              {"phrase": "gpt image 2.5", "brand": False, "source": "searched"}]
-    monkeypatch.setattr(usecases.aisa, "chat", lambda *a, **k:
+    monkeypatch.setattr(usecases.backend, "chat", lambda *a, **k:
                         '[{"i": 0, "score": 0.8, "brand": true, "name": false}, {"i": 1, "score": 0.1, "brand": true, "name": true}]')
     viewed = usecases.screen("m", "removemacai", {"posts": [], "readme": "frees 12 GB"}, cands)
     assert viewed[0]["brand"] and viewed[1]["is_name"]
@@ -826,7 +826,7 @@ def test_a_failed_post_search_costs_one_name_its_posts_not_the_step(monkeypatch)
         if "photocraft" in calls[0]["arguments"]["query"]:
             raise usecases.aisa.AisaError("HTTP 504: <html><h1>504 Gateway Time-out</h1></html>")
         return {"s": {"tweets": [{"text": "check any image", "likeCount": 900, "author": {"userName": "a"}}]}}, 3000
-    monkeypatch.setattr(usecases.aisa, "call", call)
+    monkeypatch.setattr(usecases.backend, "call", call)
     monkeypatch.setattr(usecases, "_readme", lambda repo: "PhotoCraft opens real PSD files")
     ev, cost = usecases.evidence(["photocraft", "synthid detector"], {"photocraft": "storytold/photocraft"}, TODAY)
     assert cost == 3000 and ev["photocraft"]["readme"] and ev["photocraft"]["posts"] == []
@@ -1078,7 +1078,7 @@ def test_a_crowded_rising_term_is_watched_not_prioritized(cfg, tmp_path, monkeyp
         items = [{"keyword": k, "keyword_properties": {"keyword_difficulty": 60 if k == "crowded term" else 25}}
                  for k in c["arguments"]["body"][0]["keywords"]]
         return {"kd": {"tasks": [{"result": [{"items": items}]}]}}, 12000
-    monkeypatch.setattr(competition.aisa, "call", call)
+    monkeypatch.setattr(competition.backend, "call", call)
     rated = {"canva.com": 94, "adobe.com": 96, "tiny1.ai": 8, "tiny2.ai": 12, "tiny3.ai": 21}
     asked = []
 
@@ -1206,7 +1206,7 @@ def test_asks_turns_reddit_requests_into_sized_jobs(cfg, tmp_path, monkeypatch):
                                        _reddit_post("c", "Rate my setup", 1)],
              '"how do i automate"': [_reddit_post("a", "Is there an AI tool to add b-roll automatically?", 45)]}
     monkeypatch.setattr(asks.social, "reddit", lambda q, **k: (posts[q], 1880))
-    monkeypatch.setattr(asks.aisa, "chat", lambda model, system, user: json.dumps(
+    monkeypatch.setattr(asks.backend, "chat", lambda model, system, user: json.dumps(
         [{"i": i, "kind": "request", "job": job, "ai": True} for i, job in enumerate(
             ["add b roll automatically", "convert slides to notes"])]))
     monkeypatch.setattr(asks.usecases, "volumes", lambda phrases, loc: (
@@ -1238,7 +1238,7 @@ def test_pains_groups_reviews_posts_and_comments_into_gaps(cfg, monkeypatch):
     monkeypatch.setattr(pains.social, "reddit", lambda q, **k: ([_reddit_post("r1", "Headshot apps all look plastic")], 1880))
     monkeypatch.setattr(pains.social, "youtube_comments", lambda vid: ([{"text": "Is there a way to do this for a whole team at once?", "likes": 40},
                                                                         {"text": "nice", "likes": 0}], 1000))
-    monkeypatch.setattr(pains.aisa, "chat", lambda model, system, user, max_tokens=2500: json.dumps([
+    monkeypatch.setattr(pains.backend, "chat", lambda model, system, user, max_tokens=2500: json.dumps([
         {"gap": "No team or group headshots", "kind": "missing", "items": [0, 2], "phrase": "ai headshots for teams"},
         {"gap": "Results look plastic", "kind": "quality", "items": [1]}]))
     result = pains.run(cfg, "ai headshot")
@@ -1253,7 +1253,7 @@ def test_tutorial_asks_only_for_leads_marked_one_click(cfg, monkeypatch):
     monkeypatch.setenv("GOANYAPI_API_KEY", "k")
     monkeypatch.setattr(pains.goanyapi, "serp", lambda q, gl="US": ([{"url": "https://www.youtube.com/watch?v=abcdefghijk", "title": "t", "rank": 1}], 2000))
     monkeypatch.setattr(pains.social, "youtube_comments", lambda vid: ([{"text": "Can someone make this one click? Too many steps", "likes": 12}], 1000))
-    monkeypatch.setattr(pains.aisa, "chat", lambda model, system, user, max_tokens=2500: json.dumps(
+    monkeypatch.setattr(pains.backend, "chat", lambda model, system, user, max_tokens=2500: json.dumps(
         [{"gap": "Too many manual steps", "kind": "wants a tool", "items": [0], "phrase": "one click blender export"}]))
     out = pains.tutorial_asks(cfg, [{"term": "opus blender game", "one_click": "tutorial"}, {"term": "plain", "one_click": None}])
     assert [x["term"] for x in out["leads"]] == ["opus blender game"] and out["cost_micros"] == 2000 + 1000
@@ -1296,14 +1296,14 @@ def test_sellers_keep_payment_links_and_leave_out_the_rest(cfg, tmp_path, monkey
     def call(calls):
         target = calls[0]["arguments"]["body"][0]["target"]
         return (_sites(new[target]) if calls[0]["tool"] == sellers.DOMAINS else _backlinks(answers[target])), 27600
-    monkeypatch.setattr(sellers.aisa, "call", call)
+    monkeypatch.setattr(sellers.backend, "call", call)
     monkeypatch.setattr(sellers, "page_words", lambda host: ("Pestora — pest control software", "Book and bill pest jobs") if host.startswith("pestora")
                         else ("", ""))
     kinds = {"pestora.framer.website": "ai", "meeting-demo.app": "ai", "janemaker.com": "content", "launch-demo.app": "ai", "try.demotools.dev": "ai"}
 
     def chat(model, system, user, max_tokens=1500):
         return json.dumps([{"i": x["i"], "kind": kinds[x["domain"]]} for x in json.loads(user)])
-    monkeypatch.setattr(sellers.aisa, "chat", chat)
+    monkeypatch.setattr(sellers.backend, "chat", chat)
     first = sellers.sellers(cfg, tmp_path)
     hosts = {s["host"]: s for s in first["sellers"]}
     assert [s["kind"] for s in first["sellers"]] == ["ai", "ai", "ai", "ai", "content"]                 # AI and software first
@@ -1366,7 +1366,7 @@ def test_history_pulls_every_page_and_picks_up_where_it_stopped(tmp_path, monkey
         sent.append(body)
         assert body["order_by"] == ["first_seen,asc"] and body["mode"] == "one_per_domain"
         return _history_page(*pages[body.get("search_after_token", "")]), 60000
-    monkeypatch.setattr(seller_history.aisa, "call", call)
+    monkeypatch.setattr(seller_history.backend, "call", call)
     db = seller_history.connect(tmp_path)
     first = seller_history.pull(db, ["gumroad"], 50000)                        # the budget runs out after one page
     assert first["platforms"]["gumroad"] == {"rows": 2, "done": False, "cost_micros": 60000, "spent_micros": 60000, "error": ""}
@@ -1397,7 +1397,7 @@ def test_history_update_adds_the_new_sellers_back_to_the_newest_day(tmp_path, mo
         sent.append(body.get("search_after_token", ""))
         assert body["order_by"] == ["first_seen,desc"]
         return _history_page(*pages[body.get("search_after_token", "")]), 60000
-    monkeypatch.setattr(seller_history.aisa, "call", call)
+    monkeypatch.setattr(seller_history.backend, "call", call)
     got = seller_history.update(db, ["polar"], 1_000_000, date(2026, 10, 15))["platforms"]["polar"]
     assert sent == ["", "t1"] and got["since"] == "2026-10-07"
     assert got["new"] == 3 and got["paying"] == 3 and got["elsewhere"] == 1 and got["cost_micros"] == 120000   # moveddemo.app sold via Stripe
@@ -1407,7 +1407,7 @@ def test_history_update_adds_the_new_sellers_back_to_the_newest_day(tmp_path, mo
 
 def test_history_stops_on_a_refused_page(tmp_path, monkeypatch):
     refused = {"h": {"tasks": [{"status_code": 40501, "status_message": "Invalid Field: 'search_after_token'."}]}}
-    monkeypatch.setattr(seller_history.aisa, "call", lambda calls: (refused, 0))
+    monkeypatch.setattr(seller_history.backend, "call", lambda calls: (refused, 0))
     db = seller_history.connect(tmp_path)
     got = seller_history.pull(db, ["polar"], 1_000_000)["platforms"]["polar"]
     assert not got["done"] and "Invalid Field" in got["error"]
@@ -1421,7 +1421,7 @@ def test_history_reads_sorts_and_counts(tmp_path, monkeypatch):
     monkeypatch.setattr(seller_history.sellers, "page_words",
                         lambda host, limit: ("NotchLive — Live Captions for Mac", "") if host == "captions-demo.app" else ("", ""))
     assert seller_history.read(db, 2) == {"step": "read", "read": 2, "answered": 1}            # spam-network-demo.com is no seller: not read
-    monkeypatch.setattr(seller_history.sellers.aisa, "chat", lambda model, system, user, max_tokens=1500: '[{"i": 0, "kind": "ai"}]')
+    monkeypatch.setattr(seller_history.sellers.backend, "chat", lambda model, system, user, max_tokens=1500: '[{"i": 0, "kind": "ai"}]')
     sorted_ = seller_history.sort(db, "gpt-4.1-mini", 1_000_000)
     assert sorted_["sorted"] == 1 and sorted_["by_rules"] == 0                                 # the dead site is left unsorted
     out = tmp_path / "sellers.csv"
@@ -1485,7 +1485,7 @@ def test_history_sorts_by_rules_for_free_and_the_model_redoes_them(tmp_path, mon
                    [("captions-demo.app", "NotchLive — Live Captions for Mac"), ("themes-demo.com", "Astro Themes & Tailwind CSS Templates")])
     free = seller_history.sort(db, "", 0)                                            # no model: rules, whatever the budget
     assert free["sorted"] == 2 and free["by_rules"] == 2 and free["cost_micros"] == 0
-    monkeypatch.setattr(seller_history.sellers.aisa, "chat",
+    monkeypatch.setattr(seller_history.sellers.backend, "chat",
                         lambda model, system, user, max_tokens=1500: '[{"i": 0, "kind": "ai"}, {"i": 1, "kind": "template"}]')
     paid = seller_history.sort(db, "gpt-4.1-mini", 1_000_000)
     assert paid["sorted"] == 2 and paid["by_rules"] == 0
@@ -1514,7 +1514,7 @@ def test_feeds_take_a_snapshot_first_then_report_what_is_new(cfg, tmp_path, monk
             return json.dumps({"hits": [{"objectID": "9", "title": "Show HN: Quarry – SQL for spreadsheets", "points": 80}]}).encode()
         return pages[url].encode()
     monkeypatch.setattr(feeds, "get", get)
-    monkeypatch.setattr(feeds.aisa, "call", lambda calls: ({"tiktok": {"data": {"trending_search_words": [
+    monkeypatch.setattr(feeds.backend, "call", lambda calls: ({"tiktok": {"data": {"trending_search_words": [
         {"trendingSearchWord": "AI yearbook filter"}, {"trendingSearchWord": "Mayor Arrested"}]}}}, 1000))
     first = feeds.feeds(cfg, tmp_path, today=date(2026, 10, 14))
     assert set(first["first_run"]) == {"producthunt", "hn", "openrouter", "awesome", "trending"}
@@ -1613,7 +1613,7 @@ def test_builders_keep_the_badge_and_leave_posts_about_the_tool(cfg, tmp_path, m
         return {"b": {"tasks": [{"result": [{"items": [{"domain_from": d, "url_to": u, "anchor": a, "url_from": f"https://{d}/deep/page",
                                                          "first_seen": "2026-10-14 03:00:00 +00:00", "domain_from_rank": 5}
                                                         for d, u, a in rows[target]]}]}]}}, 27600
-    monkeypatch.setattr(sellers.aisa, "call", call)
+    monkeypatch.setattr(sellers.backend, "call", call)
     monkeypatch.setattr(sellers, "page_words", lambda host: ("FormDemo — forms that fill themselves", "") if host == "formdemo.app"
                         else ("Radar", "A weekly letter on climate startups"))
     got = sellers.builders(cfg, tmp_path)
@@ -1660,7 +1660,7 @@ def test_asks_also_read_x_software_recommendations_and_freelancer(monkeypatch):
     import io
     c = {"x_query": '"is there a tool"', "x_min_likes": 10, "stack_all": ["softwarerecs"], "stack_sites": ["superuser"],
          "stack_titles": ["automate"], "freelancer_queries": ["automate"], "min_score": 2}
-    monkeypatch.setattr(asks.aisa, "call", lambda calls: ({"x": {"tweets": [
+    monkeypatch.setattr(asks.backend, "call", lambda calls: ({"x": {"tweets": [
         {"id": "1", "text": "is there a tool that turns slides into notes?", "likeCount": 44, "url": "u"}]}}, 3000))
     stack = {"softwarerecs": {"items": [{"question_id": 7, "title": "Open-source tool to auto-generate API regression tests", "score": 0, "link": "l"}]},
              "superuser": {"items": [{"question_id": 8, "title": "Automate renaming 500 PDFs &amp; folders", "score": 3, "link": "m"}]}}
@@ -1717,7 +1717,7 @@ def test_dodo_and_waffo_links_take_money():
 
 def test_side_evidence_asks_whois_for_the_first_names(monkeypatch):
     asked = []
-    monkeypatch.setattr(sidelights.aisa, "rest", lambda path, task: (asked.append(task["filters"][0][2]) or
+    monkeypatch.setattr(sidelights.backend, "rest", lambda path, task: (asked.append(task["filters"][0][2]) or
                         {"total_count": 4, "items": [{"domain": "nanobanana-demo.app"}, {"domain": "nano-banana-demo.ai"}]}, 121200))
     monkeypatch.setattr(sidelights, "_get", lambda url: b"[]" if "crt.sh" in url else (_ for _ in ()).throw(OSError("offline")))
     got = sidelights.evidence({"names": 2, "whois_names": 1, "whois_days": 30}, ["nano banana", "seedream five"], today=date(2026, 10, 15))
@@ -1758,7 +1758,7 @@ def test_only_software_built_with_a_builder_becomes_a_lead(cfg, tmp_path, monkey
         return {"b": {"tasks": [{"result": [{"items": [{"domain_from": d, "url_to": "https://lovable.dev/projects/x", "anchor": a,
                                                          "url_from": f"https://{d}/", "first_seen": "2026-10-15 03:00:00 +00:00",
                                                          "domain_from_rank": 5} for d, a in rows]}]}]}}, 27600
-    monkeypatch.setattr(sellers.aisa, "call", call)
+    monkeypatch.setattr(sellers.backend, "call", call)
     monkeypatch.setattr(sellers, "page_words", lambda host: ("FormDemo — forms that fill themselves with AI", "") if host == "formdemo.app"
                         else ("Pizzeria Demo — Pizza napoletana a Roma", ""))
     got = sellers.builders(cfg, tmp_path)
@@ -1794,7 +1794,7 @@ def test_a_payment_link_on_several_new_sites_is_a_network(cfg, tmp_path, monkeyp
         if calls[0]["tool"] == sellers.DOMAINS:
             return _sites([d for d, _ in rows]), 27600
         return _backlinks(rows), 27600
-    monkeypatch.setattr(sellers.aisa, "call", call)
+    monkeypatch.setattr(sellers.backend, "call", call)
     got = sellers.fresh(cfg["sellers"], {})
     assert set(got["found"]) == {"formdemo.app"} and got["networked"] == 2
 
@@ -1845,7 +1845,7 @@ def test_word_age_reads_the_acted_on_rows(cfg, monkeypatch):
     def call_all(calls):
         asked.extend(c["arguments"]["body"][0] for c in calls)
         return {c["call_id"]: {"tasks": [_weeks([0] * 250 + [9] * 7)]} for c in calls}, 1200 * len(calls)
-    monkeypatch.setattr(wordage.aisa, "call_all", call_all)
+    monkeypatch.setattr(wordage.backend, "call_all", call_all)
     rows = [{"phrase": "pdfcraft"}, {"phrase": "ai image detector"}]
     assert wordage.assess(rows, cfg, TODAY) == (2400, [])
     assert all(r["is_new"] for r in rows) and asked[0] == {"keywords": ["pdfcraft"], "time_range": "past_5_years"}
@@ -1876,8 +1876,8 @@ def test_markets_reuse_the_tables_own_volumes_and_buy_the_rest(cfg, monkeypatch)
     regions = {"result": [{"items": [{"type": "subregion_interests", "interests": [{"keyword": "x", "values": [   # as DataForSEO answers
         {"geo_id": "US", "geo_name": "United States", "value": 40}, {"geo_id": "DE", "geo_name": "Germany", "value": 70},
         {"geo_id": "SX", "geo_name": "Sint Maarten", "value": 100}]}]}]}]}       # a small place tops the share: left out
-    monkeypatch.setattr(markets.aisa, "call", call)
-    monkeypatch.setattr(markets.aisa, "call_all", lambda calls: ({c["call_id"]: {"tasks": [regions]} for c in calls}, 2400 * len(calls)))
+    monkeypatch.setattr(markets.backend, "call", call)
+    monkeypatch.setattr(markets.backend, "call_all", lambda calls: ({c["call_id"]: {"tasks": [regions]} for c in calls}, 2400 * len(calls)))
     rows = [{"phrase": "pdfcraft"}, {"phrase": "ai image detector"}]
     cost, errors = markets.assess(rows, cfg, {2840: {"ai image detector": {"volume": 60000, "month": "2026-08"}}})
     assert errors == [] and bought == [(2840, ["pdfcraft"]), (2276, ["pdfcraft", "ai image detector"])]
@@ -1938,7 +1938,7 @@ def test_a_new_term_reads_one_step_easier_on_page_one(cfg, tmp_path, monkeypatch
             return {"serp": _serp(strong)}, 2000
         return {"kd": {"tasks": [{"result": [{"items": [{"keyword": k, "keyword_properties": {"keyword_difficulty": 60}}
                                                         for k in c["arguments"]["body"][0]["keywords"]]}]}]}}, 12000
-    monkeypatch.setattr(competition.aisa, "call", call)
+    monkeypatch.setattr(competition.backend, "call", call)
     rows = [{"phrase": "old term", "decision": "prioritize"}, {"phrase": "new term", "decision": "prioritize", "is_new": True}]
     competition.assess(rows, cfg, tmp_path)
     old, new = rows
@@ -1947,7 +1947,7 @@ def test_a_new_term_reads_one_step_easier_on_page_one(cfg, tmp_path, monkeypatch
     assert new["competition"]["results"][0]["url"] == "https://canva.com/ai"
     # the SERP shape reuses the results the page-one check read: no second purchase
     cfg["serp_shape"]["enabled"] = True
-    monkeypatch.setattr(competition.aisa, "call", lambda calls: (_ for _ in ()).throw(AssertionError("bought twice")))
+    monkeypatch.setattr(competition.backend, "call", lambda calls: (_ for _ in ()).throw(AssertionError("bought twice")))
     assert serpshape.assess([new], cfg) == (0, []) and new["serp"]["verdict"] == "beatable" and new["serp"]["inner"] == 2
 
 
@@ -1964,8 +1964,8 @@ def test_keyword_table_shows_age_markets_and_shape_in_both_languages(cfg, tmp_pa
         if c["tool"] == markets.VOLUME_TOOL:
             return {"vol": {"tasks": [{"result": [{"keyword": k, "search_volume": 1500} for k in c["arguments"]["body"][0]["keywords"]]}]}}, 90000
         return {"serp": page}, 2000
-    monkeypatch.setattr(usecases.aisa, "call", call)
-    monkeypatch.setattr(usecases.aisa, "call_all", lambda calls: (
+    monkeypatch.setattr(usecases.backend, "call", call)
+    monkeypatch.setattr(usecases.backend, "call_all", lambda calls: (
         {x["call_id"]: {"tasks": [_weeks([0] * 250 + [5] * 7)]} for x in calls}, 1200 * len(calls)))
     uc = usecases.run(cfg, tmp_path, ["synthid detector"], {}, TODAY)
     rows = {r["phrase"]: r for r in uc["rows"]}
@@ -2028,7 +2028,7 @@ def test_twelve_months_read_as_a_word():
 def test_volumes_carry_twelve_months_oldest_first(monkeypatch):
     newest_first = [{"year": 2026, "month": m, "search_volume": 100 * m} for m in range(8, 0, -1)] + \
                    [{"year": 2025, "month": m, "search_volume": None} for m in range(12, 8, -1)]
-    monkeypatch.setattr(usecases.aisa, "call", lambda calls: ({"vol": {"tasks": [{"result": [
+    monkeypatch.setattr(usecases.backend, "call", lambda calls: ({"vol": {"tasks": [{"result": [
         {"keyword": "pdf editor", "search_volume": 400, "monthly_searches": newest_first}]}]}}, 90000))
     vol, cost = usecases.volumes(["pdf editor"], 2840)
     got = vol["pdf editor"]
@@ -2104,7 +2104,7 @@ def test_page_one_keeps_forum_threads_and_marks_what_takes_clicks(cfg, tmp_path,
         if calls[0]["call_id"] == "serp":
             return {"serp": {"tasks": [{"result": [{"items": items}]}]}}, 2000
         return {"kd": {"tasks": [{"result": [{"items": []}]}]}}, 12000
-    monkeypatch.setattr(competition.aisa, "call", call)
+    monkeypatch.setattr(competition.backend, "call", call)
     rows = [{"phrase": "pdf editor", "decision": "watch"}, {"phrase": "best pdf editor", "decision": "watch"}]
     competition.assess(rows, cfg, tmp_path)
     comp = rows[0]["competition"]
@@ -2161,7 +2161,7 @@ def test_ai_answers_name_tools_and_cite_sites(cfg, monkeypatch):
     def rest(path, task):
         asked.append((path, task))
         return (CHATGPT if "chat_gpt" in path else AI_MODE), 4000
-    monkeypatch.setattr(ai_answers.aisa, "rest", rest)
+    monkeypatch.setattr(ai_answers.backend, "rest", rest)
     cost, errors = ai_answers.assess(rows, cfg)
     assert cost == 8000 and errors == ["unknown engine: bing"] and "ai" not in rows[1]
     assert sorted(p for p, _ in asked) == sorted(ai_answers.PATHS.values())
@@ -2205,7 +2205,7 @@ def test_keyword_table_shows_the_year_your_rank_threads_and_the_dot_com(cfg, tmp
             return {"serp": _serp(pages[c["arguments"]["body"][0]["keyword"]])}, 2000
         return {"kd": {"tasks": [{"result": [{"items": [{"keyword": k, "keyword_properties": {"keyword_difficulty": 25}}
                                                         for k in c["arguments"]["body"][0]["keywords"]]}]}]}}, 12000
-    monkeypatch.setattr(usecases.aisa, "call", call)
+    monkeypatch.setattr(usecases.backend, "call", call)
     monkeypatch.setattr(dotcom, "_get", lambda url: (404, {}))
     uc = usecases.run(cfg, tmp_path, ["synthid detector"], {}, TODAY)
     rows = {r["phrase"]: r for r in uc["rows"]}
@@ -2269,7 +2269,7 @@ def test_kgr_and_ai_answers_multi_run_distribution(cfg, monkeypatch):
         ({"brand_entities": [{"markdown": "ToolB"}], "sources": [{"domain": "b.com"}]}, 4000),
         ({"brand_entities": [], "sources": []}, 4000),
     ])
-    monkeypatch.setattr(ai_answers.aisa, "rest", lambda path, task: next(replies))
+    monkeypatch.setattr(ai_answers.backend, "rest", lambda path, task: next(replies))
     rows = [{"phrase": "convert slides to notes", "posts": [], "subreddits": []}]
     cost, errors = ai_answers.assess(rows, cfg)
     ai = rows[0]["ai"]
@@ -2322,9 +2322,9 @@ def test_chat_cost_due_window_x_age_missing_visits_and_fan_out_modifiers(cfg, tm
         if calls[0]["tool"] == sellers.DOMAINS:
             return _sites([d for d, _ in rows]), 27600
         return _backlinks(rows), 27600
-    monkeypatch.setattr(sellers.aisa, "call", seller_call)
+    monkeypatch.setattr(sellers.backend, "call", seller_call)
     monkeypatch.setattr(sellers, "page_words", lambda host: ("Indie AI Tool", "automate tasks"))
-    monkeypatch.setattr(sellers.aisa, "chat", lambda model, system, user, max_tokens=1500: '[{"i": 0, "kind": "ai"}, {"i": 1, "kind": "ai"}]')
+    monkeypatch.setattr(sellers.backend, "chat", lambda model, system, user, max_tokens=1500: '[{"i": 0, "kind": "ai"}, {"i": 1, "kind": "ai"}]')
     monkeypatch.setattr(sellers, "visits", lambda hosts: ({"small-indie.app": {"visits": 1200}}, 3000))
     got_sellers = sellers.sellers(cfg, tmp_path / "sellers_state")
     assert [s["host"] for s in got_sellers["sellers"]] == ["small-indie.app"]
@@ -2337,7 +2337,7 @@ def test_chat_cost_due_window_x_age_missing_visits_and_fan_out_modifiers(cfg, tm
         ({"brand_entities": [{"markdown": "ToolA"}], "sources": [{"domain": "a.com"}],
           "fan_out_queries": ["convert slides to notes github open source 2026"]}, 4000),
     ])
-    monkeypatch.setattr(ai_answers.aisa, "rest", lambda path, task: next(fan_replies))
+    monkeypatch.setattr(ai_answers.backend, "rest", lambda path, task: next(fan_replies))
     job_rows = [{"phrase": "convert slides to notes", "posts": [], "subreddits": []}]
     ai_answers.assess(job_rows, cfg)
     ai = job_rows[0]["ai"]

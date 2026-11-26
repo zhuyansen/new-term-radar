@@ -23,7 +23,7 @@ import re
 import urllib.parse
 import urllib.request
 
-from . import UA, aisa, goanyapi, social
+from . import UA, aisa, backend, goanyapi, social
 
 EXTENSION = re.compile(r"(?:chromewebstore\.google\.com/detail|chrome\.google\.com/webstore/detail)/(?:[^/?#]+/)?([a-p]{32})")
 VIDEO = re.compile(r"youtube\.com/watch\?v=([\w-]{11})")
@@ -62,7 +62,7 @@ def group(model: str, items: list[dict]) -> list[dict]:
     if not items:
         return []
     user = json.dumps([{"i": i, "source": x["source"], "text": x["text"][:300]} for i, x in enumerate(items)], ensure_ascii=False)
-    return parse(aisa.chat(model, SYSTEM, user, max_tokens=2500), items)
+    return parse(backend.chat(model, SYSTEM, user, max_tokens=2500), items)
 
 
 def chrome(keyword: str, extensions: list[str], c: dict) -> tuple[list[dict], int, list[str]]:
@@ -168,7 +168,7 @@ def run(cfg: dict, keyword: str, extensions: list[str] | None = None) -> dict:
     except aisa.AisaError as exc:
         gaps, errors = [], errors + [f"model: {exc}"]
     by = {s: sum(1 for x in items if x["source"] == s) for s in ("chrome", "reddit", "youtube", "appstore")}
-    return {"keyword": keyword, "items": len(items), "by_source": by, "gaps": gaps, "errors": errors, "cost_micros": cost + aisa.take_chat_cost()}
+    return {"keyword": keyword, "items": len(items), "by_source": by, "gaps": gaps, "errors": errors, "cost_micros": cost + backend.take_chat_cost()}
 
 
 def tutorial_asks(cfg: dict, leads: list[dict]) -> dict:
@@ -184,4 +184,4 @@ def tutorial_asks(cfg: dict, leads: list[dict]) -> dict:
             gaps, errors = [], errors + [f"model: {exc}"]
         if gaps:
             out.append({"term": lead["term"], "comments": len(items), "gaps": gaps[:5]})
-    return {"leads": out, "errors": errors, "cost_micros": cost + aisa.take_chat_cost()}
+    return {"leads": out, "errors": errors, "cost_micros": cost + backend.take_chat_cost()}

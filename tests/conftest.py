@@ -2,13 +2,17 @@ import copy
 
 import pytest
 
-from radar import aisa, config, dotcom, goanyapi, i18n, page_age
+from radar import aisa, backend, config, dotcom, glasser, goanyapi, i18n, page_age
 
 
 @pytest.fixture(autouse=True)
 def english(monkeypatch):
     i18n.set_lang("en")
     monkeypatch.delenv("GOANYAPI_API_KEY", raising=False)   # the optional source is off unless a test turns it on
+    # Glasser and a model endpoint are off unless a test turns them on, and so is an AIsa key on the machine
+    for name in ("GLASSER_API_KEY", "RADAR_LLM_BASE_URL", "RADAR_LLM_API_KEY", "RADAR_LLM_MODEL"):
+        monkeypatch.delenv(name, raising=False)
+    monkeypatch.setattr(backend, "_aisa_key", lambda: "")
 
     def no_network(*a, **k):
         raise goanyapi.GoAnyError("no network in tests")
@@ -17,6 +21,10 @@ def english(monkeypatch):
     def no_paid_calls(*a, **k):       # a key on the machine must never turn a test into a paid call
         raise aisa.AisaError("no network in tests")
     monkeypatch.setattr(aisa, "_post", no_paid_calls)
+
+    def no_paid_runs(*a, **k):        # Glasser's Runs and a model endpoint go through this opener
+        raise OSError("no network in tests")
+    monkeypatch.setattr(glasser._OPENER, "open", no_paid_runs)
     monkeypatch.setattr(page_age, "ask", lambda domain: ("", "none"))      # RDAP: a test that needs it stubs it
 
     def no_rdap(url):                 # the .com lookup is free, but a test never reaches the registry

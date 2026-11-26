@@ -25,7 +25,7 @@ import urllib.parse
 import urllib.request
 from datetime import date, timedelta
 
-from . import UA, aisa, goanyapi, usecases
+from . import UA, aisa, backend, goanyapi, usecases
 
 TIMEOUT = 20
 WHOIS = "domain_analytics/whois/overview/live"
@@ -57,7 +57,7 @@ def registered(name: str, today: date, days: int) -> tuple[int, list[str], int]:
     if len(token) < 5:
         return 0, [], 0
     since = (today - timedelta(days=days)).isoformat() + " 00:00:00 +00:00"
-    result, cost = aisa.rest(WHOIS, {"limit": 3, "order_by": ["created_datetime,desc"],
+    result, cost = backend.rest(WHOIS, {"limit": 3, "order_by": ["created_datetime,desc"],
                                      "filters": [["domain", "like", f"%{token}%"], "and", ["created_datetime", ">", since]]})
     return int(result.get("total_count") or 0), [i["domain"] for i in result.get("items") or []], cost
 

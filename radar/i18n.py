@@ -163,8 +163,11 @@ T = {
     "st_sitemaps": ("- ③ sitemaps: {state}", "- ③ 竞品:{state}"),
     "st_record": ("- saving leads: {state}", "- 记录候选词:{state}"),
     "st_judge": ("- name judge: {state}", "- 名字判断:{state}"),
-    "cost": ("- Paid API data spend this run (AIsa + GoAnyAPI): {cost} (model chat calls are billed apart)",
-             "- 本次数据接口花费(AIsa + GoAnyAPI):{cost}(模型对话调用另计)"),
+    "judge_no_llm": ("skipped, no model to ask (set RADAR_LLM_BASE_URL for any OpenAI-compatible endpoint, or AISA_API_KEY): "
+                     "every term is listed, unscored",
+                     "跳过:没有可用的模型(设置 RADAR_LLM_BASE_URL,任意 OpenAI 兼容接口;或 AISA_API_KEY),所有词照列、不打分"),
+    "cost": ("- Paid API data spend this run ({via} + GoAnyAPI): {cost} (model chat calls are billed apart)",
+             "- 本次数据接口花费({via} + GoAnyAPI):{cost}(模型对话调用另计)"),
     # the generic terms behind the names
     "kind_usecase": ("generic term", "通用词"),
     "note_usecase": ("generic term behind {names}: {volume}/mo", "{names} 背后的通用词,月搜 {volume}"),
@@ -265,6 +268,7 @@ T = {
     "uc_degraded": ("**⚠ This table is incomplete today: a data source failed, so it holds less than usual (see the lines under it). No rise shown here does not mean nothing rose.**",
                     "**⚠ 今天这张表不完整:有数据源失败,内容比平时少(原因见表下)。表里没出现上涨,不代表真的没涨。**"),
     "uc_posts_err": ("The post search failed; this run used READMEs and related queries only: {why}", "推文搜索失败,这次只用了 README 和相关查询:{why}"),
+    "uc_no_model": ("No model proposed generic terms, so the table holds the names only: {why}", "没有模型来提出通用词,这张表只有名字本身:{why}"),
     "uc_related_err": ("Related queries failed for: {names}.", "相关查询失败:{names}。"),
     "uc_geo_note": ("({geo}) = the curve was read from 30 days of daily data for that country (GoAnyAPI), settled to yesterday; a rise there is 1.5x the earlier level for three days. The other rows use the worldwide series.",
                     "({geo}) = 走势读自这个国家的 30 天日数据(GoAnyAPI),结算到昨天;在这份数据里,比之前高 50% 且持续三天算上涨。其余行用的是全球数据。"),

@@ -46,7 +46,7 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import date
 from pathlib import Path
 
-from . import UA, aisa, goanyapi, snap
+from . import UA, aisa, backend, goanyapi, snap
 from .i18n import t
 
 TOOL = "post_dataforseo_backlinks_backlinks_live"
@@ -150,7 +150,7 @@ def result(data: dict, call_id: str) -> dict:
 def links(platform: str, limit: int, rank_max: int = 350, table: dict = PLATFORMS, own: bool = True) -> tuple[list[dict], int]:
     """The newest site per linking domain that carries a payment link of this platform (or a builder's badge)."""
     target, is_payment = table[platform]
-    data, cost = aisa.call([{"call_id": "b", "tool": TOOL, "arguments": {"body": [{
+    data, cost = backend.call([{"call_id": "b", "tool": TOOL, "arguments": {"body": [{
         "target": target, "mode": "one_per_domain", "limit": limit, "order_by": ["first_seen,desc"], "backlinks_status_type": "live"}]}}])
     out = []
     for i in result(data, "b").get("items") or []:
@@ -167,7 +167,7 @@ def links(platform: str, limit: int, rank_max: int = 350, table: dict = PLATFORM
 
 def started(platform: str, limit: int, table: dict = PLATFORMS) -> tuple[dict[str, str], int]:
     """{site: day} for the sites whose first link to this platform is among the newest `limit`."""
-    data, cost = aisa.call([{"call_id": "d", "tool": DOMAINS, "arguments": {"body": [{
+    data, cost = backend.call([{"call_id": "d", "tool": DOMAINS, "arguments": {"body": [{
         "target": table[platform][0], "limit": limit, "order_by": ["first_seen,desc"], "backlinks_status_type": "live"}]}}])
     return {i["domain"].lower().removeprefix("www."): str(i.get("first_seen") or "")[:10]
             for i in result(data, "d").get("items") or [] if i.get("domain")}, cost
@@ -220,7 +220,7 @@ def kinds(model: str, rows: list[dict]) -> tuple[dict[str, str], str]:
         user = json.dumps([{"i": i, "domain": r["host"], "title": r.get("title", ""), "description": r.get("description", "")[:160]}
                            for i, r in enumerate(rows)], ensure_ascii=False)
         try:
-            answer = aisa.chat(model, KIND_SYSTEM, user)
+            answer = backend.chat(model, KIND_SYSTEM, user)
             m = re.search(r"\[.*\]", answer, re.S)
             for it in json.loads(m.group(0)) if m else []:
                 i = it.get("i") if isinstance(it, dict) else None
@@ -320,7 +320,7 @@ def sellers(cfg: dict, state: Path, today: date | None = None) -> dict:
     new = sorted(pool, key=order)[:c["max_leads"] * 2]
     want_visits = bool(c.get("visits", True) and goanyapi.key())
     sizes, spent = visits([r["host"] for r in new]) if c.get("visits", True) else ({}, 0)
-    cost += spent + aisa.take_chat_cost()
+    cost += spent + backend.take_chat_cost()
     for r in new:
         info = sizes.get(r["host"]) or {}
         r.update(visits=info.get("visits"), registered=info.get("registered", ""), top_source=info.get("top_source", ""),
@@ -370,4 +370,4 @@ def builders(cfg: dict, state: Path, today: date | None = None) -> dict:
               "examples": [f"{r['host']} · {LABEL[r['platform']]}"], "note": t("note_builder", via=LABEL[r["platform"]], day=r["first_seen"])}
              for r in rows if r["kind"] == "ai"]
     return {"links": got["read"], "old": got["old"], "new": len(found), "first_run": first, "sites": rows, "terms": terms,
-            "by_kind": by_kind, "kind_error": kind_error, "errors": got["errors"], "cost_micros": got["cost"] + aisa.take_chat_cost()}
+            "by_kind": by_kind, "kind_error": kind_error, "errors": got["errors"], "cost_micros": got["cost"] + backend.take_chat_cost()}

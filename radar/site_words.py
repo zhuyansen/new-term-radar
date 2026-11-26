@@ -9,7 +9,7 @@ started ranking for a word; a word new since Labs' previous check of its results
 """
 from __future__ import annotations
 
-from . import aisa
+from . import aisa, backend
 
 PATH = "dataforseo_labs/google/ranked_keywords/live"
 TOP = 20                # positions that count: the first two pages
@@ -35,7 +35,7 @@ def word_row(item: dict) -> dict:
 
 def words(domain: str) -> tuple[list[dict], int, int]:
     """(its WORDS words in the top TOP, the most traffic first; how many it has there in all; cost in micro-USD)."""
-    result, cost = aisa.rest(PATH, {"target": domain, "limit": WORDS, "order_by": ["ranked_serp_element.serp_item.etv,desc"],
+    result, cost = backend.rest(PATH, {"target": domain, "limit": WORDS, "order_by": ["ranked_serp_element.serp_item.etv,desc"],
                                     "filters": [["ranked_serp_element.serp_item.rank_absolute", "<=", TOP]]})
     return [word_row(i) for i in result.get("items") or []], int(result.get("total_count") or 0), cost
 

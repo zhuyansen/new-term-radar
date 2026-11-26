@@ -23,7 +23,7 @@ from __future__ import annotations
 
 from datetime import date
 
-from . import aisa, review
+from . import aisa, backend, review
 
 
 def series(task: dict) -> list[tuple[date, int, date]]:
@@ -62,7 +62,7 @@ def assess(rows: list[dict], cfg: dict, today: date) -> tuple[int, list[str]]:
     calls = [{"call_id": f"a{i}", "tool": review.TOOL, "arguments": {"body": [{"keywords": [r["phrase"]], "time_range": c["time_range"]}]}}
              for i, r in enumerate(rows)]
     try:
-        data, cost = aisa.call_all(calls)
+        data, cost = backend.call_all(calls)
     except aisa.AisaError as exc:
         return 0, [f"word age: {exc}"]
     errors = []

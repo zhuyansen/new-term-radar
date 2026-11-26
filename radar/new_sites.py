@@ -22,7 +22,7 @@ import re
 from datetime import date, timedelta
 from pathlib import Path
 
-from . import aisa, site_words, snap
+from . import aisa, backend, site_words, snap
 from .i18n import t
 from .terms import STOP
 
@@ -65,7 +65,7 @@ def new_sites(cfg: dict, state: Path, today: date | None = None) -> dict:
     cost, answered, errors = 0, 0, []
     for name, pattern in c["queries"].items():
         try:
-            result, spent = aisa.rest(PATH, _task(c, today, pattern))
+            result, spent = backend.rest(PATH, _task(c, today, pattern))
         except aisa.AisaError as exc:
             errors.append(f"{name}: {exc}")
             continue

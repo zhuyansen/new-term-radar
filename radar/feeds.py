@@ -36,7 +36,7 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime, timezone
 from pathlib import Path
 
-from . import UA, aisa, goanyapi, snap
+from . import UA, aisa, backend, goanyapi, snap
 from .i18n import t
 
 TIMEOUT = 20
@@ -154,7 +154,7 @@ def google_new(c: dict) -> tuple[list[dict], int]:
     """Pages Google indexed in the last seven days under each path."""
     out, cost = [], 0
     for path in c["google_new"]:
-        data, spent = aisa.call([{"call_id": "g", "tool": SERP, "arguments": {"body": [{
+        data, spent = backend.call([{"call_id": "g", "tool": SERP, "arguments": {"body": [{
             "keyword": f"site:{path}", "location_code": 2840, "language_code": "en", "depth": 100, "search_param": "tbs=qdr:w"}]}}])
         cost += spent
         res = ((((data.get("g") or {}).get("tasks") or [{}])[0].get("result") or [{}])[0]) or {}
@@ -179,7 +179,7 @@ TRENDING = {
 
 def trending(c: dict) -> tuple[list[dict], int]:
     calls = [{"call_id": k, "tool": TRENDING[k][0], "arguments": TRENDING[k][1]} for k in c["trending"]]
-    data, cost = aisa.call(calls)
+    data, cost = backend.call(calls)
     out = []
     for k in c["trending"]:
         words = TRENDING[k][2](((data.get(k) or {}).get("data")) or {})

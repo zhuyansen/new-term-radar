@@ -4,16 +4,18 @@ The signals surface whatever is new in the text they read: "Opus 5.5" and "Hyper
 but also "Lots", "Trained" and "voice notes". A small model reads each term with a few
 places it appeared and scores it from 0 to 1; the report leads with the names.
 
-One chat call per CHUNK terms through AIsa's OpenAI-compatible endpoint, the model set in
-config.json (judge.model). Without a key, or when the call fails, the terms keep no
-score and the report lists them all: the judge sorts the report, it never blocks it.
+One chat call per CHUNK terms, the model set in config.json (judge.model), through the
+model backend.chat() asks: an OpenAI-compatible endpoint of your own (RADAR_LLM_BASE_URL),
+else AIsa's. Without either the judge is skipped and the report says so; when a call fails
+the terms keep no score. Either way the report lists them all: the judge sorts the report,
+it never blocks it.
 """
 from __future__ import annotations
 
 import json
 import re
 
-from . import aisa
+from . import aisa, backend
 
 CHUNK = 25
 SYSTEM = (
@@ -48,7 +50,8 @@ def parse(answer: str, n: int) -> dict[int, float]:
 
 
 def score(rows: list[dict], model: str) -> dict:
-    """Sets r["named"] on each row the model scored. Returns {"judged": n} or {"error": ...}."""
+    """Sets r["named"] on each row the model scored. Returns {"judged": n}, {"error": ...}, or
+    {"skipped": True, "no_llm": why} when there is no model to ask."""
     if not model:
         return {"judged": 0, "skipped": True}
     judged = 0
@@ -57,12 +60,14 @@ def score(rows: list[dict], model: str) -> dict:
         user = json.dumps([{"i": i, "term": r["term"], "examples": [e[:160] for e in r.get("examples", [])[:3]]}
                            for i, r in enumerate(chunk)], ensure_ascii=False)
         try:
-            scores = parse(aisa.chat(model, SYSTEM, user), len(chunk))
+            scores = parse(backend.chat(model, SYSTEM, user), len(chunk))
+        except backend.NoLLM as exc:
+            return {"judged": 0, "skipped": True, "no_llm": str(exc)}
         except aisa.AisaError as exc:
-            spent = aisa.take_chat_cost()
+            spent = backend.take_chat_cost()
             return {"judged": judged, "error": str(exc)[:160], **({"cost_micros": spent} if spent else {})}
         for i, s in scores.items():
             chunk[i]["named"] = s
         judged += len(scores)
-    spent = aisa.take_chat_cost()
+    spent = backend.take_chat_cost()
     return {"judged": judged, **({"cost_micros": spent} if spent else {})}

@@ -65,7 +65,7 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import date, timedelta
 from pathlib import Path
 
-from . import UA, aisa, competition, curve, dotcom, goanyapi, markets, review, serpshape, snap, wordage, yours
+from . import UA, aisa, backend, competition, curve, dotcom, goanyapi, markets, review, serpshape, snap, wordage, yours
 
 POSTS_KEPT = 12
 POST_CHARS = 400
@@ -138,7 +138,7 @@ def evidence(names: list[str], repos: dict[str, str], today: date,
     for n in names:
         error, tweets = "", []
         try:
-            data, spent = aisa.call([{"call_id": "s", "tool": SEARCH_TOOL, "arguments": {
+            data, spent = backend.call([{"call_id": "s", "tool": SEARCH_TOOL, "arguments": {
                 "query": f'"{n}" min_faves:{MIN_FAVES} -filter:replies since:{since}', "queryType": "Top"}}])
             cost += spent
             d = data.get("s") or {}
@@ -176,7 +176,7 @@ def propose(model: str, name: str, ev: dict) -> list[dict]:
         return []
     posts = "\n".join(f"- ({p['likes']} likes) @{p['by']}: {p['text'][:POST_CHARS]}" for p in ev["posts"])
     user = f"NAME: {name}\n\nPOSTS:\n{posts or '(none found)'}\n" + (f"\nREADME of {ev['repo']}:\n{ev['readme']}\n" if ev["readme"] else "")
-    return parse(aisa.chat(model, SYSTEM, user, max_tokens=900), name)
+    return parse(backend.chat(model, SYSTEM, user, max_tokens=900), name)
 
 
 SCREEN = (
@@ -236,7 +236,7 @@ def screen(model: str, name: str, ev: dict, cands: list[dict]) -> list[dict]:
     user = f"NAME: {name}\n\nEVIDENCE:\n{posts or ev['readme'][:1200]}\n\nCANDIDATES:\n" + json.dumps(
         [{"i": i, "keyword": c["phrase"]} for i, c in enumerate(cands)], ensure_ascii=False)
     try:
-        answer = aisa.chat(model, SCREEN, user, max_tokens=600)
+        answer = backend.chat(model, SCREEN, user, max_tokens=600)
     except aisa.AisaError:
         return cands
     m = re.search(r"\[.*\]", answer, re.S)
@@ -283,7 +283,7 @@ def volumes(phrases: list[str], location_code: int) -> tuple[dict[str, dict], in
     """{phrase: {"volume", "month"}} from Google Ads, one batch call."""
     if not phrases:
         return {}, 0
-    data, cost = aisa.call([{"call_id": "vol", "tool": VOLUME_TOOL, "arguments": {"body": [{
+    data, cost = backend.call([{"call_id": "vol", "tool": VOLUME_TOOL, "arguments": {"body": [{
         "keywords": phrases, "location_code": location_code, "language_code": "en"}]}}])
     out = {}
     for r in ((data.get("vol") or {}).get("tasks") or [{}])[0].get("result") or []:
@@ -454,7 +454,7 @@ def fetch_series(keywords: list[str], benchmark: str, today: date) -> tuple[dict
     for i, k in enumerate(keywords):
         calls.append({"call_id": f"s{i}", "tool": review.TOOL, "arguments": {"body": [{"keywords": [k], **window}]}})
         calls.append({"call_id": f"p{i}", "tool": review.TOOL, "arguments": {"body": [{"keywords": [k, benchmark], **window}]}})
-    data, cost = aisa.call_all(calls)
+    data, cost = backend.call_all(calls)
     task = lambda cid: ((data.get(cid) or {}).get("tasks") or [{}])[0]  # noqa: E731
     return {k: {"solo": review._series(task(f"s{i}")), "pair": _pairs(task(f"p{i}"))} for i, k in enumerate(keywords)}, cost
 
@@ -501,8 +501,12 @@ def run(cfg: dict, state: Path, names: list[str], repos: dict[str, str], today: 
     cosearch: list[dict] = []
     related_errors: list[str] = []
     use_related = bool(goanyapi.key()) and c.get("related", True)
+    no_model = ""
     for name in todo:
-        cands = [dict(u, source="model") for u in propose(c["model"], name, ev[name])]
+        try:
+            cands = [dict(u, source="model") for u in propose(c["model"], name, ev[name])]
+        except backend.NoLLM as exc:            # no model to ask: the names are still read, without generic terms of their own
+            cands, no_model = [], str(exc)
         if use_related:
             try:
                 related, cost_r = goanyapi.related_queries(name, c["related_geo"])
@@ -551,9 +555,9 @@ def run(cfg: dict, state: Path, names: list[str], repos: dict[str, str], today: 
             "no_evidence": [n for n in todo if not ev[n]["posts"] and not ev[n]["readme"]],
             "posts_error": "; ".join(f"{n}: {e['error']}" for n, e in ev.items() if e.get("error")),
             "related": use_related, "tails": {n: v for n, v in tails.items() if v}, "cosearch": cosearch,
-            "related_errors": related_errors, "geo": c["related_geo"], "country_errors": local_errors,
+            "related_errors": related_errors, "geo": c["related_geo"], "country_errors": local_errors, "no_model": no_model,
             "competition_errors": comp_errors, "extra_errors": age_errors + market_errors + serp_errors + own_errors + com_errors,
-            "cost_micros": cost + c0 + c2 + c3 + c4 + c5 + c6 + c7 + c8 + aisa.take_chat_cost()}
+            "cost_micros": cost + c0 + c2 + c3 + c4 + c5 + c6 + c7 + c8 + backend.take_chat_cost()}
 
 
 READ_KINDS = {"x", "hf", "breakout", "newsite", "revenue", "seller"}
@@ -576,4 +580,5 @@ def names_to_read(leads_today: list[dict], recent_sources: list[dict]) -> list[s
 
 def degraded(uc: dict) -> bool:
     """A source failed during this run, so the table holds less than it would have."""
-    return bool(uc.get("posts_error") or uc.get("related_errors") or uc.get("country_errors") or uc.get("competition_errors"))
+    return bool(uc.get("posts_error") or uc.get("related_errors") or uc.get("country_errors") or uc.get("competition_errors")
+                or uc.get("no_model"))

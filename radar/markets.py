@@ -24,7 +24,7 @@ among the rows, which is nearly always) and four difficulty calls, $0.41 for two
 """
 from __future__ import annotations
 
-from . import aisa, competition
+from . import aisa, backend, competition
 
 VOLUME_TOOL = "post_dataforseo_keywords_gads_search_volume_live"
 REGION_TOOL = "post_dataforseo_keywords_trends_subregion_interests_live"
@@ -53,7 +53,7 @@ def best_market(by: dict[str, dict]) -> str | None:
 
 def volumes(phrases: list[str], loc: int) -> tuple[dict[str, int], int]:
     """{phrase: monthly searches} in one market, every language."""
-    data, cost = aisa.call([{"call_id": "vol", "tool": VOLUME_TOOL, "arguments": {"body": [{"keywords": phrases, "location_code": loc}]}}])
+    data, cost = backend.call([{"call_id": "vol", "tool": VOLUME_TOOL, "arguments": {"body": [{"keywords": phrases, "location_code": loc}]}}])
     found = ((data.get("vol") or {}).get("tasks") or [{}])[0].get("result") or []
     return {r["keyword"]: int(r.get("search_volume") or 0) for r in found if r.get("keyword")}, cost
 
@@ -109,7 +109,7 @@ def _regions(rows: list[dict], pool: set[str]) -> tuple[dict[str, dict | None], 
     calls = [{"call_id": f"g{i}", "tool": REGION_TOOL, "arguments": {"body": [{"keywords": [r["phrase"]], "time_range": "past_12_months"}]}}
              for i, r in enumerate(rows)]
     try:
-        data, cost = aisa.call_all(calls)
+        data, cost = backend.call_all(calls)
     except aisa.AisaError as exc:
         return {}, 0, [f"top region: {exc}"]
     return {r["phrase"]: top_region(((data.get(f"g{i}") or {}).get("tasks") or [{}])[0], pool) for i, r in enumerate(rows)

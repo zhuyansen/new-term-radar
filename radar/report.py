@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import re
 
-from . import asks, competition, opportunity, sellers, config, judge, usecases, yours
+from . import asks, backend, competition, opportunity, sellers, config, judge, usecases, yours
 from .i18n import t
 
 SHOWN = 20
@@ -345,7 +345,7 @@ def pains(result: dict) -> str:
         lines.append(t("pains_none"))
     if result["errors"]:
         lines += ["", t("pains_err", why="; ".join(result["errors"][:4]))]
-    lines += ["", t("pains_note"), t("cost", cost=_cost(result))]
+    lines += ["", t("pains_note"), t("cost", via=backend.name(), cost=_cost(result))]
     return "\n".join(lines) + "\n"
 
 
@@ -412,14 +412,23 @@ def _status_lines(b: dict[str, dict], extra: dict[str, dict]) -> list[str]:
         lines.append(t("st_site", site=site, state=state))
     if sm.get("error"):
         lines.append(t("st_sitemaps", state=sm["error"]))
-    for key, label in (("judge", "st_judge"), ("record", "st_record")):
-        if extra.get(key, {}).get("error"):
-            lines.append(t(label, state=extra[key]["error"]))
+    lines += _extra_status(extra)
     timed = [(k, v["seconds"]) for k, v in [*b.items(), *extra.items()] if isinstance(v, dict) and v.get("seconds") is not None]
     slow = sorted(((k, sec) for k, sec in timed if sec >= 60), key=lambda kv: -kv[1])
     if timed:
         total = sum(sec for _, sec in timed)
         lines.append(t("st_time", total=_minutes(total), parts="、".join(f"{k} {_minutes(sec)}" for k, sec in slow) or t("dash")))
+    return lines
+
+
+def _extra_status(extra: dict[str, dict]) -> list[str]:
+    """The judge's and the database's lines: an error, or the judge skipped for want of a model."""
+    lines = []
+    for key, label in (("judge", "st_judge"), ("record", "st_record")):
+        if extra.get(key, {}).get("error"):
+            lines.append(t(label, state=extra[key]["error"]))
+        elif extra.get(key, {}).get("no_llm"):
+            lines.append(t(label, state=t("judge_no_llm")))
     return lines
 
 
@@ -460,9 +469,10 @@ def daily(cfg: dict, lead: list[dict], b: dict[str, dict], gsc: dict, rev: dict,
     lines += _gsc_lines(gsc)
     lines += _review_lines(cfg, rev, summ)
     lines += _status_lines(b, extra)
-    lines.append(t("cost", cost=_cost(b["x"], rev, b.get("newsite", {}), b.get("ask", {}), b.get("seller", {}), extra.get("usecases", {}),
-                                      extra.get("tutorials", {}), b.get("builder", {}), b.get("feed", {}), b.get("money", {}),
-                                      extra.get("sidelights", {}), extra.get("tails", {}))))
+    lines.append(t("cost", via=backend.name(), cost=_cost(b["x"], rev, b.get("newsite", {}), b.get("ask", {}), b.get("seller", {}),
+                                                         extra.get("usecases", {}), extra.get("tutorials", {}), b.get("builder", {}),
+                                                         b.get("feed", {}), b.get("money", {}), extra.get("sidelights", {}),
+                                                         extra.get("tails", {}))))
     return "\n".join(lines) + "\n"
 
 
@@ -707,6 +717,8 @@ def keyword_table(cfg: dict, uc: dict) -> list[str]:
         lines += ["", t("uc_no_evidence", names=", ".join(uc["no_evidence"]))]
     if uc.get("posts_error"):
         lines += ["", t("uc_posts_err", why=uc["posts_error"])]
+    if uc.get("no_model"):
+        lines += ["", t("uc_no_model", why=uc["no_model"])]
     if uc.get("related_errors"):
         lines += ["", t("uc_related_err", names="; ".join(uc["related_errors"]))]
     elif not uc.get("related"):
@@ -754,8 +766,6 @@ def sources(cfg: dict, lead: list[dict], b: dict[str, dict], extra: dict[str, di
     for key, label in (("x", "st_x"), ("hf", "st_hf")):
         if b[key].get("error"):
             lines.append(t(label, state=b[key]["error"]))
-    for key, label in (("judge", "st_judge"), ("record", "st_record")):
-        if extra.get(key, {}).get("error"):
-            lines.append(t(label, state=extra[key]["error"]))
-    lines.append(t("cost", cost=_cost(b["x"])))
+    lines += _extra_status(extra)
+    lines.append(t("cost", via=backend.name(), cost=_cost(b["x"])))
     return "\n".join(lines) + "\n"
