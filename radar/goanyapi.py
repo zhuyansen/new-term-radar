@@ -1,4 +1,4 @@
-"""Optional second data source: GoAnyAPI (goanyapi.com), for what AIsa's tools do not give.
+"""Optional second data source: GoAnyAPI (goanyapi.com), for what Glasser's and AIsa's tools do not give.
 
 Used for two things: Google Trends' *related queries* for a name, the terms real people
 searched together with it, and a 30-day daily Trends series for one country, which

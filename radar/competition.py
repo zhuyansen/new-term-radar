@@ -4,7 +4,7 @@ Rising is not enough: a term whose first page is held by strong sites is a fight
 loses. For the table's rows that would be acted on (prioritize, then watch), up to `max_rows`
 a run, this reads:
 
-- Google's first page (DataForSEO through AIsa, about $0.002 a keyword): what kinds of pages
+- Google's first page (DataForSEO through Glasser or AIsa, about $0.002 a keyword): what kinds of pages
   hold it, and whether ads show (someone pays for that click: there is money in the term);
 - the rating of each site there (GoAnyAPI, $0.002 a site, kept 30 days): `weak` counts the
   results on sites rated under 30, the slots a new site can take, and the weakest one is named;

@@ -1,5 +1,35 @@
 # Changelog
 
+## 0.8.0 (2026-11-26)
+
+- **Glasser first for the paid data.** With `GLASSER_API_KEY` set, every call Glasser sells goes there
+  (`radar/glasser.py`, routed by `radar/backend.py`): all twelve DataForSEO calls (Google's results, Ads volumes,
+  DataForSEO Trends and its regions, keyword difficulty, ranked keywords, backlinks and referring domains, whois,
+  the ChatGPT scraper and AI Mode), TikHub's YouTube comments and its Douyin, TikTok and Reddit trending lists, and
+  ScrapeCreators' Reddit search. Glasser hands back the provider's own answer, so every caller reads the same data as
+  from AIsa, at the same prices. One Run a call, with its own idempotency key: a Run still queued or running is
+  polled, a rate limit, a 5xx or a broken connection is sent once more with the same key (never billed twice), and a
+  redirect is refused so the key stays on api.glasser.ai.
+- **AIsa stays for what Glasser does not sell**: X (AIsa's X tools are twitterapi.io, which Glasser does not resell)
+  and Google searches with operators (⑨'s `site:` searches for Google's new pages). With an AIsa key and no Glasser
+  key, everything goes through AIsa as before. With neither, a paid call stops before anything is bought and names
+  both keys. X through AnyAPI on Glasser is written and tested against its published response schema, but stays off
+  until a paid Run confirms the answer.
+- **A model of your own**: `RADAR_LLM_BASE_URL` (any OpenAI-compatible endpoint), with `RADAR_LLM_API_KEY` and
+  `RADAR_LLM_MODEL`, takes the place of AIsa's chat for the name judge and the other small sorting jobs; its tokens
+  count in the cost like AIsa's. With no model at all, the judge is skipped and the report says so, and the keyword
+  table holds the names alone instead of failing.
+- **Google's page one reads the site from the breadcrumb.** Since 2026-11-06 DataForSEO gives each organic result's
+  url as a google.com/goto redirect and its domain as google.com, so the page-one check rated google.com ten times
+  and never found your own site. The site now comes from the breadcrumb (or a video's site name), and a home page is a
+  breadcrumb with no path. The fields DataForSEO moved into each result's `checks` array (`is_video`, `amp_version`
+  and the others) were never read.
+- **Fixes**: the review no longer stops with a NameError when a lead's Trends call failed past its retry window; a
+  request whose every Glasser call failed raises with the first reason (AIsa's router answered with nothing).
+- **Docs**: Glasser is the first key in the READMEs, the Claude Code plugin, the MCP registry entry, the skills and
+  the Actions workflow (which now passes `GLASSER_API_KEY` and the `RADAR_LLM_*` settings); AIsa's referral links
+  are gone.
+
 ## 0.7.1 (2026-11-21)
 
 - **README: how early, as far as it was checked.** "Not two weeks later" and "days or weeks later" rested on one case:

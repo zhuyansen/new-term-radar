@@ -8,18 +8,18 @@ Signals:
   ① hf        models new to Hugging Face's trending top 50
   ② breakout  one new GitHub repo taking off on its own
   ③ sitemaps  pages other sites added since the last run
-  ③ newsites  domains registered in the last 90 days that already rank (weekly; AIsa)
+  ③ newsites  domains registered in the last 90 days that already rank (weekly; Glasser or AIsa)
   ⑥ revenue   products people pay for, growing fastest or newly listed (weekly; TrustMRR key)
-  ⑦ asks      what people ask for on Reddit ("is there an AI tool that…"), sized (weekly; AIsa)
-  ⑧ sellers   sites that just put up a payment link: Stripe, Polar, Lemon Squeezy, Gumroad, Creem, Paddle (weekly; AIsa)
-  ⑧ builders  sites just built with Lovable or v0, newsletters just started on beehiiv (weekly; AIsa)
+  ⑦ asks      what people ask for on Reddit ("is there an AI tool that…"), sized (weekly; Glasser or AIsa)
+  ⑧ sellers   sites that just put up a payment link: Stripe, Polar, Lemon Squeezy, Gumroad, Creem, Paddle (weekly; Glasser or AIsa)
+  ⑧ builders  sites just built with Lovable or v0, newsletters just started on beehiiv (weekly; Glasser or AIsa)
   ⑨ feeds     just listed: Product Hunt, Show HN, OpenRouter, Civitai, App Store grossing, awesome lists,
               Google's new pages under Figma / There's An AI For That / Chrome Web Store, trending searches,
               rising searches next to root words (daily; the paid ones weekly)
   ⑩ money     the other sites of a paying product's AdSense account; new advertisers on your terms (weekly; GoAnyAPI)
   ④ gsc       queries your own site got impressions for, for the first time (optional)
-  ⑤ review    leads from 14 days ago checked in DataForSEO Trends; hit rate per signal (AIsa)
-  usecases    the generic terms behind today's names, sized against a benchmark keyword (AIsa)
+  ⑤ review    leads from 14 days ago checked in DataForSEO Trends; hit rate per signal (Glasser or AIsa)
+  usecases    the generic terms behind today's names, sized against a benchmark keyword (Glasser or AIsa; the posts: AIsa)
 
   python -m radar keywords "name one" "name two" [--repo "name one=owner/repo"] [--json]
   python -m radar leads    [--days 7] [--json]

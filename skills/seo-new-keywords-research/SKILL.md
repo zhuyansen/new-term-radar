@@ -11,9 +11,9 @@ A name ("SynthID Detector") has a short life as a keyword and belongs to someone
 
 ## Before you run anything
 
-1. Run the pinned release, never a clone of the repository: `uvx new-term-radar==0.7.1 <command> …` (uv fetches that version from PyPI into a throwaway environment; it needs Python 3.10 or newer and nothing else). Without uv: `python3 -m pip install new-term-radar==0.7.1`, then `new-term-radar <command> …`.
+1. Run the pinned release, never a clone of the repository: `uvx new-term-radar==0.8.0 <command> …` (uv fetches that version from PyPI into a throwaway environment; it needs Python 3.10 or newer and nothing else). Without uv: `python3 -m pip install new-term-radar==0.8.0`, then `new-term-radar <command> …`.
 2. Run every command from one working directory: `$NEW_TERM_RADAR_DIR` if set, else `~/new-term-radar` (create it if it is missing).
-3. An AIsa key must be available, as `AISA_API_KEY` or from the AIsa CLI (`aisa login` stores it in `~/.aisa`): every lookup here is paid through it. Without it, stop and say so. A key comes from https://go.aisa.one/yansen-zhu.
+3. Check the keys. `GLASSER_API_KEY` is the first choice for every lookup here but the posts: search volumes, DataForSEO Trends, Google's results, keyword difficulty (a key: https://link.glasser.ai/JasonZhuX, a referral link). The posts read about each name and the model need an AIsa key, as `AISA_API_KEY` or from the AIsa CLI (`aisa login` stores it in `~/.aisa`); the model can instead be any OpenAI-compatible endpoint set in `RADAR_LLM_BASE_URL` (with `RADAR_LLM_API_KEY` and `RADAR_LLM_MODEL`). With an AIsa key alone, everything goes through AIsa. With neither key, stop and say so. With Glasser alone, say that the table is built without posts (from READMEs only) and, without a model endpoint, holds the names alone.
 4. `GOANYAPI_API_KEY` is optional (a key comes from https://goanyapi.com/r/ga-95708898fb). With it the table also holds what people really searched together with each name, and reads the bigger rows from one country's settled series. Without it, tell the user that a "flat" reading is weaker evidence (see below).
 5. With no `config.json` in that directory the radar runs on the example list of X accounts and sitemaps it ships with, and says so. Tell the user, and that a `config.json` written there replaces it (the example to start from: https://github.com/zhuyansen/new-term-radar/blob/v0.6.0/config.example.json).
 
@@ -31,7 +31,7 @@ If the user gave names, use them. If they gave text (a listening report, posts, 
 About 0.05 USD a name plus 0.09 USD a call for the core table (and about 0.41 USD a call when `markets` is enabled), and 40 to 90 seconds a name. State the estimate and run only after the user says yes: a request for keywords is not a yes to the cost. Ask again if the list of names changes. Then:
 
 ```bash
-uvx new-term-radar==0.7.1 keywords "photocraft" "synthid detector" --repo "photocraft=storytold/photocraft" --json
+uvx new-term-radar==0.8.0 keywords "photocraft" "synthid detector" --repo "photocraft=storytold/photocraft" --json
 ```
 
 Drop `--json` for the Markdown table alone. Run one call with all the names, not one call per name: the 0.09 USD is per call.

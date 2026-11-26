@@ -1,8 +1,8 @@
-"""Where people ask for things in their own words: Reddit posts and YouTube comments, through AIsa.
+"""Where people ask for things in their own words: Reddit posts and YouTube comments, through Glasser or AIsa.
 
-reddit(): AIsa's Reddit search, $0.0019 a query (2026-10-14), with title, text, score, comments,
+reddit(): a Reddit search (ScrapeCreators': $0.00188 through Glasser, $0.0019 through AIsa on 2026-10-14), with title, text, score, comments,
 subreddit, link and creation time. youtube_comments(): the top-level comments of a video through
-AIsa (TikHub), $0.001 a page of 20. Both are read for research: quote them, do not republish them.
+TikHub through Glasser or AIsa, $0.001 a page of 20. Both are read for research: quote them, do not republish them.
 """
 from __future__ import annotations
 

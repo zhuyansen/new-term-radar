@@ -20,7 +20,7 @@ For the day's new names this step:
   3. screens them: a second call scores how well the name answers each phrase, and the
      loosely related ones are dropped (a keyword taken from a passing comparison);
   4. looks the rest up: Google Ads monthly searches (one batch call);
-  5. reads DataForSEO Trends (worldwide, through AIsa) for the names and for the phrases with enough volume, twice
+  5. reads DataForSEO Trends (worldwide, through Glasser or AIsa) for the names and for the phrases with enough volume, twice
      each: alone, for the shape of the curve (when it started rising, its peak, what it
      is doing now), and next to a benchmark keyword ("gpts" by default), for the size.
      A generic term's searches a day come from its own Google Ads volume, moved to today

@@ -7,12 +7,12 @@
     "url": "https://github.com/zhuyansen/new-term-radar",
     "source": "github"
   },
-  "version": "0.7.1",
+  "version": "0.8.0",
   "packages": [
     {
       "registryType": "pypi",
       "identifier": "new-term-radar",
-      "version": "0.7.1",
+      "version": "0.8.0",
       "runtimeHint": "uvx",
       "runtimeArguments": [
         {
@@ -34,10 +34,32 @@
       },
       "environmentVariables": [
         {
-          "name": "AISA_API_KEY",
-          "description": "AIsa key. X posts, search volumes, DataForSEO Trends and the models all go through it.",
-          "isRequired": true,
+          "name": "GLASSER_API_KEY",
+          "description": "Glasser key, the first choice for the paid data: search volumes, DataForSEO Trends, Google results, Reddit.",
+          "isRequired": false,
           "isSecret": true
+        },
+        {
+          "name": "AISA_API_KEY",
+          "description": "AIsa key: X posts and the model; all the paid data when there is no Glasser key. One of the two is needed.",
+          "isRequired": false,
+          "isSecret": true
+        },
+        {
+          "name": "RADAR_LLM_BASE_URL",
+          "description": "Optional. An OpenAI-compatible endpoint for the model, in place of AIsa's (RADAR_LLM_API_KEY, RADAR_LLM_MODEL).",
+          "isRequired": false
+        },
+        {
+          "name": "RADAR_LLM_API_KEY",
+          "description": "Optional. The key of the RADAR_LLM_BASE_URL endpoint.",
+          "isRequired": false,
+          "isSecret": true
+        },
+        {
+          "name": "RADAR_LLM_MODEL",
+          "description": "Optional. The model to ask at RADAR_LLM_BASE_URL, in place of the ones config.json names.",
+          "isRequired": false
         },
         {
           "name": "GOANYAPI_API_KEY",

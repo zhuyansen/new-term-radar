@@ -2,7 +2,7 @@
 
 A word that catches on gets sites built for it: ai-hailuo.com was registered in August
 2026 for the Hailuo video model and ranked for 258 keywords within weeks. DataForSEO's
-domain whois overview (through AIsa's REST passthrough) finds such domains: registered AND first seen by
+domain whois overview (through Glasser, or AIsa's REST passthrough) finds such domains: registered AND first seen by
 DataForSEO within `window_days`, with estimated organic traffic over `min_etv` and at
 least `min_keywords` ranking keywords. Both dates are needed: whois creation dates get
 rewritten (dagbladet.no, a 2020 site, showed a July 2026 "created"). The keyword floor
@@ -26,7 +26,7 @@ from . import aisa, backend, site_words, snap
 from .i18n import t
 from .terms import STOP
 
-PATH = "domain_analytics/whois/overview/live"      # through AIsa's REST passthrough: the router refuses these filters
+PATH = "domain_analytics/whois/overview/live"      # Glasser, or AIsa's REST passthrough: AIsa's router refuses these filters
 LIMIT = 30
 DOMAIN_STOP = {"com", "net", "org", "app", "io", "co", "online", "free", "tool", "tools", "the", "my", "get",
                "official", "site", "hub", "pro", "best", "video", "videos"}

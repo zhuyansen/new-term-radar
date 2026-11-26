@@ -395,3 +395,23 @@ def test_a_lead_whose_review_call_failed_stays_due_then_closes_as_no_data(monkey
     monkeypatch.setattr(review.backend, "call_all", lambda calls: ({}, 0))      # the call failed: left out, as AIsa leaves it out
     got = review.review(cfg, conn, today=date(2026, 11, 26))                       # 56 days on: past the retry window
     assert got["checked"] == [] and conn.execute("SELECT verdict FROM leads WHERE term = 'photocraft'").fetchone() == ("no_data",)
+
+
+# --- the docs -------------------------------------------------------------------------------------------------------
+
+def test_glasser_is_the_first_key_everywhere_and_aisas_referral_links_are_gone():
+    link = "https://link.glasser.ai/JasonZhuX"
+    en, zh = (ROOT / "README.md").read_text(), (ROOT / "README.zh-CN.md").read_text()
+    assert f"[Glasser]({link})" in en and "That link is a referral link" in en.split("## Keys: Glasser first")[1][:900]
+    assert f"[Glasser]({link})" in zh and "上面是推荐链接" in zh.split("## Key：首选 Glasser")[1][:600]
+    plugin = json.loads((ROOT / ".claude-plugin" / "plugin.json").read_text())
+    assert list(plugin["userConfig"])[0] == "glasser_api_key" and link in plugin["userConfig"]["glasser_api_key"]["description"]
+    assert list(plugin["mcpServers"]["new-term-radar"]["env"])[0] == "GLASSER_API_KEY"
+    server = json.loads((ROOT / "server.json").read_text())
+    assert server["packages"][0]["environmentVariables"][0]["name"] == "GLASSER_API_KEY"
+    for name in ("new-term-radar", "ai-listening", "seo-new-keywords-research"):
+        assert "GLASSER_API_KEY" in (ROOT / "skills" / name / "SKILL.md").read_text()
+    assert "secrets.GLASSER_API_KEY" in (ROOT / ".github" / "workflows" / "radar.yml").read_text()
+    shipped = [p for p in ROOT.rglob("*") if p.is_file() and p.suffix in (".md", ".json", ".py", ".yml", ".toml")
+               and ".git" not in p.parts and p.name != "CHANGELOG.md" and "tests" not in p.parts]
+    assert [p.name for p in shipped if re.search(r"go\.aisa\.one|aisa\.one/\S*(ref|aff|invite)", p.read_text())] == []

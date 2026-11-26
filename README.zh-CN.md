@@ -54,24 +54,24 @@
 
 | 信号 | 抓什么 | 需要 | 花费 |
 |---|---|---|---|
-| ① X | 你关注的账号里，60 天内第一次出现的名字 | AIsa key | 每个账号每次 $0.003 |
+| ① X | 你关注的账号里，60 天内第一次出现的名字 | AIsa key（Glasser 不卖 X） | 每个账号每次 $0.003 |
 | ① Hugging Face | 新进热门榜前 50 的模型和 Space（大家实际在试的 demo）；量化版、微调版和模型自己的 demo 归到同一个基础名下 | 无 | 免费 |
 | ② GitHub 爆发 | 创建不到 14 天、平均每天涨 200 星以上，或比昨天多 400 星的仓库；附带大家实际会搜的写法（「niko strata」） | 无（有 GitHub token 限额更高） | 免费 |
 | ③ 竞品 sitemap | 某个站新增的几个网址共用、而它的旧网址里很少出现的词。示例配置盯着 8 个 AI 工具导航站（toolify、aixploria、ai-bot.cn、opentools、dang.ai、clipfly、aitoptools、futurepedia）和 4 个 MCP、skill 目录 | 你列出的 sitemap | 免费 |
-| ③ 新站 | 近 90 天注册且首次被收录、已经有 20 个以上排名词的域名；每个新出现的站附上它最先排进 Google 前 20 的词，不限国家：这么新的站已经够得着的搜索 | AIsa key | 每个查询约 $0.13，每周一次；每个新站查词约 $0.013 |
-| ⑦ 求助 | Reddit 上大家在要什么（"is there an AI tool that…" 等 12 种问法），还有 X、Stack Exchange（Software Recommendations 等 4 个站）和 Freelancer.com 上的：模型留下 AI 工具能解决的求助和抱怨，把每件事写成大家会搜的说法；有搜索量的再做首页竞争检查 | AIsa key | 每周约 $0.12，X 另加几美分 |
-| ⑧ 新卖家 | 刚挂上第一条收款链接的站（Stripe Payment Links、Polar、Lemon Squeezy、Gumroad、Creem、Paddle、Dodo Payments、Waffo Pancake），来自公开外链数据，带这个站第一次挂链接的日期；老卖家的新页面、平台上的用户页、论坛，以及好几个新站共用的同一条链接（站群）都不算；站点自己的介绍交给新词表，有 GoAnyAPI 时还有访问量、域名注册日期和访客来源（含 AI 占比） | AIsa key；GoAnyAPI 可选 | 每周约 $0.50 |
-| ⑧b 新作品 | 刚用 Lovable、v0 做出来的站，刚在 beehiiv 开张的 newsletter，从它们挂的徽章认出来；只有其中的软件才进线索 | AIsa key | 每周约 $0.15 |
-| ⑨ 新上架 | Product Hunt、Show HN、OpenRouter、Civitai、App Store 畅销榜和 awesome 列表上的新条目（免费）；每天一次：There's An AI For That 自己的 Just Released 列表（GoAnyAPI）；每周一次：Google 新收录的 Figma 插件、There's An AI For That、Chrome 应用商店页面，抖音、TikTok、Reddit 热搜，以及词根旁边正在上升的搜索（"ai generator"） | 免费列表不用 key；其余要 AIsa 和 GoAnyAPI 的 key | 免费；TAAFT 每天 5 个 GoAnyAPI 积分；每个路径约 $0.02，每份热搜 $0.001，每个词根 6 个 GoAnyAPI 积分 |
+| ③ 新站 | 近 90 天注册且首次被收录、已经有 20 个以上排名词的域名；每个新出现的站附上它最先排进 Google 前 20 的词，不限国家：这么新的站已经够得着的搜索 | Glasser 或 AIsa key | 每个查询约 $0.13，每周一次；每个新站查词约 $0.013 |
+| ⑦ 求助 | Reddit 上大家在要什么（"is there an AI tool that…" 等 12 种问法），还有 X、Stack Exchange（Software Recommendations 等 4 个站）和 Freelancer.com 上的：模型留下 AI 工具能解决的求助和抱怨，把每件事写成大家会搜的说法；有搜索量的再做首页竞争检查 | Glasser 或 AIsa key；X 上的求助要 AIsa | 每周约 $0.12，X 另加几美分 |
+| ⑧ 新卖家 | 刚挂上第一条收款链接的站（Stripe Payment Links、Polar、Lemon Squeezy、Gumroad、Creem、Paddle、Dodo Payments、Waffo Pancake），来自公开外链数据，带这个站第一次挂链接的日期；老卖家的新页面、平台上的用户页、论坛，以及好几个新站共用的同一条链接（站群）都不算；站点自己的介绍交给新词表，有 GoAnyAPI 时还有访问量、域名注册日期和访客来源（含 AI 占比） | Glasser 或 AIsa key；GoAnyAPI 可选 | 每周约 $0.50 |
+| ⑧b 新作品 | 刚用 Lovable、v0 做出来的站，刚在 beehiiv 开张的 newsletter，从它们挂的徽章认出来；只有其中的软件才进线索 | Glasser 或 AIsa key | 每周约 $0.15 |
+| ⑨ 新上架 | Product Hunt、Show HN、OpenRouter、Civitai、App Store 畅销榜和 awesome 列表上的新条目（免费）；每天一次：There's An AI For That 自己的 Just Released 列表（GoAnyAPI）；每周一次：Google 新收录的 Figma 插件、There's An AI For That、Chrome 应用商店页面，抖音、TikTok、Reddit 热搜，以及词根旁边正在上升的搜索（"ai generator"） | 免费列表不用 key；热搜要 Glasser 或 AIsa，Google 新收录的页面要 AIsa（`site:` 搜索，Glasser 不卖），其余要 GoAnyAPI | 免费；TAAFT 每天 5 个 GoAnyAPI 积分；每个路径约 $0.02，每份热搜 $0.001，每个词根 6 个 GoAnyAPI 积分 |
 | ⑩ 付费信号 | 一个付费工具站的 AdSense 账户名下的其他站（站长的其他赛道），以及你关注的词上新出现的广告主（Google 广告透明度中心） | GoAnyAPI key | 每个站双向各 3 积分，每个词 4 积分；每周一次 |
-| 新名字的旁证 | 当天最强的几个新名字：带这个名字的新域名（whois，或 crt.sh 的新证书）、维基百科浏览量、Google 把它认作什么、Discord 服务器；付费产品则查「alternative」「vs」「free」「pricing」「review」这些搜索 | AIsa key；Discord 要 GoAnyAPI | whois 每个名字约 $0.12，搜索量 $0.09 |
+| 新名字的旁证 | 当天最强的几个新名字：带这个名字的新域名（whois，或 crt.sh 的新证书）、维基百科浏览量、Google 把它认作什么、Discord 服务器；付费产品则查「alternative」「vs」「free」「pricing」「review」这些搜索 | Glasser 或 AIsa key；Discord 要 GoAnyAPI | whois 每个名字约 $0.12，搜索量 $0.09 |
 | ⑥ 收入 | 有人付钱的产品，来自 TrustMRR 核验过的收入：增长最快的（30 天收入 $500 以上）和最新上榜的；上次 $0、这次过了门槛的排最前。它自己的介绍会作为依据交给新词表 | TrustMRR key | 免费，6 次请求，每周一次 |
 | ④ Search Console | 你的站第一次获得曝光的查询词（用新鲜数据） | 你自己的 Google 授权 | 免费 |
-| ⑤ 复盘 | 每条线索 14 天后去 DataForSEO Trends 核对，和它自己的基线比；按信号统计命中率和提前天数 | AIsa key | 每个搜索写法 $0.0012 |
-| 新词表 | 针对当天的新名字:找出它背后的通用搜索词(大家拿这个新东西做什么),逐个估算规模、看首页还有没有位置,并给出决策 | AIsa key；[GoAnyAPI](https://goanyapi.com) key 可选 | 5 个名字约每天 $0.18，加上 GoAnyAPI 约 $0.30 |
-| 名字判断 | 小模型给每个词打分：是某个具体东西的名字，还是普通词？ | AIsa key | 每次不到一美分 |
+| ⑤ 复盘 | 每条线索 14 天后去 DataForSEO Trends 核对，和它自己的基线比；按信号统计命中率和提前天数 | Glasser 或 AIsa key | 每个搜索写法 $0.0012 |
+| 新词表 | 针对当天的新名字:找出它背后的通用搜索词(大家拿这个新东西做什么),逐个估算规模、看首页还有没有位置,并给出决策 | Glasser 或 AIsa key，名字的推文要 AIsa；一个模型；[GoAnyAPI](https://goanyapi.com) key 可选 | 5 个名字约每天 $0.18，加上 GoAnyAPI 约 $0.30 |
+| 名字判断 | 小模型给每个词打分：是某个具体东西的名字，还是普通词？ | 一个模型：你自己的 OpenAI 兼容接口，或 AIsa | 每次不到一美分 |
 
-价格是 2026 年 10 月 AIsa 的实际收费。按示例配置（35 个 X 账号、每天读三次，新词表每天读 5 个名字），一个月约 $15：读 X 约 $10，新词表约 $5。少读几个账号或者每天只读一次，费用按比例下降。
+价格是 Glasser 2026-11-26 的标价，和 2026 年 10 月 AIsa 对同样调用的实际收费一样（X 只有 AIsa 有）。按示例配置（35 个 X 账号、每天读三次，新词表每天读 5 个名字），一个月约 $15：读 X 约 $10，新词表约 $5。少读几个账号或者每天只读一次，费用按比例下降。
 
 ## 新词表
 
@@ -140,7 +140,8 @@
 | 某个名字的 AIsa 推文搜索失败（2026-10-13 遇到两次超时） | 这个名字的推文证据。仓库还有 README 可用；没有 README 的模型或产品就只剩相关查询，如果又没配 GoAnyAPI，这一天它就没有通用词 | 「推文搜索失败，这次只用了 README 和相关查询：…」 |
 | 某个名字既没有推文也没有 README | 它的通用词；名字自己那一行还在 | 「没找到帖子或 README：…」 |
 | 当天没有名字得分 0.8 以上的「东西」类线索 | 整张表 | 「今天没有要读的名字…」 |
-| AIsa 的搜索量或 Trends 查询失败 | 整张表：这两项没有替代来源 | 表的位置直接显示报错 |
+| 没有可用的模型（没设 `RADAR_LLM_BASE_URL`，也没有 AIsa key） | 所有通用词：表里只有名字本身 | 「没有模型来提出通用词，这张表只有名字本身：…」 |
+| 搜索量或 Trends 查询失败（走 Glasser 的，或没有 Glasser key 时走 AIsa 的） | 整张表：这两项没有替代来源 | 表的位置直接显示报错 |
 
 表变薄不等于今天没动静。下结论说「什么都没涨」之前，先看表下面这几行。
 
@@ -201,7 +202,7 @@ python -m radar history --out sellers.csv
 
 ### ⚡ 教程观众在要什么
 
-对每天最多 3 条带 ⚡ 的线索（一条被大量转发的手动流程教程），雷达找出它的热门教程视频（GoAnyAPI），读视频下的评论（AIsa，每页 $0.001），让模型挑出观众在要什么：哪一步太难、「能不能一键搞定」。这张清单就是那个一键工具。找视频需要 GoAnyAPI key。
+对每天最多 3 条带 ⚡ 的线索（一条被大量转发的手动流程教程），雷达找出它的热门教程视频（GoAnyAPI），读视频下的评论（Glasser 或 AIsa，每页 $0.001），让模型挑出观众在要什么：哪一步太难、「能不能一键搞定」。这张清单就是那个一键工具。找视频需要 GoAnyAPI key。
 
 ## 痛点：`python -m radar pains "ai headshot"`
 
@@ -209,36 +210,41 @@ python -m radar history --out sellers.csv
 
 - Google 上这个词对应的 Chrome 扩展的低星评论（1 到 3 星），或你用 `--extension ID` 指定的扩展（GoAnyAPI：找扩展 2 credits，每页评论 3 credits）；
 - 苹果搜索接口为这个词返回的 iOS 应用的低星评论（1 到 3 星，来自苹果公开 RSS，免费）；
-- Reddit 上抱怨这件事或相关工具的帖子（"{关键词} alternative"、"{关键词} frustrating" 等；AIsa）；
-- 这个词的热门教程视频下的评论（AIsa）。
+- Reddit 上抱怨这件事或相关工具的帖子（"{关键词} alternative"、"{关键词} frustrating" 等；Glasser 或 AIsa）；
+- 这个词的热门教程视频下的评论（Glasser 或 AIsa）。
 
 模型把它们归成缺口（缺功能、太难、质量、价格、想要工具），每个缺口给出次数、例子和有这个问题的人会搜的说法。每个词约 $0.05。次数是读到的条目数，不代表市场规模。
 
 读不到的：Google Play、Trustpilot 的评论（DataForSEO 是「先提交、后取结果」的任务接口，AIsa 只支持同步调用）；There's An AI For That 的求助板（每个页面前都有 Cloudflare 挑战，硬闯就是绕过对方的反爬，雷达不做）；Facebook 小组（Meta 2024 年 4 月关闭了 Groups API，它的研究数据库只对获批的学术和非营利研究者开放）。
 
-## 一个必需的 key，一个可选的
+## Key：首选 Glasser，X 走 AIsa
 
-所有付费的部分都走 [AIsa](https://go.aisa.one/yansen-zhu)：X 帖子、DataForSEO Trends（DataForSEO 对 Google 搜索热度的估算，不是 Google Trends 本身）和域名数据、判断名字的模型。一个 key，按次付费，不用分别订阅 X API 和 DataForSEO。
+设了 `GLASSER_API_KEY`，付费数据走 [Glasser](https://link.glasser.ai/JasonZhuX)：Google 搜索结果、Google Ads 搜索量、DataForSEO Trends（DataForSEO 对 Google 搜索热度的估算，不是 Google Trends 本身）、关键词难度和域名数据（都来自 DataForSEO），还有 Reddit 搜索、YouTube 评论，以及抖音、TikTok、Reddit 的热搜。按次付费，不用订阅，同样的调用价格和 AIsa 一样。
 
-> 上面是推荐链接：通过它注册是对这个项目的支持。从 aisa.one 任何入口拿到的 key 用起来完全一样。
+> 上面是推荐链接：通过它注册是对这个项目的支持。从 glasser.ai 任何入口拿到的 key 用起来完全一样。
+
+Glasser 不卖的走 AIsa（`AISA_API_KEY`，或用 AIsa 命令行 `aisa login` 登录）：X 帖子（① X、新词表为每个名字读的推文、X 上的求助），以及带运算符的 Google 搜索（⑨ 用 `site:` 查 Google 新收录的页面）。只有 AIsa key、没有 Glasser key 时，全部照 0.8 以前一样走 AIsa。
+
+判断名字、提出通用词的模型：`RADAR_LLM_BASE_URL` 指定的任意 OpenAI 兼容接口（配 `RADAR_LLM_API_KEY`；`RADAR_LLM_MODEL` 会替换 `config.json` 里写的模型），没有就用 AIsa 的对话接口。Glasser 不卖模型调用。两样都没有时，名字判断跳过并在报告里写明，新词表只有名字本身。
 
 **可选：`GOANYAPI_API_KEY`**（[goanyapi.com](https://goanyapi.com/r/ga-95708898fb)）从两方面改进新词表，每天约 $0.07：给每个名字加上 Google Trends 的相关查询；名字和规模较大的通用词（月搜 1,000 以上，最多 8 行）的走势，改用单个国家的 30 天日数据来读，这份数据结算到昨天。这些行的「现在」一列后面会标出国家，例如 `还在涨 (US)`。不配这个 key，新词表只用模型提出的写法和全球数据。这个服务很新（2026 年 8 月才发布）；我们测试时每次调用要 20 到 55 秒，大约十次有一次失败，所以雷达会试两次，失败就写在表里，继续往下跑。上面这个也是推荐链接。
 
-没有 AIsa 的 key 时，免费的信号照常运行（Hugging Face、GitHub、sitemap、Search Console），只是报告里所有词不分先后列出，因为没有模型判断哪些是名字。
+没有 key 时，免费的信号照常运行（Hugging Face、GitHub、sitemap、Search Console）；没有模型时，报告里所有词不分先后列出，因为没有模型判断哪些是名字。
 
 ## 快速开始
 
 用 [uv](https://docs.astral.sh/uv/) 的 `uvx` 可以直接从 PyPI 运行雷达，不用克隆，也不用安装：
 
 ```bash
-export AISA_API_KEY=...                       # 从 https://go.aisa.one/yansen-zhu 获取；用 AIsa 命令行 `aisa login` 登录过也可以
+export GLASSER_API_KEY=...                    # 从 https://link.glasser.ai/JasonZhuX 获取（推荐链接）
+export AISA_API_KEY=...                       # X 帖子和模型用；用 AIsa 命令行 `aisa login` 登录过也可以
 uvx new-term-radar daily --out report.md      # 今天的新名字，和它们背后的关键词表
 uvx new-term-radar keywords "photocraft"      # 你手上已有的名字的关键词表
 ```
 
 当前目录没有 `config.json` 时，`daily` 用雷达自带的示例 X 账号和 sitemap，快照存在 `./state`；把 [config.example.json](config.example.json) 复制成 `config.json` 再编辑，就换成你自己的清单（想要中文报告把 lang 改成 "zh"）。`uvx new-term-radar@latest …` 会拿到新版本；想一直装着就 `pip install new-term-radar`（或 `uv tool install new-term-radar`），之后直接用 `new-term-radar` 命令。需要 Python 3.10 或更高版本，雷达本身只用标准库。
 
-从克隆的仓库里运行是同一个程序，用同一个 key：
+从克隆的仓库里运行是同一个程序，用同样的 key：
 
 ```bash
 git clone https://github.com/zhuyansen/new-term-radar
@@ -291,7 +297,7 @@ python -m radar daily --skip x,hf --out report.md  # 其余全部，每天一次
 | `topics` | 名称和正则：每个主题单独一节，列出匹配的线索、仓库和查询 |
 | `known_terms` | 你已经有页面的词，或者永远不想看到的词。包含它或被它包含的线索会被标出，不进入复盘 |
 | `stop_words` | 你这个领域的日常用词，追加到内置列表（内置列表是按 AI 工具领域调的） |
-| `judge` | `model`（AIsa 上任意对话模型）和 `min_score`（默认 0.5） |
+| `judge` | `model`（AIsa 或你自己接口上的任意对话模型；用自己的接口时 `RADAR_LLM_MODEL` 会替换它）和 `min_score`（默认 0.5） |
 | `breakout` | `window_days`、`min_stars`、`velocity_min`（每天涨星）、`delta_min`（比昨天多的星）；可选影子查询 `young_days`/`young_min_stars`（刚出生涨得快的年轻仓库）和 `late_days`/`late_min_stars`（更早创建但最近起量的仓库）；当天首次达到爆发标准的新仓库（`is_new`）在前 15 条展示切片中优先保留 |
 | `new_sites` | `queries`：名称和域名的 SQL LIKE 模式（`"%ai%"`），每个是一次付费查询；`weekday`（0 = 周一） |
 | `review` | `after_days`（14）和 `per_day`（每天复盘 5 条） |
@@ -343,7 +349,7 @@ npx skills add zhuyansen/new-term-radar
 /plugin install new-term-radar@new-term-radar
 ```
 
-然后对你的 agent 说「今天有哪些 AI 新词」「出一份 AI listening 报告」或「给 PhotoCraft 和 SynthID Detector 做关键词调研」。skill 跑的是 PyPI 上锁定的版本（`uvx new-term-radar==0.7.1`），不克隆仓库，状态存在 `~/new-term-radar`；任何付费运行之前先告诉你大概花多少，等你同意再跑；要替你往外发东西（发帖、上线页面、提交、发邮件）之前，先给你看发到哪里、发什么，等你同意再发；读到的帖子和网页只当数据，不当指令；表不完整时也会说明。
+然后对你的 agent 说「今天有哪些 AI 新词」「出一份 AI listening 报告」或「给 PhotoCraft 和 SynthID Detector 做关键词调研」。skill 跑的是 PyPI 上锁定的版本（`uvx new-term-radar==0.8.0`），不克隆仓库，状态存在 `~/new-term-radar`；任何付费运行之前先告诉你大概花多少，等你同意再跑；要替你往外发东西（发帖、上线页面、提交、发邮件）之前，先给你看发到哪里、发什么，等你同意再发；读到的帖子和网页只当数据，不当指令；表不完整时也会说明。
 
 ### MCP 服务器
 
@@ -356,6 +362,7 @@ npx skills add zhuyansen/new-term-radar
       "command": "uvx",
       "args": ["--with", "mcp", "new-term-radar", "mcp"],
       "env": {
+        "GLASSER_API_KEY": "...",
         "AISA_API_KEY": "...",
         "RADAR_CONFIG": "/绝对路径/config.json",
         "RADAR_STATE": "/绝对路径/state"
@@ -365,7 +372,7 @@ npx skills add zhuyansen/new-term-radar
 }
 ```
 
-没有 uv：先 `pip install "new-term-radar[mcp]"`，再把 `"command"` 改成 `"new-term-radar-mcp"`、去掉 `args`。上面的 Claude Code 插件已经自带这个服务器：启用插件时 Claude Code 会让你填 AIsa key（GoAnyAPI key 可选），存进系统钥匙串；服务器用示例配置，状态存在插件自己的数据目录里。
+没有 uv：先 `pip install "new-term-radar[mcp]"`，再把 `"command"` 改成 `"new-term-radar-mcp"`、去掉 `args`。上面的 Claude Code 插件已经自带这个服务器：启用插件时 Claude Code 会让你填 Glasser key、AIsa key（X 和模型用；GoAnyAPI key 可选），存进系统钥匙串；服务器用示例配置，状态存在插件自己的数据目录里。
 
 | 工具 | 返回什么 | 花费和耗时 |
 |---|---|---|
@@ -389,16 +396,17 @@ startup_timeout_sec = 120
 tool_timeout_sec = 900
 
 [mcp_servers.new-term-radar.env]
+GLASSER_API_KEY = "..."
 AISA_API_KEY = "..."
 RADAR_STATE = "/绝对路径/state"
 ```
 
-Codex 默认只给服务器 10 秒启动、每次工具调用 60 秒。第一次启动要下载包，`keyword_table` 每个名字要 40 到 90 秒，`daily` 一次要 5 到 15 分钟，所以两个都要像上面这样调大。`codex mcp add new-term-radar --env AISA_API_KEY=... --env RADAR_STATE=/绝对路径/state -- uvx --with mcp new-term-radar mcp` 也能写入同样的配置，只是不带这两个超时。
+Codex 默认只给服务器 10 秒启动、每次工具调用 60 秒。第一次启动要下载包，`keyword_table` 每个名字要 40 到 90 秒，`daily` 一次要 5 到 15 分钟，所以两个都要像上面这样调大。`codex mcp add new-term-radar --env GLASSER_API_KEY=... --env AISA_API_KEY=... --env RADAR_STATE=/绝对路径/state -- uvx --with mcp new-term-radar mcp` 也能写入同样的配置，只是不带这两个超时。
 
-**TRAE。** skill：`npx skills add zhuyansen/new-term-radar -a trae-cn`（国际版用 `-a trae`）。服务器：设置 → MCP → 添加 → 手动添加，粘贴上面的 JSON。TRAE CN 也可以把下面这个链接粘贴到浏览器地址栏，TRAE 会打开这个服务器的配置，填上 AIsa key，把 `RADAR_STATE` 改成本机的一个绝对路径，再确认：
+**TRAE。** skill：`npx skills add zhuyansen/new-term-radar -a trae-cn`（国际版用 `-a trae`）。服务器：设置 → MCP → 添加 → 手动添加，粘贴上面的 JSON。TRAE CN 也可以把下面这个链接粘贴到浏览器地址栏，TRAE 会打开这个服务器的配置，填上 Glasser 和 AIsa 的 key，把 `RADAR_STATE` 改成本机的一个绝对路径，再确认：
 
 ```text
-trae-cn://trae.ai-ide/mcp-import?type=stdio&name=new-term-radar&config=eyJjb21tYW5kIjoidXZ4IiwiYXJncyI6WyItLXdpdGgiLCJtY3AiLCJuZXctdGVybS1yYWRhciIsIm1jcCJdLCJlbnYiOnsiQUlTQV9BUElfS0VZIjoiIiwiR09BTllBUElfQVBJX0tFWSI6IiIsIlJBREFSX1NUQVRFIjoiL2Fic29sdXRlL3BhdGgvdG8vc3RhdGUifX0%3D
+trae-cn://trae.ai-ide/mcp-import?type=stdio&name=new-term-radar&config=eyJjb21tYW5kIjoidXZ4IiwiYXJncyI6WyItLXdpdGgiLCJtY3AiLCJuZXctdGVybS1yYWRhciIsIm1jcCJdLCJlbnYiOnsiR0xBU1NFUl9BUElfS0VZIjoiIiwiQUlTQV9BUElfS0VZIjoiIiwiR09BTllBUElfQVBJX0tFWSI6IiIsIlJBREFSX1NUQVRFIjoiL2Fic29sdXRlL3BhdGgvdG8vc3RhdGUifX0%3D
 ```
 
 **WorkBuddy。** 把上面的 JSON 写进 `~/.workbuddy/mcp.json`，或者在侧边栏「插件」→ 右上角「MCP 服务器」→「配置 MCP」里粘贴。
@@ -415,6 +423,7 @@ trae-cn://trae.ai-ide/mcp-import?type=stdio&name=new-term-radar&config=eyJjb21tY
         command: uvx
         args: ['--with', 'mcp', 'new-term-radar', 'mcp']
         env:
+          GLASSER_API_KEY: !!js process.env.GLASSER_API_KEY ?? ''
           AISA_API_KEY: !!js process.env.AISA_API_KEY ?? ''
           GOANYAPI_API_KEY: !!js process.env.GOANYAPI_API_KEY ?? ''
           RADAR_STATE: /absolute/path/to/state
@@ -429,7 +438,7 @@ DeepSeek Harness 不会把环境里像密钥的变量传给服务器，所以 ke
 
 1. Fork 这个仓库（私有 fork 也可以）。
 2. 把 `config.json` 从 `.gitignore` 里删掉，提交你的配置。配置里没有任何密钥。
-3. 添加 secret `AISA_API_KEY`；可选 `GOANYAPI_API_KEY`、`RESEND_API_KEY`、`EMAIL_FROM`、`RADAR_EMAIL_TO`、`GSC_TOKEN_JSON`。
+3. 添加 secret `GLASSER_API_KEY`，以及 X 帖子和模型要用的 `AISA_API_KEY`；可选 `GOANYAPI_API_KEY`、`RESEND_API_KEY`、`EMAIL_FROM`、`RADAR_EMAIL_TO`、`GSC_TOKEN_JSON`，用自己的模型时再加 `RADAR_LLM_API_KEY` 和变量 `RADAR_LLM_BASE_URL`、`RADAR_LLM_MODEL`。
 4. 把仓库变量 `RADAR_ENABLED` 设为 `true`。
 
 ## 各部分怎么判断

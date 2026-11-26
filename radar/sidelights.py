@@ -3,7 +3,7 @@ paying product search for besides its name.
 
 For the strongest new names of the day (`names`, five by default):
 - new sites: for the first `whois_names` names, domains carrying the name registered in the last
-  `whois_days` days, from DataForSEO's whois overview through AIsa's REST passthrough (about $0.12
+  `whois_days` days, from DataForSEO's whois overview through Glasser or AIsa's REST passthrough (about $0.12
   a name: the query.domain method of watching who registers on a new word); for the rest, HTTPS
   certificates issued in the last week (crt.sh, free; it rate-limits hard, so one try, and a miss
   is a gap, not a zero). People register sites on a name before search engines list them;

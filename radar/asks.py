@@ -1,7 +1,7 @@
 """Signal ⑦: what people ask for on Reddit ("is there an AI tool that…").
 
 A request is demand said out loud. Once a week (asks.weekday, Monday by default) this searches
-Reddit for the ways people ask for a tool (`patterns`, $0.0019 a query through AIsa), keeps the
+Reddit for the ways people ask for a tool (`patterns`, about $0.0019 a query through Glasser or AIsa), keeps the
 posts of the last week, and a small model sorts each: a request for something that does a job,
 a complaint about a tool, a solution someone shares, or other. For requests and complaints it
 writes the job as the words a person would search ("convert powerpoint slides to notes"). The

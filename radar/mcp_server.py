@@ -12,8 +12,9 @@ Three tools:
 
 Where it looks: RADAR_CONFIG (default ./config.json, or the example the radar ships with when
 there is none) and RADAR_STATE (default ./state), the same files the command line uses, so the
-server sees what the scheduled runs kept. Keys come from the environment: AISA_API_KEY, and
-optionally GOANYAPI_API_KEY.
+server sees what the scheduled runs kept. Keys come from the environment: GLASSER_API_KEY (the paid
+data) and AISA_API_KEY (X posts and the model; everything without a Glasser key), optionally
+GOANYAPI_API_KEY and a model endpoint of your own (RADAR_LLM_BASE_URL, RADAR_LLM_API_KEY, RADAR_LLM_MODEL).
 
 The transport is stdio, so nothing here may print to stdout: the tools run the radar with
 its output captured. A tool that fails reaches the agent as a ToolError with its reason (no key,

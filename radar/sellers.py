@@ -2,7 +2,7 @@
 
 A product's first payment link says more than a launch post: someone built a thing and asked
 for money for it. Payment links are ordinary links on the seller's own page, so the public link
-graph (DataForSEO through AIsa) shows them, each with the day it was first seen:
+graph (DataForSEO through Glasser or AIsa) shows them, each with the day it was first seen:
 
 - Stripe Payment Links (buy.stripe.com) and Polar checkout links (buy.polar.sh): every link is one;
 - Lemon Squeezy store checkouts (<store>.lemonsqueezy.com/checkout or /buy);

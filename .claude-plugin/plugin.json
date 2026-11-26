@@ -1,6 +1,6 @@
 {
   "name": "new-term-radar",
-  "version": "0.7.1",
+  "version": "0.8.0",
   "description": "Three skills that find the names of new AI models, products and repositories as they surface, and size the search terms behind them with Google Ads volume and DataForSEO Trends, an estimate of Google search interest.",
   "author": {
     "name": "Jason Zhu",
@@ -24,10 +24,11 @@
       "args": [
         "--with",
         "mcp==2.3.0",
-        "new-term-radar==0.7.1",
+        "new-term-radar==0.8.0",
         "mcp"
       ],
       "env": {
+        "GLASSER_API_KEY": "${user_config.glasser_api_key}",
         "AISA_API_KEY": "${user_config.aisa_api_key}",
         "GOANYAPI_API_KEY": "${user_config.goanyapi_api_key}",
         "RADAR_CONFIG": "${CLAUDE_PLUGIN_ROOT}/config.example.json",
@@ -36,10 +37,17 @@
     }
   },
   "userConfig": {
+    "glasser_api_key": {
+      "type": "string",
+      "title": "Glasser API key",
+      "description": "First choice for the radar's paid data: Google Ads volumes, DataForSEO Trends, Google results, domain data, Reddit and YouTube. recent_leads works without it. A key: https://link.glasser.ai/JasonZhuX (referral link)",
+      "sensitive": true,
+      "default": ""
+    },
     "aisa_api_key": {
       "type": "string",
       "title": "AIsa API key",
-      "description": "Pays for the radar's lookups: X posts, Google Ads volumes, DataForSEO Trends and the model. recent_leads works without it. A key: https://go.aisa.one/yansen-zhu (referral link)",
+      "description": "For what Glasser does not sell: X posts and the model that judges names. Without a Glasser key, all the paid data goes through it too. A key: https://aisa.one",
       "sensitive": true,
       "default": ""
     },

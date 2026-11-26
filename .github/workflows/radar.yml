@@ -7,11 +7,13 @@ name: New-term radar
 #            source leads of the last day.
 #
 # Off until you opt in: set the repository variable RADAR_ENABLED to "true"
-# (Settings > Secrets and variables > Actions > Variables), add the secret AISA_API_KEY,
+# (Settings > Secrets and variables > Actions > Variables), add the secrets GLASSER_API_KEY
+# (the paid data) and AISA_API_KEY (X posts and the model; with it alone, everything),
 # and commit your config.json (remove it from .gitignore first; it holds no secrets).
 # Optional secrets: GOANYAPI_API_KEY (related queries in the keyword table),
 # RESEND_API_KEY, EMAIL_FROM, RADAR_EMAIL_TO (mail the reports),
-# GSC_TOKEN_JSON (the Search Console signal).
+# GSC_TOKEN_JSON (the Search Console signal), RADAR_LLM_API_KEY with the variables
+# RADAR_LLM_BASE_URL and RADAR_LLM_MODEL (a model of your own in place of AIsa's).
 #
 # State (state/radar.db and the snapshots) lives in the Actions cache: one entry per
 # run, restored by prefix, so the repository does not grow. A missing cache only means
@@ -61,7 +63,11 @@ jobs:
 
       - name: Run the radar
         env:
+          GLASSER_API_KEY: ${{ secrets.GLASSER_API_KEY }}
           AISA_API_KEY: ${{ secrets.AISA_API_KEY }}
+          RADAR_LLM_BASE_URL: ${{ vars.RADAR_LLM_BASE_URL }}
+          RADAR_LLM_MODEL: ${{ vars.RADAR_LLM_MODEL }}
+          RADAR_LLM_API_KEY: ${{ secrets.RADAR_LLM_API_KEY }}
           GOANYAPI_API_KEY: ${{ secrets.GOANYAPI_API_KEY }}
           GITHUB_TOKEN: ${{ github.token }}
           GSC_TOKEN_JSON: ${{ secrets.GSC_TOKEN_JSON }}

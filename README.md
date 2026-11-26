@@ -54,24 +54,24 @@ Purple, tagged NEW: what 0.6.0 added. On the keyword table: word age, markets, p
 
 | Signal | What it catches | Needs | Cost |
 |---|---|---|---|
-| ① X | Names the accounts in your list used for the first time in 60 days | AIsa key | $0.003 per account per run |
+| ① X | Names the accounts in your list used for the first time in 60 days | AIsa key (Glasser does not sell X) | $0.003 per account per run |
 | ① Hugging Face | Models and Spaces (the demos people try) new to the trending top 50; quantised copies and a model's own demo grouped under the base name | nothing | free |
 | ② GitHub breakout | A repo under 14 days old averaging 200+ stars a day, or +400 since yesterday; adds the search variants people use ("niko strata") | nothing (a GitHub token raises the rate limit) | free |
 | ③ Sitemaps | Words that several new URLs on a site share and its older URLs rarely carried. The example config watches eight AI tool directories (toolify, aixploria, ai-bot.cn, opentools, dang.ai, clipfly, aitoptools, futurepedia) and four MCP and skill directories | the sitemaps you list | free |
-| ③ New sites | Domains registered and first indexed in the last 90 days that already rank for 20+ keywords, each new one with the first words it ranks for in Google's top 20, in any country: searches a site that new already reached | AIsa key | about $0.13 per query, weekly; about $0.013 a new site for its words |
-| ⑦ Asks | What people ask for on Reddit ("is there an AI tool that…", twelve phrasings), X, Stack Exchange (Software Recommendations and three more) and Freelancer.com: a model keeps the requests and complaints an AI tool could answer and writes each job as people would search it; jobs with searches get the page-one check | AIsa key | about $0.12 a week, plus a few cents for X |
-| ⑧ Sellers | Sites that just put up their first payment link (Stripe Payment Links, Polar, Lemon Squeezy, Gumroad, Creem, Paddle, Dodo Payments, Waffo Pancake), from the public link graph with the day each site first linked; new pages of old sellers, platform pages, forums and one link shared by several new sites (a network's) left out; the site's own description goes to the keyword table, and with GoAnyAPI its visits, its domain's registration and where its visitors come from (the AI share) | AIsa key; GoAnyAPI optional | about $0.50 a week |
-| ⑧b Builders | Sites just built with Lovable or v0 and newsletters just started on beehiiv, read off their badges; only the software among them becomes a lead | AIsa key | about $0.15 a week |
-| ⑨ Just listed | New on Product Hunt, Show HN, OpenRouter, Civitai, the App Store's top-grossing charts and awesome lists (free); daily, There's An AI For That's own just-released list, day by day (GoAnyAPI); weekly, the pages Google indexed under Figma plugins, There's An AI For That and the Chrome Web Store, trending searches on Douyin, TikTok and Reddit, and rising searches next to root words ("ai generator") | nothing for the free lists; AIsa and GoAnyAPI keys for the rest | free; 5 GoAnyAPI credits a day for TAAFT; about $0.02 a path, $0.001 a trending list, 6 GoAnyAPI credits a root word |
+| ③ New sites | Domains registered and first indexed in the last 90 days that already rank for 20+ keywords, each new one with the first words it ranks for in Google's top 20, in any country: searches a site that new already reached | Glasser or AIsa key | about $0.13 per query, weekly; about $0.013 a new site for its words |
+| ⑦ Asks | What people ask for on Reddit ("is there an AI tool that…", twelve phrasings), X, Stack Exchange (Software Recommendations and three more) and Freelancer.com: a model keeps the requests and complaints an AI tool could answer and writes each job as people would search it; jobs with searches get the page-one check | Glasser or AIsa key; AIsa for the asks on X | about $0.12 a week, plus a few cents for X |
+| ⑧ Sellers | Sites that just put up their first payment link (Stripe Payment Links, Polar, Lemon Squeezy, Gumroad, Creem, Paddle, Dodo Payments, Waffo Pancake), from the public link graph with the day each site first linked; new pages of old sellers, platform pages, forums and one link shared by several new sites (a network's) left out; the site's own description goes to the keyword table, and with GoAnyAPI its visits, its domain's registration and where its visitors come from (the AI share) | Glasser or AIsa key; GoAnyAPI optional | about $0.50 a week |
+| ⑧b Builders | Sites just built with Lovable or v0 and newsletters just started on beehiiv, read off their badges; only the software among them becomes a lead | Glasser or AIsa key | about $0.15 a week |
+| ⑨ Just listed | New on Product Hunt, Show HN, OpenRouter, Civitai, the App Store's top-grossing charts and awesome lists (free); daily, There's An AI For That's own just-released list, day by day (GoAnyAPI); weekly, the pages Google indexed under Figma plugins, There's An AI For That and the Chrome Web Store, trending searches on Douyin, TikTok and Reddit, and rising searches next to root words ("ai generator") | nothing for the free lists; Glasser or AIsa for the trending searches, AIsa for Google's new pages (a `site:` search, which Glasser does not sell), GoAnyAPI for the rest | free; 5 GoAnyAPI credits a day for TAAFT; about $0.02 a path, $0.001 a trending list, 6 GoAnyAPI credits a root word |
 | ⑩ Money | The other sites on a paying tool site's AdSense account (its owner's other niches), and the advertisers new on your own terms (Google Ads Transparency) | GoAnyAPI key | 3 credits a site each way, 4 a term; weekly |
-| Beside the names | For the day's strongest new names: new domains carrying the name (whois, or crt.sh certificates), Wikipedia views, what Google knows it as, Discord servers; for paying products, the "alternative", "vs", "free", "pricing" and "review" searches | AIsa key; GoAnyAPI for Discord | about $0.12 a name read by whois, $0.09 for the searches |
+| Beside the names | For the day's strongest new names: new domains carrying the name (whois, or crt.sh certificates), Wikipedia views, what Google knows it as, Discord servers; for paying products, the "alternative", "vs", "free", "pricing" and "review" searches | Glasser or AIsa key; GoAnyAPI for Discord | about $0.12 a name read by whois, $0.09 for the searches |
 | ⑥ Revenue | Products people pay for, from TrustMRR's verified revenue: the fastest growing ($500+ in 30 days) and the newest listings; one at $0 last time and earning now is called out first. Its own description goes to the keyword table as evidence | TrustMRR key | free, 6 requests, weekly |
 | ④ Search Console | Queries your site got impressions for, for the first time (fresh data) | your own Google token | free |
-| ⑤ Review | Each lead checked in DataForSEO Trends 14 days later, against its own baseline; hit rate and days ahead per signal | AIsa key | $0.0012 per search variant |
-| Keyword table | For the day's new names: the generic search terms behind them (what people do with the new thing), each sized, checked for room on page one, and given a decision | AIsa key; [GoAnyAPI](https://goanyapi.com) key optional | about $0.18 a day for 5 names, $0.30 with GoAnyAPI |
-| Name judge | A small model scores every term: the name of one specific thing, or a common word? | AIsa key | a fraction of a cent per run |
+| ⑤ Review | Each lead checked in DataForSEO Trends 14 days later, against its own baseline; hit rate and days ahead per signal | Glasser or AIsa key | $0.0012 per search variant |
+| Keyword table | For the day's new names: the generic search terms behind them (what people do with the new thing), each sized, checked for room on page one, and given a decision | Glasser or AIsa key, and AIsa for the posts about each name; a model; [GoAnyAPI](https://goanyapi.com) key optional | about $0.18 a day for 5 names, $0.30 with GoAnyAPI |
+| Name judge | A small model scores every term: the name of one specific thing, or a common word? | a model: your own OpenAI-compatible endpoint, or AIsa | a fraction of a cent per run |
 
-Prices are what AIsa charged in October 2026. With the example config (35 X accounts read three times a day, the keyword table for 5 names a day) a month costs about $15: $10 for the X reads, $5 for the keyword table. Read fewer accounts, or read them once a day, and it drops in proportion.
+Prices are Glasser's on 2026-11-26, the same as AIsa charged in October 2026 for the same calls (X is AIsa's alone). With the example config (35 X accounts read three times a day, the keyword table for 5 names a day) a month costs about $15: $10 for the X reads, $5 for the keyword table. Read fewer accounts, or read them once a day, and it drops in proportion.
 
 ## The keyword table
 
@@ -138,7 +138,8 @@ The table is still written, but it gets thinner, and it says which part is missi
 | AIsa's post search fails for a name (timeouts seen twice on 2026-10-13) | That name's posts. A repository still has its README; a model or product without one is left with the related queries only, and with no GoAnyAPI key it gets no generic terms that day | "The post search failed; this run used READMEs and related queries only: …" |
 | Neither posts nor a README for a name | Its generic terms; the name's own row stays | "No posts or README found for: …" |
 | No lead that day is a thing with a name score of 0.8 or more | The whole table | "Nothing to read today…" |
-| AIsa's search-volume or Trends lookup fails | The whole table: these two are not replaceable | the error, in place of the table |
+| No model to ask (no `RADAR_LLM_BASE_URL`, no AIsa key) | Every generic term: the table holds the names alone | "No model proposed generic terms, so the table holds the names only: …" |
+| The search-volume or Trends lookup fails (Glasser's, or AIsa's without a Glasser key) | The whole table: these two are not replaceable | the error, in place of the table |
 
 A thin table is not a quiet day. Read the lines under it before you conclude that nothing moved.
 
@@ -199,7 +200,7 @@ Two cautions. In October 2023 Stripe's count jumped from 3,216 to 16,206, and ne
 
 ### ⚡ What tutorial viewers ask for
 
-For up to three leads a day marked ⚡ (a widely shared walkthrough of a manual workflow), the radar finds the top tutorial videos for the lead (GoAnyAPI), reads their comments (AIsa, $0.001 a page) and has the model pull out what viewers ask for: the steps they find too hard, the "can this be done in one click". That list is the one-click tool. It needs a GoAnyAPI key to find the videos.
+For up to three leads a day marked ⚡ (a widely shared walkthrough of a manual workflow), the radar finds the top tutorial videos for the lead (GoAnyAPI), reads their comments (Glasser or AIsa, $0.001 a page) and has the model pull out what viewers ask for: the steps they find too hard, the "can this be done in one click". That list is the one-click tool. It needs a GoAnyAPI key to find the videos.
 
 ## Pain points: `python -m radar pains "ai headshot"`
 
@@ -207,36 +208,41 @@ What people complain about for a kind of tool, grouped into the gaps a new tool 
 
 - low-star Chrome Web Store reviews (1 to 3 stars) of the extensions Google shows for the keyword, or of the ones you name with `--extension ID` (GoAnyAPI: 2 credits to find them, 3 a page of reviews);
 - low-star App Store reviews (1 to 3 stars) of the iOS apps Apple's search API returns for the keyword, read from Apple's public RSS feed (free);
-- Reddit posts that complain about the job or its tools ("{keyword} alternative", "{keyword} frustrating", ...; AIsa);
-- comments under the top tutorial videos for the keyword (AIsa).
+- Reddit posts that complain about the job or its tools ("{keyword} alternative", "{keyword} frustrating", ...; Glasser or AIsa);
+- comments under the top tutorial videos for the keyword (Glasser or AIsa).
 
 A model groups them into gaps (missing, too hard, quality, price, wants a tool), each with a count, an example and the phrase someone with that problem would search. About $0.05 a keyword. Counts are of what was read, not of the market.
 
 What it cannot read: Google Play and Trustpilot reviews (DataForSEO serves them as tasks to post and fetch later, and AIsa runs synchronous calls only); There's An AI For That's request board (a Cloudflare challenge in front of every page; getting past it would be getting past their bot protection, so the radar does not); Facebook groups (Meta closed the Groups API in April 2024, and its research library is open to approved academic and nonprofit researchers only).
 
-## One key, and an optional second
+## Keys: Glasser first, AIsa for X
 
-Everything the radar needs goes through [AIsa](https://go.aisa.one/yansen-zhu): X posts, DataForSEO Trends (DataForSEO's estimate of Google search interest, not Google Trends itself) and domain data, and the models that judge names and propose phrases. One key, pay per call, no subscriptions to X's API or DataForSEO.
+With `GLASSER_API_KEY` set, the paid data goes through [Glasser](https://link.glasser.ai/JasonZhuX): Google's results, Google Ads volumes, DataForSEO Trends (DataForSEO's estimate of Google search interest, not Google Trends itself), keyword difficulty and domain data, all from DataForSEO, and Reddit searches, YouTube comments and the Douyin, TikTok and Reddit trending lists. Pay per call, no subscriptions, at the prices AIsa charges for the same calls.
 
-> That link is a referral link: signing up through it supports this project. The radar works the same with a key from anywhere on aisa.one.
+> That link is a referral link: signing up through it supports this project. The radar works the same with a key from anywhere on glasser.ai.
+
+AIsa (`AISA_API_KEY`, or `aisa login` with the AIsa CLI) answers what Glasser does not sell: the X posts (① X, the posts the keyword table reads about each name, the asks on X) and Google searches with operators (⑨'s `site:` searches for Google's new pages). With an AIsa key and no Glasser key, everything goes through AIsa, as before 0.8.
+
+The model that judges names and proposes phrases: any OpenAI-compatible endpoint you name with `RADAR_LLM_BASE_URL` (with `RADAR_LLM_API_KEY`, and `RADAR_LLM_MODEL` in place of the models in `config.json`), else AIsa's chat. Glasser sells no model calls. With neither, the name judge is skipped and the report says so, and the keyword table holds the names alone.
 
 **Optional: `GOANYAPI_API_KEY`** ([goanyapi.com](https://goanyapi.com/r/ga-95708898fb)) improves the keyword table in two ways, for about $0.07 a day: it adds Google Trends' related queries for each name, and it reads the curve of the names and the bigger generic terms (1,000 searches a month or more, eight rows at most) from 30 days of daily data for one country, settled to yesterday. Those rows show the country after "Now", as in `still rising (US)`. Without the key the table is built from the model's phrases and the worldwide series alone. The service is young (first released in August 2026); in our tests calls took 20 to 55 seconds and about one in ten failed, so the radar tries twice, reports a failure in the table and carries on. That link is a referral link too.
 
-Without an AIsa key the free signals still run (Hugging Face, GitHub, sitemaps, Search Console); the report then lists every term unsorted, because nothing judges which are names.
+Without a key the free signals still run (Hugging Face, GitHub, sitemaps, Search Console); without a model the report lists every term unsorted, because nothing judges which are names.
 
 ## Quick start
 
 [uv](https://docs.astral.sh/uv/)'s `uvx` runs the radar straight from PyPI, with nothing to clone or install:
 
 ```bash
-export AISA_API_KEY=...                       # from https://go.aisa.one/yansen-zhu; or `aisa login` with the AIsa CLI
+export GLASSER_API_KEY=...                    # from https://link.glasser.ai/JasonZhuX (a referral link)
+export AISA_API_KEY=...                       # the X posts and the model; or `aisa login` with the AIsa CLI
 uvx new-term-radar daily --out report.md      # today's new names and the keyword table behind them
 uvx new-term-radar keywords "photocraft"      # the keyword table for names you already have
 ```
 
 With no `config.json` in the folder, `daily` watches the example X accounts and sitemaps that ship with the radar and keeps its snapshots in `./state`; copy [config.example.json](config.example.json) to `config.json` there and edit it to watch your own. `uvx new-term-radar@latest …` picks up a new release; `pip install new-term-radar` (or `uv tool install new-term-radar`) keeps a `new-term-radar` command installed. Python 3.10 or newer; the radar uses only the standard library.
 
-From a clone it is the same program, with the same key:
+From a clone it is the same program, with the same keys:
 
 ```bash
 git clone https://github.com/zhuyansen/new-term-radar
@@ -296,7 +302,7 @@ and from `sources`:
 | `topics` | Name and regex: each topic gets its own section listing the leads, repos and queries that match |
 | `known_terms` | Terms you already have a page for, or never want reported. A lead that contains one, or is contained in one, is marked and not kept for review |
 | `stop_words` | Everyday words of your field, added to the built-in list (which is tuned for AI tooling) |
-| `judge` | `model` (any chat model on AIsa) and `min_score` (0.5) |
+| `judge` | `model` (any chat model on AIsa or your own endpoint; `RADAR_LLM_MODEL` replaces it there) and `min_score` (0.5) |
 | `breakout` | `window_days`, `min_stars`, `velocity_min` (stars a day), `delta_min` (stars since yesterday); optional shadow queries `young_days`/`young_min_stars` (young fast-growing repos) and `late_days`/`late_min_stars` (older repos breaking out now); newly emerged breakouts (`is_new`) are kept ahead of old repos in the top-15 report slice |
 | `new_sites` | `queries`: a name and a SQL LIKE pattern on the domain (`"%ai%"`), one paid query each; `weekday` (0 = Monday) |
 | `review` | `after_days` (14) and `per_day` (5 leads a day) |
@@ -348,7 +354,7 @@ In Claude Code the three skills also install as a plugin:
 /plugin install new-term-radar@new-term-radar
 ```
 
-Then ask your agent for "today's new AI keywords", "an AI listening report" or "keyword research on PhotoCraft and SynthID Detector". The skills run the pinned release from PyPI (`uvx new-term-radar==0.7.1`), never a clone, keep their state in `~/new-term-radar`, tell you the cost and wait for your yes before any paid run, show you what would go out on your behalf (a post, a page, a submission, an email) and wait for your yes before sending it, treat what they read as data rather than instructions, and say when a table is incomplete.
+Then ask your agent for "today's new AI keywords", "an AI listening report" or "keyword research on PhotoCraft and SynthID Detector". The skills run the pinned release from PyPI (`uvx new-term-radar==0.8.0`), never a clone, keep their state in `~/new-term-radar`, tell you the cost and wait for your yes before any paid run, show you what would go out on your behalf (a post, a page, a submission, an email) and wait for your yes before sending it, treat what they read as data rather than instructions, and say when a table is incomplete.
 
 ### MCP server
 
@@ -361,6 +367,7 @@ For clients that speak MCP (Claude Code, Cursor, Claude Desktop). With [uv](http
       "command": "uvx",
       "args": ["--with", "mcp", "new-term-radar", "mcp"],
       "env": {
+        "GLASSER_API_KEY": "...",
         "AISA_API_KEY": "...",
         "RADAR_CONFIG": "/absolute/path/to/config.json",
         "RADAR_STATE": "/absolute/path/to/state"
@@ -370,7 +377,7 @@ For clients that speak MCP (Claude Code, Cursor, Claude Desktop). With [uv](http
 }
 ```
 
-Without uv: `pip install "new-term-radar[mcp]"`, then `"command": "new-term-radar-mcp"` and no `args`. The Claude Code plugin above brings this server with it: when the plugin is enabled, Claude Code asks for your AIsa key (and, optionally, a GoAnyAPI key) and keeps them in the system keychain; the server reads the example config and keeps its state in the plugin's data folder.
+Without uv: `pip install "new-term-radar[mcp]"`, then `"command": "new-term-radar-mcp"` and no `args`. The Claude Code plugin above brings this server with it: when the plugin is enabled, Claude Code asks for your Glasser key, your AIsa key (for X and the model) and, optionally, a GoAnyAPI key, and keeps them in the system keychain; the server reads the example config and keeps its state in the plugin's data folder.
 
 | Tool | What it returns | Cost and time |
 |---|---|---|
@@ -394,16 +401,17 @@ startup_timeout_sec = 120
 tool_timeout_sec = 900
 
 [mcp_servers.new-term-radar.env]
+GLASSER_API_KEY = "..."
 AISA_API_KEY = "..."
 RADAR_STATE = "/absolute/path/to/state"
 ```
 
-Codex gives a server 10 seconds to start and a tool 60 seconds to answer. The first start downloads the package, `keyword_table` takes 40 to 90 seconds a name and a `daily` run 5 to 15 minutes, so raise both as above. `codex mcp add new-term-radar --env AISA_API_KEY=... --env RADAR_STATE=/absolute/path/to/state -- uvx --with mcp new-term-radar mcp` writes the same entry without the two timeouts.
+Codex gives a server 10 seconds to start and a tool 60 seconds to answer. The first start downloads the package, `keyword_table` takes 40 to 90 seconds a name and a `daily` run 5 to 15 minutes, so raise both as above. `codex mcp add new-term-radar --env GLASSER_API_KEY=... --env AISA_API_KEY=... --env RADAR_STATE=/absolute/path/to/state -- uvx --with mcp new-term-radar mcp` writes the same entry without the two timeouts.
 
-**TRAE.** The skills: `npx skills add zhuyansen/new-term-radar -a trae` (TRAE CN: `-a trae-cn`). The server: Settings → MCP → Add → Add manually, and paste the JSON above. In TRAE CN you can instead paste this link into the browser's address bar; TRAE opens the server's configuration, where you fill in your AIsa key and an absolute path for `RADAR_STATE`, and confirm:
+**TRAE.** The skills: `npx skills add zhuyansen/new-term-radar -a trae` (TRAE CN: `-a trae-cn`). The server: Settings → MCP → Add → Add manually, and paste the JSON above. In TRAE CN you can instead paste this link into the browser's address bar; TRAE opens the server's configuration, where you fill in your Glasser and AIsa keys and an absolute path for `RADAR_STATE`, and confirm:
 
 ```text
-trae-cn://trae.ai-ide/mcp-import?type=stdio&name=new-term-radar&config=eyJjb21tYW5kIjoidXZ4IiwiYXJncyI6WyItLXdpdGgiLCJtY3AiLCJuZXctdGVybS1yYWRhciIsIm1jcCJdLCJlbnYiOnsiQUlTQV9BUElfS0VZIjoiIiwiR09BTllBUElfQVBJX0tFWSI6IiIsIlJBREFSX1NUQVRFIjoiL2Fic29sdXRlL3BhdGgvdG8vc3RhdGUifX0%3D
+trae-cn://trae.ai-ide/mcp-import?type=stdio&name=new-term-radar&config=eyJjb21tYW5kIjoidXZ4IiwiYXJncyI6WyItLXdpdGgiLCJtY3AiLCJuZXctdGVybS1yYWRhciIsIm1jcCJdLCJlbnYiOnsiR0xBU1NFUl9BUElfS0VZIjoiIiwiQUlTQV9BUElfS0VZIjoiIiwiR09BTllBUElfQVBJX0tFWSI6IiIsIlJBREFSX1NUQVRFIjoiL2Fic29sdXRlL3BhdGgvdG8vc3RhdGUifX0%3D
 ```
 
 **WorkBuddy.** Put the JSON above in `~/.workbuddy/mcp.json`, or paste it under Plugins → MCP servers → Configure MCP.
@@ -420,6 +428,7 @@ trae-cn://trae.ai-ide/mcp-import?type=stdio&name=new-term-radar&config=eyJjb21tY
         command: uvx
         args: ['--with', 'mcp', 'new-term-radar', 'mcp']
         env:
+          GLASSER_API_KEY: !!js process.env.GLASSER_API_KEY ?? ''
           AISA_API_KEY: !!js process.env.AISA_API_KEY ?? ''
           GOANYAPI_API_KEY: !!js process.env.GOANYAPI_API_KEY ?? ''
           RADAR_STATE: /absolute/path/to/state
@@ -434,7 +443,7 @@ DeepSeek Harness does not pass the variables that look like keys on to a server,
 
 1. Fork the repository (a private fork is fine).
 2. Remove `config.json` from `.gitignore` and commit your config. It holds no secrets.
-3. Add the secret `AISA_API_KEY`; optionally `GOANYAPI_API_KEY`, `RESEND_API_KEY`, `EMAIL_FROM`, `RADAR_EMAIL_TO`, `GSC_TOKEN_JSON`.
+3. Add the secrets `GLASSER_API_KEY` and, for the X posts and the model, `AISA_API_KEY`; optionally `GOANYAPI_API_KEY`, `RESEND_API_KEY`, `EMAIL_FROM`, `RADAR_EMAIL_TO`, `GSC_TOKEN_JSON`, and `RADAR_LLM_API_KEY` with the variables `RADAR_LLM_BASE_URL` and `RADAR_LLM_MODEL` for a model of your own.
 4. Set the repository variable `RADAR_ENABLED` to `true`.
 
 ## How the pieces decide

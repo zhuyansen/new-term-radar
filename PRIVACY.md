@@ -12,7 +12,9 @@ Free, with no key:
 
 Through the providers whose keys you set. A request carries what the radar is looking up or judging (X account names, terms and names, and the public posts and pages they came from) and nothing else from your machine:
 
-- AIsa (`tools.aisa.one`, `api.aisa.one`), with `AISA_API_KEY`, or the key the AIsa CLI stored at login: X posts, Reddit and YouTube searches, Google Ads volumes, DataForSEO Trends, domain data, and the model that judges which terms are names
+- Glasser (`api.glasser.ai`), with `GLASSER_API_KEY`: Google Ads volumes, DataForSEO Trends, Google's results, domain data, Reddit searches, YouTube comments and trending lists, passed on to the provider that answers them (DataForSEO, TikHub, ScrapeCreators)
+- AIsa (`tools.aisa.one`, `api.aisa.one`), with `AISA_API_KEY`, or the key the AIsa CLI stored at login: X posts and the model that judges which terms are names; without a Glasser key, the data above too
+- the model endpoint you set in `RADAR_LLM_BASE_URL`, with `RADAR_LLM_API_KEY`: the terms and posts the model reads, in place of AIsa's model
 - GoAnyAPI (`api.goanyapi.com`), with `GOANYAPI_API_KEY`: related queries, one country's Trends series, searches, and Chrome Web Store reviews
 - TrustMRR (`trustmrr.com`), with `TRUSTMRR_API_KEY`: verified revenue listings
 - Google Search Console (`googleapis.com`), with your own Google token: the queries your own site got

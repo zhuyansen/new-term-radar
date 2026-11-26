@@ -1,6 +1,6 @@
 """SERP shape: what kind of pages hold page one, for the terms rated prioritize.
 
-From the live top ten organic results (DataForSEO through AIsa, US / en / desktop by
+From the live top ten organic results (DataForSEO through Glasser or AIsa, US / en / desktop by
 default; the page-one check's own results are reused when it read the same market):
 
 - `homepages` and `inner`: a result at a site's root ("/", "/index.html", a bare locale

@@ -3,8 +3,8 @@
 `python -m radar pains "<keyword>"` reads, for a kind of tool:
 - low-star Chrome Web Store reviews (1 to `max_stars`) of the extensions Google shows for the
   keyword (GoAnyAPI: a site search, 2 credits; reviews, 3 credits a page), or of the ones you name;
-- Reddit posts that complain about the job or the tools for it (AIsa, $0.0019 a query);
-- comments under the top tutorial videos for it (AIsa, $0.001 a page of 20);
+- Reddit posts that complain about the job or the tools for it (Glasser or AIsa, about $0.0019 a query);
+- comments under the top tutorial videos for it (Glasser or AIsa, $0.001 a page of 20);
 and a small model groups them into the gaps they point at: what the tools fail to do, what is
 too hard, too slow or too dear, what people wish existed. Each gap has a count, quotes and the
 phrase someone with that problem would search.

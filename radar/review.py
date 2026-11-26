@@ -1,7 +1,7 @@
 """The radar's review: check every lead in DataForSEO Trends two weeks later.
 
 review()  takes up to `per_day` leads first seen `after_days` ago or earlier and not yet
-          checked, asks DataForSEO Trends (through AIsa) about each search variant, and
+          checked, asks DataForSEO Trends (through Glasser or AIsa) about each search variant, and
           stores hit / miss / no_data plus how many days the radar was ahead.
 
 Each variant is its own call: in one shared task the values share a 0-100 scale and a

@@ -2,7 +2,7 @@
 
 A domain registered in the last few months that already ranks on Google's first two pages has found searches a new
 site can reach. For each site new this week, the most traffic first and SITES_MAX at most, DataForSEO Labs' ranked
-keywords (through AIsa's REST passthrough: about $0.012 a site, $0.00012 a word) give its WORDS words in the top TOP,
+keywords (through Glasser or AIsa's REST passthrough: about $0.012 a site, $0.00012 a word) give its WORDS words in the top TOP,
 the most traffic first, in any country: a new site often starts outside the US (on 2026-10-27, one registered in
 August ranked 5 to 11 in Taiwan for stock-price long-tails and for nothing in the US top 20). Labs keeps no day a site
 started ranking for a word; a word new since Labs' previous check of its results started between the two (`since`).
