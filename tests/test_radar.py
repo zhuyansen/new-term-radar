@@ -138,6 +138,38 @@ def test_paths_are_not_mistaken_for_locales():
     assert re.sub(sitemaps._LOCALE, r"\1", "https://lobehub.com/mcp/foo") == "https://lobehub.com/mcp/foo"
 
 
+def test_sitemap_counts_page_locations_and_ignores_extension_locations(monkeypatch):
+    xml = """<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+        <url>
+            <loc>https://example.com/en/tool?a=1&amp;b=2</loc>
+            <image xmlns="http://www.google.com/schemas/sitemap-image/1.1">
+                <loc>https://example.com/tool.jpg</loc>
+            </image>
+        </url>
+        <url><loc><![CDATA[https://example.com/tool?a=1&b=2]]></loc></url>
+    </urlset>"""
+    monkeypatch.setattr(sitemaps, "fetch", lambda url: xml)
+
+    assert sitemaps.site_urls("https://example.com/sitemap.xml", None, 0, True) == {
+        "https://example.com/tool?a=1&b=2",
+    }
+
+
+def test_sitemap_index_reads_matching_prefixed_shards(monkeypatch):
+    index = "https://example.com/sitemap.xml"
+    shard = "https://example.com/shard.xml?a=1&b=2"
+    documents = {
+        index: """<sm:sitemapindex xmlns:sm="http://www.sitemaps.org/schemas/sitemap/0.9">
+            <sm:sitemap><sm:loc>https://example.com/shard.xml?a=1&amp;b=2</sm:loc></sm:sitemap>
+            <sm:sitemap><sm:loc>https://example.com/other.xml</sm:loc></sm:sitemap>
+        </sm:sitemapindex>""",
+        shard: "<urlset><url><loc>https://example.com/tool</loc></url></urlset>",
+    }
+    monkeypatch.setattr(sitemaps, "fetch", documents.__getitem__)
+
+    assert sitemaps.site_urls(index, r"/shard\.xml\?a=1&b=2$", 0) == {"https://example.com/tool"}
+
+
 def test_sitemap_diff_reports_a_word_new_urls_share(cfg, tmp_path, monkeypatch):
     cfg["sitemaps"] = {"site": {"index": "https://example.com/sitemap.xml", "pause": 0}}
     old = {f"https://example.com/tools/thing-{i}" for i in range(40)}

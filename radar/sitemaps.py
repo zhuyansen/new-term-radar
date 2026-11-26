@@ -24,6 +24,7 @@ import re
 import time
 import urllib.request
 from pathlib import Path
+from xml.etree import ElementTree
 
 from . import UA, snap
 from .terms import by_source, surges
@@ -39,11 +40,11 @@ DEFAULT_PAUSE = 3
 LANGS = ("en|zh|tw|ja|ko|fr|de|es|pt|it|ru|ar|tr|vi|th|id|nl|pl|sv|da|fi|no|nb|cs|hu|ro|uk|el|he|hi|ms|fa|bn|"
          "ur|ta|te|sk|bg|hr|sr|sl|lt|lv|et|ca|tl|fil|sw")
 _LOCALE = rf"^(https?://[^/]+)/(?:{LANGS})(?:[-_][A-Za-z]{{2,4}})?(?=/)"
-_LOC = re.compile(r"<loc>\s*(?:<!\[CDATA\[)?\s*([^<\s\]]+)\s*(?:\]\]>)?\s*</loc>")
+_SITEMAP_NS = "{http://www.sitemaps.org/schemas/sitemap/0.9}"
 
 
 def fetch(url: str) -> str:
-    req = urllib.request.Request(url.replace("&amp;", "&"), headers={"User-Agent": UA, "Accept-Encoding": "gzip"})
+    req = urllib.request.Request(url, headers={"User-Agent": UA, "Accept-Encoding": "gzip"})
     for attempt in range(RETRIES):
         try:
             with urllib.request.urlopen(req, timeout=TIMEOUT) as res:
@@ -58,12 +59,12 @@ def fetch(url: str) -> str:
 
 def site_urls(index: str, shards: str | None, pause: float, strip_locale: bool = False) -> set[str]:
     files = [index] if not shards else \
-        [u for u in _LOC.findall(fetch(index)) if re.search(shards, u.replace("&amp;", "&"))]
+        [u for u in _locations(fetch(index), "sitemapindex", "sitemap") if re.search(shards, u)]
     urls: set[str] = set()
     for i, u in enumerate(files):
         if i or shards:
             time.sleep(pause)
-        urls.update(x.replace("&amp;", "&") for x in _LOC.findall(fetch(u)))
+        urls.update(_locations(fetch(u), "urlset", "url"))
     return {re.sub(_LOCALE, r"\1", u) for u in urls} if strip_locale else urls
 
 
@@ -101,3 +102,13 @@ def diff(cfg: dict, state: Path) -> dict:
         snap.save(path, sorted(now))
     ratio = len(recent) / max(len(baseline), 1)
     return {"sites": report, "terms": surges(by_source(recent), by_source(baseline), ratio, MIN_URLS, TOP)}
+
+
+def _locations(xml: str, root_name: str, item_name: str) -> list[str]:
+    root = ElementTree.fromstring(xml)
+    namespace = _SITEMAP_NS if root.tag == _SITEMAP_NS + root_name else ""
+    if root.tag != namespace + root_name:
+        return []
+    nodes = root.findall(f"{namespace}{item_name}/{namespace}loc")
+    locations = [(node.text or "").strip() for node in nodes]
+    return [location for location in locations if location]
