@@ -10,11 +10,13 @@
   from AIsa, at the same prices. One Run a call, with its own idempotency key: a Run still queued or running is
   polled, a rate limit, a 5xx or a broken connection is sent once more with the same key (never billed twice), and a
   redirect is refused so the key stays on api.glasser.ai.
-- **AIsa stays for what Glasser does not sell**: X (AIsa's X tools are twitterapi.io, which Glasser does not resell)
-  and Google searches with operators (⑨'s `site:` searches for Google's new pages). With an AIsa key and no Glasser
-  key, everything goes through AIsa as before. With neither, a paid call stops before anything is bought and names
-  both keys. X through AnyAPI on Glasser is written and tested against its published response schema, but stays off
-  until a paid Run confirms the answer.
+- **X through AnyAPI on Glasser.** Glasser does not resell twitterapi.io (AIsa's X), so the X posts go through
+  AnyAPI, whose fields the adapters turn into twitterapi.io's. One paid Run of each on 2026-11-26 confirmed it: the
+  search read as AIsa's; the timeline left every author handle blank, so the account's own posts are now the ones
+  with the author id most posts share. $0.00045 an account and $0.00085 a search, against $0.003 on AIsa.
+- **AIsa stays for what Glasser does not sell**: Google searches with operators (⑨'s `site:` searches for Google's
+  new pages). With an AIsa key and no Glasser key, everything goes through AIsa as before, X included. With neither,
+  a paid call stops before anything is bought and names both keys.
 - **A model of your own**: `RADAR_LLM_BASE_URL` (any OpenAI-compatible endpoint), with `RADAR_LLM_API_KEY` and
   `RADAR_LLM_MODEL`, takes the place of AIsa's chat for the name judge and the other small sorting jobs; its tokens
   count in the cost like AIsa's. With no model at all, the judge is skipped and the report says so, and the keyword
@@ -28,7 +30,9 @@
   request whose every Glasser call failed raises with the first reason (AIsa's router answered with nothing).
 - **Docs**: Glasser is the first key in the READMEs, the Claude Code plugin, the MCP registry entry, the skills and
   the Actions workflow (which now passes `GLASSER_API_KEY` and the `RADAR_LLM_*` settings); AIsa's referral links
-  are gone.
+  are gone. The Glasser and GoAnyAPI links say they are referral links that earn the author a reward. The Claude Code
+  plugin asks for the `RADAR_LLM_*` settings too. The README's monthly cost is recounted for the example config on
+  the Actions schedule: about $33 through Glasser, about $41 with everything on AIsa (it said $15).
 
 ## 0.7.1 (2026-11-21)
 

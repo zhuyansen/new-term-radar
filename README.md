@@ -54,7 +54,7 @@ Purple, tagged NEW: what 0.6.0 added. On the keyword table: word age, markets, p
 
 | Signal | What it catches | Needs | Cost |
 |---|---|---|---|
-| ① X | Names the accounts in your list used for the first time in 60 days | AIsa key (Glasser does not sell X) | $0.003 per account per run |
+| ① X | Names the accounts in your list used for the first time in 60 days | Glasser key (X through AnyAPI) or AIsa key | $0.00045 per account per run through Glasser ($0.003 through AIsa) |
 | ① Hugging Face | Models and Spaces (the demos people try) new to the trending top 50; quantised copies and a model's own demo grouped under the base name | nothing | free |
 | ② GitHub breakout | A repo under 14 days old averaging 200+ stars a day, or +400 since yesterday; adds the search variants people use ("niko strata") | nothing (a GitHub token raises the rate limit) | free |
 | ③ Sitemaps | Words that several new URLs on a site share and its older URLs rarely carried. The example config watches eight AI tool directories (toolify, aixploria, ai-bot.cn, opentools, dang.ai, clipfly, aitoptools, futurepedia) and four MCP and skill directories | the sitemaps you list | free |
@@ -71,7 +71,7 @@ Purple, tagged NEW: what 0.6.0 added. On the keyword table: word age, markets, p
 | Keyword table | For the day's new names: the generic search terms behind them (what people do with the new thing), each sized, checked for room on page one, and given a decision | Glasser or AIsa key, and AIsa for the posts about each name; a model; [GoAnyAPI](https://goanyapi.com) key optional | about $0.18 a day for 5 names, $0.30 with GoAnyAPI |
 | Name judge | A small model scores every term: the name of one specific thing, or a common word? | a model: your own OpenAI-compatible endpoint, or AIsa | a fraction of a cent per run |
 
-Prices are Glasser's on 2026-11-26, the same as AIsa charged in October 2026 for the same calls (X is AIsa's alone). With the example config (35 X accounts read three times a day, the keyword table for 5 names a day) a month costs about $15: $10 for the X reads, $5 for the keyword table. Read fewer accounts, or read them once a day, and it drops in proportion.
+Prices are Glasser's on 2026-11-26, the same as AIsa charged in October 2026 for the same calls, except X: AnyAPI on Glasser costs $0.00045 an account and $0.00085 a search, AIsa $0.003 for either. With the example config on the Actions schedule (35 X accounts read three times a day, the keyword table for 5 names a day, the weekly signals on Mondays) a month costs about $33 through Glasser, about $41 with everything on AIsa. Read fewer accounts, or read them once a day, and it drops in proportion.
 
 ## The keyword table
 
@@ -215,17 +215,17 @@ A model groups them into gaps (missing, too hard, quality, price, wants a tool),
 
 What it cannot read: Google Play and Trustpilot reviews (DataForSEO serves them as tasks to post and fetch later, and AIsa runs synchronous calls only); There's An AI For That's request board (a Cloudflare challenge in front of every page; getting past it would be getting past their bot protection, so the radar does not); Facebook groups (Meta closed the Groups API in April 2024, and its research library is open to approved academic and nonprofit researchers only).
 
-## Keys: Glasser first, AIsa for X
+## Keys: Glasser first, AIsa as the fallback
 
-With `GLASSER_API_KEY` set, the paid data goes through [Glasser](https://link.glasser.ai/JasonZhuX): Google's results, Google Ads volumes, DataForSEO Trends (DataForSEO's estimate of Google search interest, not Google Trends itself), keyword difficulty and domain data, all from DataForSEO, and Reddit searches, YouTube comments and the Douyin, TikTok and Reddit trending lists. Pay per call, no subscriptions, at the prices AIsa charges for the same calls.
+With `GLASSER_API_KEY` set, the paid data goes through [Glasser](https://link.glasser.ai/JasonZhuX): Google's results, Google Ads volumes, DataForSEO Trends (DataForSEO's estimate of Google search interest, not Google Trends itself), keyword difficulty and domain data, all from DataForSEO, Reddit searches, YouTube comments, the Douyin, TikTok and Reddit trending lists, and X posts (through AnyAPI). Pay per call, no subscriptions; DataForSEO and TikHub at the prices AIsa charges for the same calls, X for less.
 
-> That link is a referral link: signing up through it supports this project. The radar works the same with a key from anywhere on glasser.ai.
+> That link is a referral link: if you sign up through it, I get a reward (a commission or credits). The radar works the same with a key from anywhere on glasser.ai.
 
-AIsa (`AISA_API_KEY`, or `aisa login` with the AIsa CLI) answers what Glasser does not sell: the X posts (① X, the posts the keyword table reads about each name, the asks on X) and Google searches with operators (⑨'s `site:` searches for Google's new pages). With an AIsa key and no Glasser key, everything goes through AIsa, as before 0.8.
+AIsa (`AISA_API_KEY`, or `aisa login` with the AIsa CLI) answers what Glasser does not sell: Google searches with operators (⑨'s `site:` searches for Google's new pages). With an AIsa key and no Glasser key, everything goes through AIsa, X included, as before 0.8.
 
 The model that judges names and proposes phrases: any OpenAI-compatible endpoint you name with `RADAR_LLM_BASE_URL` (with `RADAR_LLM_API_KEY`, and `RADAR_LLM_MODEL` in place of the models in `config.json`), else AIsa's chat. Glasser sells no model calls. With neither, the name judge is skipped and the report says so, and the keyword table holds the names alone.
 
-**Optional: `GOANYAPI_API_KEY`** ([goanyapi.com](https://goanyapi.com/r/ga-95708898fb)) improves the keyword table in two ways, for about $0.07 a day: it adds Google Trends' related queries for each name, and it reads the curve of the names and the bigger generic terms (1,000 searches a month or more, eight rows at most) from 30 days of daily data for one country, settled to yesterday. Those rows show the country after "Now", as in `still rising (US)`. Without the key the table is built from the model's phrases and the worldwide series alone. The service is young (first released in August 2026); in our tests calls took 20 to 55 seconds and about one in ten failed, so the radar tries twice, reports a failure in the table and carries on. That link is a referral link too.
+**Optional: `GOANYAPI_API_KEY`** ([goanyapi.com](https://goanyapi.com/r/ga-95708898fb), a referral link: if you sign up through it, I get a reward) improves the keyword table in two ways, for about $0.07 a day: it adds Google Trends' related queries for each name, and it reads the curve of the names and the bigger generic terms (1,000 searches a month or more, eight rows at most) from 30 days of daily data for one country, settled to yesterday. Those rows show the country after "Now", as in `still rising (US)`. Without the key the table is built from the model's phrases and the worldwide series alone. The service is young (first released in August 2026); in our tests calls took 20 to 55 seconds and about one in ten failed, so the radar tries twice, reports a failure in the table and carries on. That link is a referral link too.
 
 Without a key the free signals still run (Hugging Face, GitHub, sitemaps, Search Console); without a model the report lists every term unsorted, because nothing judges which are names.
 
@@ -235,7 +235,7 @@ Without a key the free signals still run (Hugging Face, GitHub, sitemaps, Search
 
 ```bash
 export GLASSER_API_KEY=...                    # from https://link.glasser.ai/JasonZhuX (a referral link)
-export AISA_API_KEY=...                       # the X posts and the model; or `aisa login` with the AIsa CLI
+export AISA_API_KEY=...                       # optional: site: searches and the model; or `aisa login` with the AIsa CLI
 uvx new-term-radar daily --out report.md      # today's new names and the keyword table behind them
 uvx new-term-radar keywords "photocraft"      # the keyword table for names you already have
 ```
@@ -377,7 +377,7 @@ For clients that speak MCP (Claude Code, Cursor, Claude Desktop). With [uv](http
 }
 ```
 
-Without uv: `pip install "new-term-radar[mcp]"`, then `"command": "new-term-radar-mcp"` and no `args`. The Claude Code plugin above brings this server with it: when the plugin is enabled, Claude Code asks for your Glasser key, your AIsa key (for X and the model) and, optionally, a GoAnyAPI key, and keeps them in the system keychain; the server reads the example config and keeps its state in the plugin's data folder.
+Without uv: `pip install "new-term-radar[mcp]"`, then `"command": "new-term-radar-mcp"` and no `args`. The Claude Code plugin above brings this server with it: when the plugin is enabled, Claude Code asks for your Glasser key, your AIsa key (for `site:` searches and the model, or everything without a Glasser key), your own model endpoint if you have one (`RADAR_LLM_*`) and, optionally, a GoAnyAPI key, and keeps them in the system keychain; the server reads the example config and keeps its state in the plugin's data folder.
 
 | Tool | What it returns | Cost and time |
 |---|---|---|
@@ -443,7 +443,7 @@ DeepSeek Harness does not pass the variables that look like keys on to a server,
 
 1. Fork the repository (a private fork is fine).
 2. Remove `config.json` from `.gitignore` and commit your config. It holds no secrets.
-3. Add the secrets `GLASSER_API_KEY` and, for the X posts and the model, `AISA_API_KEY`; optionally `GOANYAPI_API_KEY`, `RESEND_API_KEY`, `EMAIL_FROM`, `RADAR_EMAIL_TO`, `GSC_TOKEN_JSON`, and `RADAR_LLM_API_KEY` with the variables `RADAR_LLM_BASE_URL` and `RADAR_LLM_MODEL` for a model of your own.
+3. Add the secrets `GLASSER_API_KEY` and, for `site:` searches and the model, `AISA_API_KEY`; optionally `GOANYAPI_API_KEY`, `RESEND_API_KEY`, `EMAIL_FROM`, `RADAR_EMAIL_TO`, `GSC_TOKEN_JSON`, and `RADAR_LLM_API_KEY` with the variables `RADAR_LLM_BASE_URL` and `RADAR_LLM_MODEL` for a model of your own.
 4. Set the repository variable `RADAR_ENABLED` to `true`.
 
 ## How the pieces decide

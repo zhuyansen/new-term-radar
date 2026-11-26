@@ -54,7 +54,7 @@
 
 | 信号 | 抓什么 | 需要 | 花费 |
 |---|---|---|---|
-| ① X | 你关注的账号里，60 天内第一次出现的名字 | AIsa key（Glasser 不卖 X） | 每个账号每次 $0.003 |
+| ① X | 你关注的账号里，60 天内第一次出现的名字 | Glasser key（X 经 AnyAPI）或 AIsa key | 走 Glasser 每个账号每次 $0.00045（走 AIsa $0.003） |
 | ① Hugging Face | 新进热门榜前 50 的模型和 Space（大家实际在试的 demo）；量化版、微调版和模型自己的 demo 归到同一个基础名下 | 无 | 免费 |
 | ② GitHub 爆发 | 创建不到 14 天、平均每天涨 200 星以上，或比昨天多 400 星的仓库；附带大家实际会搜的写法（「niko strata」） | 无（有 GitHub token 限额更高） | 免费 |
 | ③ 竞品 sitemap | 某个站新增的几个网址共用、而它的旧网址里很少出现的词。示例配置盯着 8 个 AI 工具导航站（toolify、aixploria、ai-bot.cn、opentools、dang.ai、clipfly、aitoptools、futurepedia）和 4 个 MCP、skill 目录 | 你列出的 sitemap | 免费 |
@@ -71,7 +71,7 @@
 | 新词表 | 针对当天的新名字:找出它背后的通用搜索词(大家拿这个新东西做什么),逐个估算规模、看首页还有没有位置,并给出决策 | Glasser 或 AIsa key，名字的推文要 AIsa；一个模型；[GoAnyAPI](https://goanyapi.com) key 可选 | 5 个名字约每天 $0.18，加上 GoAnyAPI 约 $0.30 |
 | 名字判断 | 小模型给每个词打分：是某个具体东西的名字，还是普通词？ | 一个模型：你自己的 OpenAI 兼容接口，或 AIsa | 每次不到一美分 |
 
-价格是 Glasser 2026-11-26 的标价，和 2026 年 10 月 AIsa 对同样调用的实际收费一样（X 只有 AIsa 有）。按示例配置（35 个 X 账号、每天读三次，新词表每天读 5 个名字），一个月约 $15：读 X 约 $10，新词表约 $5。少读几个账号或者每天只读一次，费用按比例下降。
+价格是 Glasser 2026-11-26 的标价，和 2026 年 10 月 AIsa 对同样调用的实际收费一样；X 例外：Glasser 上的 AnyAPI 每个账号 $0.00045、每次搜索 $0.00085，AIsa 都是 $0.003。按示例配置和 Actions 的排程（35 个 X 账号每天读三次，新词表每天读 5 个名字，周一多跑一轮周信号），走 Glasser 一个月约 $33，全走 AIsa 约 $41。少读几个账号或者每天只读一次，费用按比例下降。
 
 ## 新词表
 
@@ -217,17 +217,17 @@ python -m radar history --out sellers.csv
 
 读不到的：Google Play、Trustpilot 的评论（DataForSEO 是「先提交、后取结果」的任务接口，AIsa 只支持同步调用）；There's An AI For That 的求助板（每个页面前都有 Cloudflare 挑战，硬闯就是绕过对方的反爬，雷达不做）；Facebook 小组（Meta 2024 年 4 月关闭了 Groups API，它的研究数据库只对获批的学术和非营利研究者开放）。
 
-## Key：首选 Glasser，X 走 AIsa
+## Key：首选 Glasser，AIsa 兜底
 
-设了 `GLASSER_API_KEY`，付费数据走 [Glasser](https://link.glasser.ai/JasonZhuX)：Google 搜索结果、Google Ads 搜索量、DataForSEO Trends（DataForSEO 对 Google 搜索热度的估算，不是 Google Trends 本身）、关键词难度和域名数据（都来自 DataForSEO），还有 Reddit 搜索、YouTube 评论，以及抖音、TikTok、Reddit 的热搜。按次付费，不用订阅，同样的调用价格和 AIsa 一样。
+设了 `GLASSER_API_KEY`，付费数据走 [Glasser](https://link.glasser.ai/JasonZhuX)：Google 搜索结果、Google Ads 搜索量、DataForSEO Trends（DataForSEO 对 Google 搜索热度的估算，不是 Google Trends 本身）、关键词难度和域名数据（都来自 DataForSEO），还有 Reddit 搜索、YouTube 评论，抖音、TikTok、Reddit 的热搜，以及 X 帖子（经 AnyAPI）。按次付费，不用订阅；DataForSEO 和 TikHub 的调用价格和 AIsa 一样，X 更便宜。
 
-> 上面是推荐链接：通过它注册是对这个项目的支持。从 glasser.ai 任何入口拿到的 key 用起来完全一样。
+> 上面是推荐链接：通过它注册，我会得到奖励（返佣或额度）。从 glasser.ai 任何入口拿到的 key 用起来完全一样。
 
-Glasser 不卖的走 AIsa（`AISA_API_KEY`，或用 AIsa 命令行 `aisa login` 登录）：X 帖子（① X、新词表为每个名字读的推文、X 上的求助），以及带运算符的 Google 搜索（⑨ 用 `site:` 查 Google 新收录的页面）。只有 AIsa key、没有 Glasser key 时，全部照 0.8 以前一样走 AIsa。
+Glasser 不卖的走 AIsa（`AISA_API_KEY`，或用 AIsa 命令行 `aisa login` 登录）：带运算符的 Google 搜索（⑨ 用 `site:` 查 Google 新收录的页面）。只有 AIsa key、没有 Glasser key 时，全部照 0.8 以前一样走 AIsa，X 也是。
 
 判断名字、提出通用词的模型：`RADAR_LLM_BASE_URL` 指定的任意 OpenAI 兼容接口（配 `RADAR_LLM_API_KEY`；`RADAR_LLM_MODEL` 会替换 `config.json` 里写的模型），没有就用 AIsa 的对话接口。Glasser 不卖模型调用。两样都没有时，名字判断跳过并在报告里写明，新词表只有名字本身。
 
-**可选：`GOANYAPI_API_KEY`**（[goanyapi.com](https://goanyapi.com/r/ga-95708898fb)）从两方面改进新词表，每天约 $0.07：给每个名字加上 Google Trends 的相关查询；名字和规模较大的通用词（月搜 1,000 以上，最多 8 行）的走势，改用单个国家的 30 天日数据来读，这份数据结算到昨天。这些行的「现在」一列后面会标出国家，例如 `还在涨 (US)`。不配这个 key，新词表只用模型提出的写法和全球数据。这个服务很新（2026 年 8 月才发布）；我们测试时每次调用要 20 到 55 秒，大约十次有一次失败，所以雷达会试两次，失败就写在表里，继续往下跑。上面这个也是推荐链接。
+**可选：`GOANYAPI_API_KEY`**（[goanyapi.com](https://goanyapi.com/r/ga-95708898fb)）从两方面改进新词表，每天约 $0.07：给每个名字加上 Google Trends 的相关查询；名字和规模较大的通用词（月搜 1,000 以上，最多 8 行）的走势，改用单个国家的 30 天日数据来读，这份数据结算到昨天。这些行的「现在」一列后面会标出国家，例如 `还在涨 (US)`。不配这个 key，新词表只用模型提出的写法和全球数据。这个服务很新（2026 年 8 月才发布）；我们测试时每次调用要 20 到 55 秒，大约十次有一次失败，所以雷达会试两次，失败就写在表里，继续往下跑。上面这个也是推荐链接：通过它注册，我会得到奖励。
 
 没有 key 时，免费的信号照常运行（Hugging Face、GitHub、sitemap、Search Console）；没有模型时，报告里所有词不分先后列出，因为没有模型判断哪些是名字。
 
@@ -237,7 +237,7 @@ Glasser 不卖的走 AIsa（`AISA_API_KEY`，或用 AIsa 命令行 `aisa login` 
 
 ```bash
 export GLASSER_API_KEY=...                    # 从 https://link.glasser.ai/JasonZhuX 获取（推荐链接）
-export AISA_API_KEY=...                       # X 帖子和模型用；用 AIsa 命令行 `aisa login` 登录过也可以
+export AISA_API_KEY=...                       # 可选：site: 搜索和模型用；用 AIsa 命令行 `aisa login` 登录过也可以
 uvx new-term-radar daily --out report.md      # 今天的新名字，和它们背后的关键词表
 uvx new-term-radar keywords "photocraft"      # 你手上已有的名字的关键词表
 ```
@@ -372,7 +372,7 @@ npx skills add zhuyansen/new-term-radar
 }
 ```
 
-没有 uv：先 `pip install "new-term-radar[mcp]"`，再把 `"command"` 改成 `"new-term-radar-mcp"`、去掉 `args`。上面的 Claude Code 插件已经自带这个服务器：启用插件时 Claude Code 会让你填 Glasser key、AIsa key（X 和模型用；GoAnyAPI key 可选），存进系统钥匙串；服务器用示例配置，状态存在插件自己的数据目录里。
+没有 uv：先 `pip install "new-term-radar[mcp]"`，再把 `"command"` 改成 `"new-term-radar-mcp"`、去掉 `args`。上面的 Claude Code 插件已经自带这个服务器：启用插件时 Claude Code 会让你填 Glasser key、AIsa key（site: 搜索和模型用，没有 Glasser key 时全部走它）、自己的模型接口（RADAR_LLM_*，可选）和 GoAnyAPI key（可选），存进系统钥匙串；服务器用示例配置，状态存在插件自己的数据目录里。
 
 | 工具 | 返回什么 | 花费和耗时 |
 |---|---|---|
@@ -438,7 +438,7 @@ DeepSeek Harness 不会把环境里像密钥的变量传给服务器，所以 ke
 
 1. Fork 这个仓库（私有 fork 也可以）。
 2. 把 `config.json` 从 `.gitignore` 里删掉，提交你的配置。配置里没有任何密钥。
-3. 添加 secret `GLASSER_API_KEY`，以及 X 帖子和模型要用的 `AISA_API_KEY`；可选 `GOANYAPI_API_KEY`、`RESEND_API_KEY`、`EMAIL_FROM`、`RADAR_EMAIL_TO`、`GSC_TOKEN_JSON`，用自己的模型时再加 `RADAR_LLM_API_KEY` 和变量 `RADAR_LLM_BASE_URL`、`RADAR_LLM_MODEL`。
+3. 添加 secret `GLASSER_API_KEY`，以及 site: 搜索和模型要用的 `AISA_API_KEY`；可选 `GOANYAPI_API_KEY`、`RESEND_API_KEY`、`EMAIL_FROM`、`RADAR_EMAIL_TO`、`GSC_TOKEN_JSON`，用自己的模型时再加 `RADAR_LLM_API_KEY` 和变量 `RADAR_LLM_BASE_URL`、`RADAR_LLM_MODEL`。
 4. 把仓库变量 `RADAR_ENABLED` 设为 `true`。
 
 ## 各部分怎么判断

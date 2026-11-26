@@ -32,7 +32,10 @@
         "AISA_API_KEY": "${user_config.aisa_api_key}",
         "GOANYAPI_API_KEY": "${user_config.goanyapi_api_key}",
         "RADAR_CONFIG": "${CLAUDE_PLUGIN_ROOT}/config.example.json",
-        "RADAR_STATE": "${CLAUDE_PLUGIN_DATA}/state"
+        "RADAR_STATE": "${CLAUDE_PLUGIN_DATA}/state",
+        "RADAR_LLM_BASE_URL": "${user_config.radar_llm_base_url}",
+        "RADAR_LLM_API_KEY": "${user_config.radar_llm_api_key}",
+        "RADAR_LLM_MODEL": "${user_config.radar_llm_model}"
       }
     }
   },
@@ -40,15 +43,36 @@
     "glasser_api_key": {
       "type": "string",
       "title": "Glasser API key",
-      "description": "First choice for the radar's paid data: Google Ads volumes, DataForSEO Trends, Google results, domain data, Reddit and YouTube. recent_leads works without it. A key: https://link.glasser.ai/JasonZhuX (referral link)",
+      "description": "First choice for the radar's paid data: Google Ads volumes, DataForSEO Trends, Google results, domain data, Reddit, YouTube and the X posts. recent_leads works without it. A key: https://link.glasser.ai/JasonZhuX (a referral link: the author gets a reward if you sign up through it)",
       "sensitive": true,
       "default": ""
     },
     "aisa_api_key": {
       "type": "string",
       "title": "AIsa API key",
-      "description": "For what Glasser does not sell: X posts and the model that judges names. Without a Glasser key, all the paid data goes through it too. A key: https://aisa.one",
+      "description": "For what Glasser does not sell: site: searches and the model that judges names. Without a Glasser key, all the paid data goes through it too. A key: https://aisa.one",
       "sensitive": true,
+      "default": ""
+    },
+    "radar_llm_base_url": {
+      "type": "string",
+      "title": "Model endpoint (optional)",
+      "description": "Any OpenAI-compatible endpoint for the name judge, in place of AIsa's chat, e.g. https://api.openai.com/v1. Leave empty to use AIsa's.",
+      "sensitive": false,
+      "default": ""
+    },
+    "radar_llm_api_key": {
+      "type": "string",
+      "title": "Model API key (optional)",
+      "description": "The key for the model endpoint above.",
+      "sensitive": true,
+      "default": ""
+    },
+    "radar_llm_model": {
+      "type": "string",
+      "title": "Model name (optional)",
+      "description": "The model to call at that endpoint, in place of the models in config.json.",
+      "sensitive": false,
       "default": ""
     },
     "goanyapi_api_key": {

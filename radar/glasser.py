@@ -27,6 +27,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 import uuid
+from collections import Counter
 from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation
 
@@ -101,9 +102,18 @@ def _x_search(output: dict, args: dict) -> dict:
 
 def _x_timeline(output: dict, args: dict) -> dict:
     """AnyAPI's Posts tab as twitterapi.io's last tweets: {"data": {"tweets": [...]}}, the account's own posts
-    only (a repost carries another author)."""
-    handle = str(args.get("userName") or "").lower()
-    own = [t for t in _x_rows(output, "tweets") if str(t.get("authorHandle") or "").lower() == handle]
+    only (a repost carries another author). AnyAPI leaves authorHandle blank on a timeline (the paid Run of
+    2026-11-26 for @OpenAI: 18 posts, every authorHandle empty, every authorId set), so when no row names its
+    author, the account is the authorId most rows share, and its handle is the one asked for."""
+    handle = str(args.get("userName") or "")
+    rows = _x_rows(output, "tweets")
+    if any(str(t.get("authorHandle") or "") for t in rows):
+        own = [t for t in rows if str(t.get("authorHandle") or "").lower() == handle.lower()]
+    else:
+        ids = Counter(str(t.get("authorId") or "") for t in rows if t.get("authorId"))
+        owner, n = ids.most_common(1)[0] if ids else ("", 0)
+        own = [t | {"authorHandle": handle} for t in rows
+               if owner and 2 * n > len(rows) and str(t.get("authorId") or "") == owner]
     return {"data": {"tweets": [_x_post(t, "authorHandle", "likes") for t in own]}}
 
 
@@ -126,6 +136,11 @@ ENDPOINTS = {
     "get_tikhub_tiktok_web_fetch_trending_searchwords": _same("tikhub", "/api/v1/tiktok/web/fetch_trending_searchwords", 4),
     "post_tikhub_tiktok_ads_get_trends_hashtag_list": _same("tikhub", "/api/v1/tiktok/ads/get_trends_hashtag_list", 5),
     "get_tikhub_reddit_app_fetch_trending_searches": _same("tikhub", "/api/v1/reddit/app/fetch_trending_searches", 2),
+    # X through AnyAPI (see the note above UNVERIFIED)
+    "get_twitter_user_last_tweets": ("anyapi", "/twitter.user_posts", 1, lambda args: {"handle": args["userName"]}, _x_timeline),
+    "get_twitter_tweet_advanced_search": ("anyapi", "/twitter.search", 1,
+                                          lambda args: {"query": args["query"], "queryType": args.get("queryType") or "Latest"},
+                                          _x_search),
 }
 # AIsa's DataForSEO passthrough paths (aisa.rest) -> the same endpoints.
 REST = {
@@ -134,16 +149,12 @@ REST = {
     "ai_optimization/chat_gpt/llm_scraper/live/advanced": ("/v3/ai_optimization/chat_gpt/llm_scraper/live/advanced", 9),
     "serp/google/ai_mode/live/advanced": ("/v3/serp/google/ai_mode/live/advanced", 8),
 }
-# X through AnyAPI, written from its published response schema but never run: these stay on AIsa until one
-# paid Run of each shows the answer the adapters expect (then they move into ENDPOINTS). AnyAPI names the
-# fields its own way (likes, createdUtc in seconds, authorHandle) and the adapters turn them into
-# twitterapi.io's (likeCount, createdAt, author.userName).
-UNVERIFIED = {
-    "get_twitter_user_last_tweets": ("anyapi", "/twitter.user_posts", 1, lambda args: {"handle": args["userName"]}, _x_timeline),
-    "get_twitter_tweet_advanced_search": ("anyapi", "/twitter.search", 1,
-                                          lambda args: {"query": args["query"], "queryType": args.get("queryType") or "Latest"},
-                                          _x_search),
-}
+# X through AnyAPI. AnyAPI names the fields its own way (likes, createdUtc in seconds, authorHandle) and the
+# adapters turn them into twitterapi.io's (likeCount, createdAt, author.userName). One paid Run of each on
+# 2026-11-26 confirmed the shape ($0.00045 for @OpenAI's posts, $0.00085 for a Top search): the search read as
+# AIsa's; the timeline left every authorHandle blank, which _x_timeline handles. A tool written from a published
+# schema but not yet run goes here first, off by default, until one paid Run confirms it.
+UNVERIFIED: dict = {}
 
 
 class GlasserError(AisaError):

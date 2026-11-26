@@ -49,19 +49,22 @@ def test_glasser_answers_what_it_sells_when_its_key_is_set_else_aisa(monkeypatch
                                                             ({c["call_id"]: {"a": 1} for c in calls}, 20))[1])
     trends = {"call_id": "t", "tool": review.TOOL, "arguments": {"body": [{"keywords": ["photocraft"]}]}}
     x = {"call_id": "x", "tool": "get_twitter_user_last_tweets", "arguments": {"userName": "OpenAI"}}
+    other = {"call_id": "o", "tool": "get_aisa_only_tool", "arguments": {}}                  # a tool Glasser does not sell
     with pytest.raises(aisa.AisaError, match="set GLASSER_API_KEY, or AISA_API_KEY"):      # neither key: nothing bought
         backend.call([trends])
     assert asked == [] and backend.name() == "AIsa"
     monkeypatch.setattr(backend, "_aisa_key", lambda: "a")
     assert backend.call([trends, x]) == ({"t": {"a": 1}, "x": {"a": 1}}, 20)                # AIsa alone: as before
     monkeypatch.setenv("GLASSER_API_KEY", "g")
-    assert backend.call([trends, x]) == ({"x": {"a": 1}, "t": {"g": 1}}, 30)                # X stays on AIsa
-    assert asked[-2:] == [("aisa", ["x"]), ("glasser", ["t"])] and backend.name() == "Glasser + AIsa"
+    assert backend.call([trends, x]) == ({"t": {"g": 1}, "x": {"g": 1}}, 10)                # X too: AnyAPI on Glasser
+    assert asked[-1] == ("glasser", ["t", "x"]) and backend.name() == "Glasser + AIsa"
+    assert backend.call([trends, other]) == ({"o": {"a": 1}, "t": {"g": 1}}, 30)             # what Glasser does not sell
+    assert asked[-2:] == [("aisa", ["o"]), ("glasser", ["t"])]
     monkeypatch.setattr(backend, "_aisa_key", lambda: "")
-    assert backend.call([trends]) == ({"t": {"g": 1}}, 10) and backend.name() == "Glasser"
+    assert backend.call([trends, x]) == ({"t": {"g": 1}, "x": {"g": 1}}, 10) and backend.name() == "Glasser"
     asked.clear()
-    with pytest.raises(aisa.AisaError, match="no AIsa key for get_twitter_user_last_tweets, which Glasser does not sell"):
-        backend.call([trends, x])
+    with pytest.raises(aisa.AisaError, match="no AIsa key for get_aisa_only_tool, which Glasser does not sell"):
+        backend.call([trends, other])
     assert asked == []                                  # the clear error comes before Glasser bills the rest
 
 
@@ -78,14 +81,14 @@ def test_a_search_with_an_operator_goes_to_aisa_never_glasser(monkeypatch):
     assert not glasser.sells(markets.VOLUME_TOOL, {"body": [{"keywords": ["ok", "allintitle:tool"]}]})
 
 
-def test_every_paid_call_of_the_radar_is_mapped_to_glasser_but_x():
+def test_every_paid_call_of_the_radar_is_mapped_to_glasser():
     tools = {competition.SERP_TOOL, competition.KD_TOOL, feeds.SERP, markets.VOLUME_TOOL, markets.REGION_TOOL, review.TOOL,
              sellers.TOOL, sellers.DOMAINS, social.REDDIT_TOOL, social.COMMENTS_TOOL, usecases.VOLUME_TOOL,
              *(v[0] for v in feeds.TRENDING.values())}
     assert tools <= set(glasser.ENDPOINTS)
     assert {new_sites.PATH, sidelights.WHOIS, site_words.PATH, *ai_answers.PATHS.values()} <= set(glasser.REST)
     x = {usecases.SEARCH_TOOL, "get_twitter_user_last_tweets"}
-    assert not x & set(glasser.ENDPOINTS) and x <= set(glasser.UNVERIFIED)    # X: written, not yet run, on AIsa
+    assert x <= set(glasser.ENDPOINTS) and not glasser.UNVERIFIED    # X: through AnyAPI since one paid Run of each, 2026-11-26
     # Every tool the code names is one of these: a new one must be mapped or left on AIsa on purpose.
     named = set()
     for path in (ROOT / "radar").glob("*.py"):
@@ -329,7 +332,7 @@ def test_trends_and_volumes_pass_through_for_the_review_and_the_table(monkeypatc
     assert usecases.volumes(["photo to anime"], 2840) == ({"photo to anime": {"volume": 2900, "month": "2026-10", "months": [["2026-10", 2900]]}}, 90000)
 
 
-def test_x_through_anyapi_reads_as_twitterapi_io_but_is_not_used_until_a_run_confirms_it(monkeypatch):
+def test_x_through_anyapi_reads_as_twitterapi_io(monkeypatch):
     stamp = datetime(2026, 11, 25, 19, 56, 23, tzinfo=timezone.utc).timestamp()
     posts = {"provider": "AnyAPI", "items": 3, "output": {"found": True, "data": {"nextCursor": None, "tweets": [
         {"id": "1", "text": "Introducing Opus 5.5", "url": "https://x.com/AnthropicAI/status/1", "likes": 900, "createdUtc": stamp,
@@ -337,19 +340,32 @@ def test_x_through_anyapi_reads_as_twitterapi_io_but_is_not_used_until_a_run_con
         {"id": "2", "text": "a repost of someone else", "url": "https://x.com/other/status/2", "likes": 5, "createdUtc": stamp,
          "authorHandle": "other"}]}}}
     stub_runs(monkeypatch, run_of("COMPLETED", posts, charge="0.00044"))
-    data, cost = glasser.run_tool("get_twitter_user_last_tweets", {"userName": "AnthropicAI"}, glasser.UNVERIFIED)
+    data, cost = glasser.run_tool("get_twitter_user_last_tweets", {"userName": "AnthropicAI"})
     tweets = data["data"]["tweets"]
     assert cost == 440 and [t["id"] for t in tweets] == ["1"] and tweets[0]["likeCount"] == 900
     assert sources._posted(tweets[0]) == datetime(2026, 11, 25, 19, 56, 23, tzinfo=timezone.utc)
     found = {"output": {"found": True, "data": {"items": [{"id": "9", "text": "is there a tool that", "likeCount": 12, "createdUtc": stamp,
                                                            "url": "https://x.com/a/status/9", "authorUsername": "a"}]}}}
     stub_runs(monkeypatch, run_of("COMPLETED", found, charge="0.00049"))
-    data, _ = glasser.run_tool(usecases.SEARCH_TOOL, {"query": '"opus 5.5" min_faves:50', "queryType": "Top"}, glasser.UNVERIFIED)
+    data, _ = glasser.run_tool(usecases.SEARCH_TOOL, {"query": '"opus 5.5" min_faves:50', "queryType": "Top"})
     assert data == {"tweets": [{"id": "9", "text": "is there a tool that", "url": "https://x.com/a/status/9", "likeCount": 12,
                                 "createdAt": "Wed Nov 25 19:56:23 +0000 2026", "author": {"userName": "a"}}]}
     stub_runs(monkeypatch, run_of("COMPLETED", {"output": {"found": True, "data": {"posts": []}}}, charge="0.00049"))
     with pytest.raises(glasser.GlasserError, match="not the shape the radar reads"):     # a changed answer is an error, not zero posts
-        glasser.run_tool(usecases.SEARCH_TOOL, {"query": "x"}, glasser.UNVERIFIED)
+        glasser.run_tool(usecases.SEARCH_TOOL, {"query": "x"})
+    # The real timeline answer of 2026-11-26: AnyAPI left every authorHandle blank and set authorId; the owner is
+    # the authorId most posts share, a repost carries another one, and the handle asked for fills the author.
+    blank = {"provider": "AnyAPI", "items": 3, "output": {"found": True, "data": {"nextCursor": "c", "tweets": [
+        {"id": "21", "text": "For ordinary days", "url": "https://x.com/i/web/status/21", "likes": 1898, "createdUtc": stamp,
+         "authorHandle": "", "authorId": "4398626122"},
+        {"id": "22", "text": "another post", "url": "https://x.com/i/web/status/22", "likes": 7, "createdUtc": stamp,
+         "authorHandle": "", "authorId": "4398626122"},
+        {"id": "23", "text": "a repost", "url": "https://x.com/i/web/status/23", "likes": 3, "createdUtc": stamp,
+         "authorHandle": "", "authorId": "999"}]}}}
+    stub_runs(monkeypatch, run_of("COMPLETED", blank, charge="0.00045"))
+    data, cost = glasser.run_tool("get_twitter_user_last_tweets", {"userName": "OpenAI"})
+    tweets = data["data"]["tweets"]
+    assert cost == 450 and [t["id"] for t in tweets] == ["21", "22"] and tweets[0]["author"]["userName"] == "OpenAI", tweets
 
 
 # --- the model ----------------------------------------------------------------------------------------------------

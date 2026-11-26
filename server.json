@@ -41,7 +41,7 @@
         },
         {
           "name": "AISA_API_KEY",
-          "description": "AIsa key: X posts and the model; all the paid data when there is no Glasser key. One of the two is needed.",
+          "description": "AIsa key: site: searches and the model; all the paid data when there is no Glasser key. One of the two is needed.",
           "isRequired": false,
           "isSecret": true
         },
