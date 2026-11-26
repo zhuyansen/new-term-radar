@@ -170,6 +170,9 @@ def classify(model: str, posts: list[dict]) -> tuple[list[dict], list[str]]:
         try:
             for i, v in parse(backend.chat(model, SYSTEM, user), len(chunk)).items():
                 kept.append({**chunk[i], **v})
+        except backend.NoLLM as exc:            # said once, not once a chunk
+            errors.append(str(exc)[:160])
+            break
         except aisa.AisaError as exc:
             errors.append(str(exc)[:160])
     return kept, errors

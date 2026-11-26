@@ -368,13 +368,20 @@ def test_the_model_comes_from_radar_llm_first_then_aisa_and_without_either_the_j
     monkeypatch.setenv("RADAR_LLM_BASE_URL", "https://llm.example/v1/")
     monkeypatch.setenv("RADAR_LLM_API_KEY", "sk-local")
     monkeypatch.setenv("RADAR_LLM_MODEL", "qwen3-32b")
-    monkeypatch.setattr(glasser._OPENER, "open", answer_with(seen, {"choices": [{"message": {"content": '[{"i": 0, "score": 0.8}]'}}],
+    monkeypatch.setattr(backend._OPENER, "open", answer_with(seen, {"choices": [{"message": {"content": '[{"i": 0, "score": 0.8}]'}}],
                                                                      "usage": {"prompt_tokens": 1000, "completion_tokens": 100}}))
     backend.take_chat_cost()
     assert judge.score(rows, "gpt-4.1-mini") == {"judged": 1, "cost_micros": 560} and rows[0]["named"] == 0.8
     body = json.loads(seen[0].data)
     assert seen[0].full_url == "https://llm.example/v1/chat/completions" and seen[0].get_header("Authorization") == "Bearer sk-local"
     assert body["model"] == "qwen3-32b" and body["messages"][0]["role"] == "system"
+
+
+def test_without_a_model_the_asks_say_so_once():
+    from radar import asks
+    posts = [{"title": f"is there a tool {i}", "text": "", "subreddit": "x"} for i in range(45)]      # three chunks
+    kept, errors = asks.classify("gpt-4.1-mini", posts)
+    assert kept == [] and len(errors) == 1 and errors[0].startswith("no model to ask")
 
 
 def test_without_a_model_the_keyword_table_still_reads_the_names(monkeypatch, cfg, tmp_path):

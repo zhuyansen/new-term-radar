@@ -28,6 +28,14 @@ class NoLLM(AisaError):
     """No model to ask: neither RADAR_LLM_BASE_URL nor an AIsa key."""
 
 
+class _NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        raise AisaError("model endpoint redirect refused: the key stays where RADAR_LLM_BASE_URL points")
+
+
+_OPENER = urllib.request.build_opener(_NoRedirect())
+
+
 def _aisa_key() -> str:
     try:
         return aisa.key()
@@ -122,7 +130,7 @@ def _openai_chat(model: str, system: str, user: str, max_tokens: int) -> str:
             "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}]}
     req = urllib.request.Request(_endpoint(), data=json.dumps(body).encode(), headers=headers, method="POST")
     try:
-        with glasser._OPENER.open(req, timeout=LLM_TIMEOUT) as res:      # no redirects: the key stays where it was sent
+        with _OPENER.open(req, timeout=LLM_TIMEOUT) as res:              # no redirects: the key stays where it was sent
             answer = json.load(res)
     except urllib.error.HTTPError as exc:
         raise AisaError(f"model HTTP {exc.code}: {' '.join(exc.read().decode('utf-8', 'replace').split())[:200]}") from None

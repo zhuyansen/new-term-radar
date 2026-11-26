@@ -22,9 +22,10 @@ def english(monkeypatch):
         raise aisa.AisaError("no network in tests")
     monkeypatch.setattr(aisa, "_post", no_paid_calls)
 
-    def no_paid_runs(*a, **k):        # Glasser's Runs and a model endpoint go through this opener
+    def no_paid_runs(*a, **k):        # Glasser's Runs and a model endpoint of your own
         raise OSError("no network in tests")
     monkeypatch.setattr(glasser._OPENER, "open", no_paid_runs)
+    monkeypatch.setattr(backend._OPENER, "open", no_paid_runs)
     monkeypatch.setattr(page_age, "ask", lambda domain: ("", "none"))      # RDAP: a test that needs it stubs it
 
     def no_rdap(url):                 # the .com lookup is free, but a test never reaches the registry
